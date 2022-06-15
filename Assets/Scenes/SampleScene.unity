@@ -329,6 +329,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4591865485546908017, guid: 161af413d2c3d4c429c18e16c8fa5114, type: 3}
+      propertyPath: _fallRate
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4591865485546908017, guid: 161af413d2c3d4c429c18e16c8fa5114, type: 3}
       propertyPath: _runSpeed
       value: 3
       objectReference: {fileID: 0}
@@ -339,6 +343,10 @@ PrefabInstance:
     - target: {fileID: 4591865485546908017, guid: 161af413d2c3d4c429c18e16c8fa5114, type: 3}
       propertyPath: jumpForce
       value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4591865485546908017, guid: 161af413d2c3d4c429c18e16c8fa5114, type: 3}
+      propertyPath: _jumpSpeed
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 4591865485546908017, guid: 161af413d2c3d4c429c18e16c8fa5114, type: 3}
       propertyPath: _walkSpeed
@@ -355,6 +363,10 @@ PrefabInstance:
     - target: {fileID: 4591865485546908017, guid: 161af413d2c3d4c429c18e16c8fa5114, type: 3}
       propertyPath: maxJumpHeight
       value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4591865485546908017, guid: 161af413d2c3d4c429c18e16c8fa5114, type: 3}
+      propertyPath: _jumpAcceleration
+      value: 0.4
       objectReference: {fileID: 0}
     - target: {fileID: 4591865485546908018, guid: 161af413d2c3d4c429c18e16c8fa5114, type: 3}
       propertyPath: m_Name

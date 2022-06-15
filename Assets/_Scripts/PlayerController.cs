@@ -17,11 +17,19 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     private float _jumpSpeed;
     [SerializeField] 
+    private float _jumpAcceleration;
+    [SerializeField] 
     private float _fallRate;
 
     // Movement States
     private bool _isRunning;
     private bool _isJumping;
+
+    // Jumping containers
+    private float _startJumpTime;
+    private float _maxJumpTime;
+    private float _airJumpTime = 1f;
+
 
     private Rigidbody _rigidBody;
     private CapsuleCollider _collider;
@@ -48,7 +56,15 @@ public class PlayerController : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space) && IsGrounded())
         {
+            _isJumping = true;
+            _startJumpTime = Time.time;
+            _maxJumpTime = _startJumpTime + _airJumpTime;
+
             Jump();
+        }
+        else if(Input.GetKey(KeyCode.Space) && !IsGrounded() && (_startJumpTime + _maxJumpTime > Time.time))
+        {
+            HoldJump();
         }
 
         if (Input.GetKeyDown(KeyCode.LeftShift))
@@ -72,7 +88,12 @@ public class PlayerController : MonoBehaviour
 
     private void Jump()
     {
-        _rigidBody.AddForce(new Vector3(0, _jumpSpeed, 0), ForceMode.Impulse);
+        _rigidBody.AddForce(Vector3.up * _jumpSpeed, ForceMode.Impulse);
+    }
+
+    private void HoldJump()
+    {
+        _rigidBody.AddForce(Vector3.up * _jumpAcceleration, ForceMode.Acceleration);
     }
 
     private bool IsGrounded()
@@ -81,6 +102,7 @@ public class PlayerController : MonoBehaviour
         if (Physics.SphereCast(transform.position, _colliderRadius, Vector3.down, out hitInfo, _distanceToFeet))
         {
             // Reset jump state
+            _isJumping = false;
             return true;
         }
 
