@@ -6,6 +6,10 @@ public class PlayerController : MonoBehaviour
 {
     [SerializeField]
     private float _walkSpeed;
+    [SerializeField]
+    private float _runSpeed;
+
+    private bool _isRunning;
 
     private float _horizontalMovement;
     private float _verticalMovement;
@@ -24,12 +28,21 @@ public class PlayerController : MonoBehaviour
         _verticalMovement = Input.GetAxis("Vertical");
 
         _moveDirection = (_horizontalMovement * transform.right + _verticalMovement * transform.forward).normalized;
+
+        if (Input.GetKeyDown(KeyCode.LeftShift))
+        {
+            _isRunning = true;
+        }
+        else if (Input.GetKeyUp(KeyCode.LeftShift))
+        {
+            _isRunning = false;
+        }
     }
 
     private void FixedUpdate()
     {
-        Debug.Log(_moveDirection.ToString());
-        _rigidBody.velocity = _moveDirection * _walkSpeed * Time.fixedDeltaTime * 100f;
+        float movementSpeed = _isRunning ? _runSpeed : _walkSpeed; 
+        _rigidBody.velocity = _moveDirection * movementSpeed * Time.fixedDeltaTime * 100f;
     }
 
 }
