@@ -27,7 +27,11 @@ public class PlayerController : MonoBehaviour
         _horizontalMovement = Input.GetAxis("Horizontal");
         _verticalMovement = Input.GetAxis("Vertical");
 
+        Debug.Log($"{_horizontalMovement}, {_verticalMovement}");
+
         _moveDirection = (_horizontalMovement * transform.right + _verticalMovement * transform.forward).normalized;
+
+        
 
         if (Input.GetKeyDown(KeyCode.LeftShift))
         {
