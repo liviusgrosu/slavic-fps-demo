@@ -28,16 +28,27 @@ public class PlayerController : MonoBehaviour
     // Movement States
     private bool _isRunning;
     private bool _isJumping;
+    private bool _hasDashed;
+    private bool _isDashing;
 
     // Grounded Timer
     private float _ignoreGroundedMaxTime = 0.1f;
     private float _ignoreGroundedCurrentTime = 0.1f;
 
+    // Dash
+    [SerializeField]
+    private float _dashSpeed;
+    [SerializeField]
+    private float _dashTimeMax;
+    private float _dashTimeCurrent;
+    private Vector3 _lockedMovementDirection;
+
+    // Collider and Rigidbody
     private Rigidbody _rigidBody;
     private CapsuleCollider _collider;
     private float _distanceToFeet;
 
-    // Grace jump
+    // Grace Jump
     [SerializeField] private float _graceTimeMax;
     private float _graceTimeCurrent;
 
@@ -45,6 +56,7 @@ public class PlayerController : MonoBehaviour
     public static event Action<bool> IsGroundedEvent;
     public static event Action<bool> IsJumpingEvent;
     public static event Action<bool> IsRunningEvent;
+    public static event Action<bool> HasDashedEvent;
     public static event Action<float> GraceTimerEvent;
 
     private void Awake()
@@ -92,14 +104,35 @@ public class PlayerController : MonoBehaviour
             }
             _graceTimeCurrent = 0f;
             StopAllCoroutines();
+            _hasDashed = false;
+            _isDashing = false;
         }
 
-        _isRunning = Input.GetKey(KeyCode.LeftShift);
+
+        if (Input.GetKeyDown(KeyCode.LeftShift))
+        {
+            if (IsGrounded())
+            {
+                _isRunning = true;
+            }
+            else if(!_hasDashed)
+            {
+                // Perfrom the swipe
+                _hasDashed = true;
+                _lockedMovementDirection = _moveDirection;
+                StartCoroutine(StartDashingTimer());
+            }
+        }
+        else if (!Input.GetKey(KeyCode.LeftShift) && IsGrounded())
+        {
+            _isRunning = false;
+        }
 
         IsGroundedEvent?.Invoke(IsGrounded());
         IsJumpingEvent?.Invoke(_isJumping);
         IsRunningEvent?.Invoke(_isRunning);
         GraceTimerEvent?.Invoke(_graceTimeCurrent);
+        HasDashedEvent?.Invoke(_hasDashed);
     }
 
     private void FixedUpdate()
@@ -108,7 +141,15 @@ public class PlayerController : MonoBehaviour
 
         Vector3 YAxisGravity = new Vector3(0, _rigidBody.velocity.y - _fallRate, 0);
 
-        _rigidBody.velocity = (_moveDirection * movementSpeed * Time.fixedDeltaTime * 100f) + YAxisGravity;
+        // Dash in the given direction
+        if (_isDashing)
+        {
+            _rigidBody.velocity = (_lockedMovementDirection * movementSpeed * Time.fixedDeltaTime * 100f) + YAxisGravity;
+        }
+        else
+        {
+            _rigidBody.velocity = (_moveDirection * movementSpeed * Time.fixedDeltaTime * 100f) + YAxisGravity;
+        }
     }
 
     private void Jump()
@@ -133,6 +174,18 @@ public class PlayerController : MonoBehaviour
             _ignoreGroundedCurrentTime += Time.deltaTime;
             yield return null;
         }
+    }
+
+    private IEnumerator StartDashingTimer()
+    {
+        _dashTimeCurrent = 0f;
+        _isDashing = true;
+        while (_dashTimeCurrent <= _dashTimeMax)
+        {
+            _dashTimeCurrent += Time.deltaTime;
+            yield return null;
+        }
+        _isDashing = false;
     }
 
     private bool IsGrounded()
