@@ -22,13 +22,20 @@ public class PlayerController : MonoBehaviour
     [SerializeField] 
     private float _fallRate;
 
+    // Camera
+    public float _lookSpeed = 2.0f;
+    public float _lookXLimit = 45.0f;
+    private float _rotationX = 0;
+
     // Movement States
     private bool _isRunning;
     private bool _isJumping;
 
-    // Grounded
+    // Grounded timers
     private float _ignoreGroundedMaxTime = 0.1f;
     private float _ignoreGroundedCurrentTime = 0.1f;
+    private float _ignoreJumpingMaxTime = 0.1f;
+    private float _ignoreJumpingMinTime = 0.1f;
 
     private Rigidbody _rigidBody;
     private CapsuleCollider _collider;
@@ -55,6 +62,11 @@ public class PlayerController : MonoBehaviour
         IsGroundedEvent?.Invoke(IsGrounded());
         IsJumpingEvent?.Invoke(_isJumping);
         GraceTimerEvent?.Invoke(_graceTimeCurrent);
+
+        _rotationX += -Input.GetAxis("Mouse Y") * _lookSpeed;
+        _rotationX = Mathf.Clamp(_rotationX, -_lookXLimit, _lookXLimit);
+        Camera.main.transform.localRotation = Quaternion.Euler(_rotationX, 0, 0);
+        transform.rotation *= Quaternion.Euler(0, Input.GetAxis("Mouse X") * _lookSpeed, 0);
 
         _horizontalMovement = Input.GetAxis("Horizontal");
         _verticalMovement = Input.GetAxis("Vertical");
@@ -86,7 +98,7 @@ public class PlayerController : MonoBehaviour
                 _isJumping = false;
             }
             _graceTimeCurrent = 0f;
-            StopCoroutine(StartGraceTimer());
+            StopAllCoroutines();
         }
 
         if (Input.GetKeyDown(KeyCode.LeftShift))
