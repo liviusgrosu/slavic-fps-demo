@@ -18,8 +18,6 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     private float _jumpSpeed;
     [SerializeField] 
-    private float _jumpAcceleration;
-    [SerializeField] 
     private float _fallRate;
 
     // Camera
@@ -31,11 +29,9 @@ public class PlayerController : MonoBehaviour
     private bool _isRunning;
     private bool _isJumping;
 
-    // Grounded timers
+    // Grounded Timer
     private float _ignoreGroundedMaxTime = 0.1f;
     private float _ignoreGroundedCurrentTime = 0.1f;
-    private float _ignoreJumpingMaxTime = 0.1f;
-    private float _ignoreJumpingMinTime = 0.1f;
 
     private Rigidbody _rigidBody;
     private CapsuleCollider _collider;
@@ -48,6 +44,7 @@ public class PlayerController : MonoBehaviour
     // Debug Events
     public static event Action<bool> IsGroundedEvent;
     public static event Action<bool> IsJumpingEvent;
+    public static event Action<bool> IsRunningEvent;
     public static event Action<float> GraceTimerEvent;
 
     private void Awake()
@@ -59,10 +56,6 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        IsGroundedEvent?.Invoke(IsGrounded());
-        IsJumpingEvent?.Invoke(_isJumping);
-        GraceTimerEvent?.Invoke(_graceTimeCurrent);
-
         _rotationX += -Input.GetAxis("Mouse Y") * _lookSpeed;
         _rotationX = Mathf.Clamp(_rotationX, -_lookXLimit, _lookXLimit);
         Camera.main.transform.localRotation = Quaternion.Euler(_rotationX, 0, 0);
@@ -101,14 +94,12 @@ public class PlayerController : MonoBehaviour
             StopAllCoroutines();
         }
 
-        if (Input.GetKeyDown(KeyCode.LeftShift))
-        {
-            _isRunning = true;
-        }
-        else if (Input.GetKeyUp(KeyCode.LeftShift))
-        {
-            _isRunning = false;
-        }
+        _isRunning = Input.GetKey(KeyCode.LeftShift);
+
+        IsGroundedEvent?.Invoke(IsGrounded());
+        IsJumpingEvent?.Invoke(_isJumping);
+        IsRunningEvent?.Invoke(_isRunning);
+        GraceTimerEvent?.Invoke(_graceTimeCurrent);
     }
 
     private void FixedUpdate()

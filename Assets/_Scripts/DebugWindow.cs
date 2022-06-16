@@ -12,12 +12,15 @@ public class DebugWindow : MonoBehaviour
     [SerializeField]
     private TMP_Text _isJumpingText;
     [SerializeField]
+    private TMP_Text _isRunningText;
+    [SerializeField]
     private TMP_Text _graceWindowText;
 
     private void Start()
     {
         PlayerController.IsGroundedEvent += UpdateGroundedText;
         PlayerController.IsJumpingEvent += UpdateJumpingText;
+        PlayerController.IsRunningEvent += UpdateRunningText;
         PlayerController.GraceTimerEvent += UpdateGraceWindowText;
     }
 
@@ -29,6 +32,11 @@ public class DebugWindow : MonoBehaviour
     private void UpdateJumpingText(bool state)
     {
         _isJumpingText.text = $"Is Jumping: {DisplayBoolString(state)}";
+    }
+
+    private void UpdateRunningText(bool state)
+    {
+        _isRunningText.text = $"Is Running: {DisplayBoolString(state)}";
     }
 
     private void UpdateGraceWindowText(float time)
