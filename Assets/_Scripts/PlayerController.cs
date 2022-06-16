@@ -26,16 +26,13 @@ public class PlayerController : MonoBehaviour
     private bool _isRunning;
     private bool _isJumping;
 
-    // Jumping containers
-    private float _startJumpTime;
-    private float _maxJumpTime;
-    private float _airJumpTime = 1f;
+    // Grounded
+    private float _ignoreGroundedMaxTime = 0.1f;
+    private float _ignoreGroundedCurrentTime = 0.1f;
 
     private Rigidbody _rigidBody;
     private CapsuleCollider _collider;
     private float _distanceToFeet;
-    private float _colliderRadius = 0.01f;
-    private float _maxDistance = 1.0f;
 
     // Grace jump
     [SerializeField] private float _graceTimeMax;
@@ -44,17 +41,20 @@ public class PlayerController : MonoBehaviour
     // Debug Events
     public static event Action<bool> IsGroundedEvent;
     public static event Action<bool> IsJumpingEvent;
+    public static event Action<float> GraceTimerEvent;
 
     private void Awake()
     {
         _rigidBody = GetComponent<Rigidbody>();
         _collider = GetComponent<CapsuleCollider>();
-        _distanceToFeet = _collider.height / 2f;
+        _distanceToFeet = _collider.bounds.extents.y;
     }
 
     void Update()
     {
-        IsGrounded();
+        IsGroundedEvent?.Invoke(IsGrounded());
+        IsJumpingEvent?.Invoke(_isJumping);
+        GraceTimerEvent?.Invoke(_graceTimeCurrent);
 
         _horizontalMovement = Input.GetAxis("Horizontal");
         _verticalMovement = Input.GetAxis("Vertical");
@@ -64,13 +64,29 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space) && (IsGrounded() || _graceTimeCurrent < _graceTimeMax))
         {
             _isJumping = true;
-            IsJumpingEvent?.Invoke(true);
+            StartCoroutine(StartIgnoreGroundedTimer());
             Jump();
+
+            // Don't allow a second jump after the first grace jump
+            _graceTimeCurrent = _graceTimeMax;
         }
 
-        if (!IsGrounded() && _graceTimeCurrent == 0 && !_isJumping)
+        if (!IsGrounded() && !_isJumping && _graceTimeCurrent == 0)
         {
+            StartCoroutine(StartIgnoreGroundedTimer());
             StartCoroutine(StartGraceTimer());
+        }
+
+        // Reset the jumping
+        if (IsGrounded())
+        {
+            if (_isJumping)
+            {
+                // Reset jump state
+                _isJumping = false;
+            }
+            _graceTimeCurrent = 0f;
+            StopCoroutine(StartGraceTimer());
         }
 
         if (Input.GetKeyDown(KeyCode.LeftShift))
@@ -101,29 +117,24 @@ public class PlayerController : MonoBehaviour
     {
         while (_graceTimeCurrent <= _graceTimeMax)
         {
-            //Debug.Log($"{_graceTimeCurrent} : {_graceTimeMax} = {_graceTimeCurrent < _graceTimeMax}");
             _graceTimeCurrent += Time.deltaTime;
+            yield return null;
+        }
+    }
+
+    private IEnumerator StartIgnoreGroundedTimer()
+    {
+        _ignoreGroundedCurrentTime = 0f;
+        while (_ignoreGroundedCurrentTime <= _ignoreGroundedMaxTime)
+        {
+            _ignoreGroundedCurrentTime += Time.deltaTime;
             yield return null;
         }
     }
 
     private bool IsGrounded()
     {
-        RaycastHit hitInfo;
-        if (Physics.SphereCast(transform.position, _colliderRadius, Vector3.down, out hitInfo, _distanceToFeet))
-        {
-            // Reset jump state
-            _isJumping = false;
-            IsJumpingEvent?.Invoke(false);
-
-            _graceTimeCurrent = 0f;
-            StopCoroutine(StartGraceTimer());
-
-            IsGroundedEvent?.Invoke(true);
-            return true;
-        }
-
-        IsGroundedEvent?.Invoke(false);
-        return false;
+        bool dontIgnoreGrounded = _ignoreGroundedCurrentTime >= _ignoreGroundedMaxTime;
+        return Physics.Raycast(transform.position, -Vector3.up, _distanceToFeet + 0.1f) && dontIgnoreGrounded;
     }
 }
