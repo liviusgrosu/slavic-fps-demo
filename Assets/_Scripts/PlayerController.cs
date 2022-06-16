@@ -138,6 +138,12 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate()
     {
         float movementSpeed = _isRunning ? _runSpeed : _walkSpeed;
+       
+        if (_isDashing)
+        {
+            movementSpeed = _dashSpeed;
+        }
+
 
         Vector3 YAxisGravity = new Vector3(0, _rigidBody.velocity.y - _fallRate, 0);
 
