@@ -5,200 +5,144 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    // General Movement
-    private float _horizontalMovement;
-    private float _verticalMovement;
-    private Vector3 _moveDirection;
+    float playerHeight = 2f;
 
-    // Movement Speeds
-    [SerializeField]
-    private float _walkSpeed;
-    [SerializeField]
-    private float _runSpeed;
-    [SerializeField]
-    private float _jumpSpeed;
-    [SerializeField] 
-    private float _fallRate;
+    [SerializeField] Transform orientation;
 
-    // Camera
-    public float _lookSpeed = 2.0f;
-    public float _lookXLimit = 45.0f;
-    private float _rotationX = 0;
+    [Header("Movement")]
+    [SerializeField] float moveSpeed = 6f;
+    [SerializeField] float airMultiplier = 0.4f;
+    float movementMultiplier = 10f;
 
-    // Movement States
-    private bool _isRunning;
-    private bool _isJumping;
-    private bool _hasDashed;
-    private bool _isDashing;
+    [Header("Sprinting")]
+    [SerializeField] float walkSpeed = 4f;
+    [SerializeField] float sprintSpeed = 6f;
+    [SerializeField] float acceleration = 10f;
 
-    // Grounded Timer
-    private float _ignoreGroundedMaxTime = 0.1f;
-    private float _ignoreGroundedCurrentTime = 0.1f;
+    [Header("Jumping")]
+    public float jumpForce = 5f;
 
-    // Dash
-    [SerializeField]
-    private float _dashSpeed;
-    [SerializeField]
-    private float _dashTimeMax;
-    private float _dashTimeCurrent;
-    private Vector3 _lockedMovementDirection;
+    [Header("Keybinds")]
+    [SerializeField] KeyCode jumpKey = KeyCode.Space;
+    [SerializeField] KeyCode sprintKey = KeyCode.LeftShift;
 
-    // Collider and Rigidbody
-    private Rigidbody _rigidBody;
-    private CapsuleCollider _collider;
-    private float _distanceToFeet;
+    [Header("Drag")]
+    [SerializeField] float groundDrag = 6f;
+    [SerializeField] float airDrag = 2f;
 
-    // Grace Jump
-    [SerializeField] private float _graceTimeMax;
-    private float _graceTimeCurrent;
+    float horizontalMovement;
+    float verticalMovement;
 
-    // Debug Events
-    public static event Action<bool> IsGroundedEvent;
-    public static event Action<bool> IsJumpingEvent;
-    public static event Action<bool> IsRunningEvent;
-    public static event Action<bool> HasDashedEvent;
-    public static event Action<float> GraceTimerEvent;
+    [Header("Ground Detection")]
+    [SerializeField] Transform groundCheck;
+    [SerializeField] LayerMask groundMask;
+    [SerializeField] float groundDistance = 0.2f;
+    public bool isGrounded { get; private set; }
 
-    private void Awake()
+    Vector3 moveDirection;
+    Vector3 slopeMoveDirection;
+
+    Rigidbody rb;
+
+    RaycastHit slopeHit;
+
+    private bool OnSlope()
     {
-        _rigidBody = GetComponent<Rigidbody>();
-        _collider = GetComponent<CapsuleCollider>();
-        _distanceToFeet = _collider.bounds.extents.y;
+        if (Physics.Raycast(transform.position, Vector3.down, out slopeHit, playerHeight / 2 + 0.5f))
+        {
+            if (slopeHit.normal != Vector3.up)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        return false;
     }
 
-    void Update()
+    private void Start()
     {
-        _rotationX += -Input.GetAxis("Mouse Y") * _lookSpeed;
-        _rotationX = Mathf.Clamp(_rotationX, -_lookXLimit, _lookXLimit);
-        Camera.main.transform.localRotation = Quaternion.Euler(_rotationX, 0, 0);
-        transform.rotation *= Quaternion.Euler(0, Input.GetAxis("Mouse X") * _lookSpeed, 0);
+        rb = GetComponent<Rigidbody>();
+        rb.freezeRotation = true;
+    }
 
-        _horizontalMovement = Input.GetAxis("Horizontal");
-        _verticalMovement = Input.GetAxis("Vertical");
+    private void Update()
+    {
+        isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
 
-        _moveDirection = (_horizontalMovement * transform.right + _verticalMovement * transform.forward).normalized;
+        MyInput();
+        ControlDrag();
+        ControlSpeed();
 
-        if (Input.GetKeyDown(KeyCode.Space) && (IsGrounded() || _graceTimeCurrent < _graceTimeMax))
+        if (Input.GetKeyDown(jumpKey) && isGrounded)
         {
-            // Allow jump in air to feel the same as on the ground
-            _rigidBody.velocity += new Vector3(0f, -_rigidBody.velocity.y, 0f);
-            
-            _isJumping = true;
-            StartCoroutine(StartIgnoreGroundedTimer());
             Jump();
-
-            // Don't allow a second jump after the first grace jump
-            _graceTimeCurrent = _graceTimeMax;
         }
 
-        if (!IsGrounded() && !_isJumping && _graceTimeCurrent == 0)
+        slopeMoveDirection = Vector3.ProjectOnPlane(moveDirection, slopeHit.normal);
+    }
+
+    void MyInput()
+    {
+        horizontalMovement = Input.GetAxisRaw("Horizontal");
+        verticalMovement = Input.GetAxisRaw("Vertical");
+
+        moveDirection = orientation.forward * verticalMovement + orientation.right * horizontalMovement;
+    }
+
+    void Jump()
+    {
+        if (isGrounded)
         {
-            StartCoroutine(StartIgnoreGroundedTimer());
-            StartCoroutine(StartGraceTimer());
+            rb.velocity = new Vector3(rb.velocity.x, 0, rb.velocity.z);
+            rb.AddForce(transform.up * jumpForce, ForceMode.Impulse);
         }
+    }
 
-        // Reset the jumping
-        if (IsGrounded())
+    void ControlSpeed()
+    {
+        if (Input.GetKey(sprintKey) && isGrounded)
         {
-            if (_isJumping)
-            {
-                // Reset jump state
-                _isJumping = false;
-            }
-            _graceTimeCurrent = 0f;
-            StopAllCoroutines();
-            _hasDashed = false;
-            _isDashing = false;
+            moveSpeed = Mathf.Lerp(moveSpeed, sprintSpeed, acceleration * Time.deltaTime);
         }
-
-
-        if (Input.GetKeyDown(KeyCode.LeftShift))
+        else
         {
-            if (IsGrounded())
-            {
-                _isRunning = true;
-            }
-            else if(!_hasDashed)
-            {
-                // Perfrom the swipe
-                _hasDashed = true;
-                _lockedMovementDirection = _moveDirection;
-                StartCoroutine(StartDashingTimer());
-            }
+            moveSpeed = Mathf.Lerp(moveSpeed, walkSpeed, acceleration * Time.deltaTime);
         }
-        else if (!Input.GetKey(KeyCode.LeftShift) && IsGrounded())
-        {
-            _isRunning = false;
-        }
+    }
 
-        IsGroundedEvent?.Invoke(IsGrounded());
-        IsJumpingEvent?.Invoke(_isJumping);
-        IsRunningEvent?.Invoke(_isRunning);
-        GraceTimerEvent?.Invoke(_graceTimeCurrent);
-        HasDashedEvent?.Invoke(_hasDashed);
+    void ControlDrag()
+    {
+        if (isGrounded)
+        {
+            rb.drag = groundDrag;
+        }
+        else
+        {
+            rb.drag = airDrag;
+        }
     }
 
     private void FixedUpdate()
     {
-        var movementSpeed = _isRunning ? _runSpeed : _walkSpeed;
-        var yAxisGravity = new Vector3(0, _rigidBody.velocity.y - _fallRate, 0);
-
-        if (_isDashing)
-        {
-            movementSpeed = _dashSpeed;
-            yAxisGravity = Vector3.zero;
-        }
-
-        // Dash in the given direction
-        if (_isDashing)
-        {
-            _rigidBody.velocity = (_lockedMovementDirection * movementSpeed * Time.deltaTime * 100f) + yAxisGravity;
-        }
-        else
-        {
-            _rigidBody.velocity = (_moveDirection * movementSpeed * Time.fixedDeltaTime  * 100f) + yAxisGravity;
-        }
+        MovePlayer();
     }
 
-    private void Jump()
+    void MovePlayer()
     {
-        _rigidBody.AddForce(Vector3.up * _jumpSpeed, ForceMode.Impulse);
-    }
-
-    private IEnumerator StartGraceTimer()
-    {
-        while (_graceTimeCurrent <= _graceTimeMax)
+        if (isGrounded && !OnSlope())
         {
-            _graceTimeCurrent += Time.deltaTime;
-            yield return null;
+            rb.AddForce(moveDirection.normalized * moveSpeed * movementMultiplier, ForceMode.Acceleration);
         }
-    }
-
-    private IEnumerator StartIgnoreGroundedTimer()
-    {
-        _ignoreGroundedCurrentTime = 0f;
-        while (_ignoreGroundedCurrentTime <= _ignoreGroundedMaxTime)
+        else if (isGrounded && OnSlope())
         {
-            _ignoreGroundedCurrentTime += Time.deltaTime;
-            yield return null;
+            rb.AddForce(slopeMoveDirection.normalized * moveSpeed * movementMultiplier, ForceMode.Acceleration);
         }
-    }
-
-    private IEnumerator StartDashingTimer()
-    {
-        _dashTimeCurrent = 0f;
-        _isDashing = true;
-        while (_dashTimeCurrent <= _dashTimeMax)
+        else if (!isGrounded)
         {
-            _dashTimeCurrent += Time.deltaTime;
-            yield return null;
+            rb.AddForce(moveDirection.normalized * moveSpeed * movementMultiplier * airMultiplier, ForceMode.Acceleration);
         }
-        _isDashing = false;
-    }
-
-    private bool IsGrounded()
-    {
-        bool dontIgnoreGrounded = _ignoreGroundedCurrentTime >= _ignoreGroundedMaxTime;
-        return Physics.Raycast(transform.position, -Vector3.up, _distanceToFeet + 0.1f) && dontIgnoreGrounded;
     }
 }

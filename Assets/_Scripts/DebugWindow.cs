@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 public class DebugWindow : MonoBehaviour
 {
-    [SerializeField]
+    /*[SerializeField]
     private TMP_Text _isGroundedText;
     [SerializeField]
     private TMP_Text _isJumpingText;
@@ -55,5 +55,5 @@ public class DebugWindow : MonoBehaviour
     private string DisplayBoolString(bool state)
     {
         return state ? $"<color=#26D73A>{state}</color>" : $"<color=#FF0000>{state}</color>"; 
-    }
+    }*/
 }
