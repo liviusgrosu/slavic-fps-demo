@@ -80,6 +80,9 @@ public class PlayerController : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space) && (IsGrounded() || _graceTimeCurrent < _graceTimeMax))
         {
+            // Allow jump in air to feel the same as on the ground
+            _rigidBody.velocity += new Vector3(0f, -_rigidBody.velocity.y, 0f);
+            
             _isJumping = true;
             StartCoroutine(StartIgnoreGroundedTimer());
             Jump();
@@ -137,24 +140,23 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        float movementSpeed = _isRunning ? _runSpeed : _walkSpeed;
-       
+        var movementSpeed = _isRunning ? _runSpeed : _walkSpeed;
+        var yAxisGravity = new Vector3(0, _rigidBody.velocity.y - _fallRate, 0);
+
         if (_isDashing)
         {
             movementSpeed = _dashSpeed;
+            yAxisGravity = Vector3.zero;
         }
-
-
-        Vector3 YAxisGravity = new Vector3(0, _rigidBody.velocity.y - _fallRate, 0);
 
         // Dash in the given direction
         if (_isDashing)
         {
-            _rigidBody.velocity = (_lockedMovementDirection * movementSpeed * Time.fixedDeltaTime * 100f) + YAxisGravity;
+            _rigidBody.velocity = (_lockedMovementDirection * movementSpeed * Time.deltaTime * 100f) + yAxisGravity;
         }
         else
         {
-            _rigidBody.velocity = (_moveDirection * movementSpeed * Time.fixedDeltaTime * 100f) + YAxisGravity;
+            _rigidBody.velocity = (_moveDirection * movementSpeed * Time.fixedDeltaTime  * 100f) + yAxisGravity;
         }
     }
 
