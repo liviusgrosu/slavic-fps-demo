@@ -3,61 +3,43 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(PlayerInput))]
 public class PlayerController : MonoBehaviour
 {
-    float playerHeight = 2f;
-
-    [SerializeField] Transform orientation;
-
     [Header("Movement")]
-    [SerializeField] float moveSpeed = 6f;
-    [SerializeField] float airMultiplier = 0.4f;
-    float movementMultiplier = 10f;
-
+    [SerializeField] private float moveSpeed = 6f;
+    [SerializeField] private float airMultiplier = 0.4f;
+    private const float MovementMultiplier = 10f;
+    private float _horizontalMovement, _verticalMovement;
+ 
+    [Header("Rotation")]
+    [SerializeField] private Transform orientation;
+    private Vector3 _moveDirection;
+    private Vector3 _slopeMoveDirection;
+    
     [Header("Sprinting")]
-    [SerializeField] float walkSpeed = 4f;
-    [SerializeField] float sprintSpeed = 6f;
-    [SerializeField] float acceleration = 10f;
+    [SerializeField] private float walkSpeed = 4f;
+    [SerializeField] private float sprintSpeed = 6f;
+    [SerializeField] private float acceleration = 10f;
 
     [Header("Jumping")]
     public float jumpForce = 5f;
 
     [Header("Drag")]
-    [SerializeField] float groundDrag = 6f;
-    [SerializeField] float airDrag = 2f;
-
-    float horizontalMovement;
-    float verticalMovement;
+    [SerializeField] private float groundDrag = 6f;
+    [SerializeField] private float airDrag = 2f;
 
     [Header("Ground Detection")]
-    [SerializeField] Transform groundCheck;
-    [SerializeField] LayerMask groundMask;
-    [SerializeField] float groundDistance = 0.2f;
-    public bool isGrounded { get; private set; }
-
-    Vector3 moveDirection;
-    Vector3 slopeMoveDirection;
-
-    Rigidbody rb;
+    [SerializeField] private Transform groundCheck;
+    [SerializeField] private LayerMask groundMask;
+    [SerializeField] private float groundDistance = 0.2f;
+    private bool _isGrounded;
+    private RaycastHit _slopeHit;
+    
+    // Components
+    private Rigidbody _rigidbody;
     private PlayerInput _inputManager;
-
-    RaycastHit slopeHit;
-
-    private bool OnSlope()
-    {
-        if (Physics.Raycast(transform.position, Vector3.down, out slopeHit, playerHeight / 2 + 0.5f))
-        {
-            if (slopeHit.normal != Vector3.up)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-        return false;
-    }
 
     private void Awake()
     {
@@ -66,46 +48,64 @@ public class PlayerController : MonoBehaviour
 
     private void Start()
     {
-        rb = GetComponent<Rigidbody>();
-        rb.freezeRotation = true;
+        _rigidbody = GetComponent<Rigidbody>();
+        _rigidbody.freezeRotation = true;
     }
 
     private void Update()
     {
-        isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+        _isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
 
-        MyInput();
+        PlayerInput();
         ControlDrag();
         ControlSpeed();
 
-        if (Input.GetKeyDown(_inputManager.JumpKey) && isGrounded)
+        if (Input.GetKeyDown(_inputManager.JumpKey) && _isGrounded)
         {
             Jump();
         }
 
-        slopeMoveDirection = Vector3.ProjectOnPlane(moveDirection, slopeHit.normal);
+        _slopeMoveDirection = Vector3.ProjectOnPlane(_moveDirection, _slopeHit.normal);
     }
 
-    void MyInput()
+    private void FixedUpdate()
     {
-        horizontalMovement = Input.GetAxisRaw("Horizontal");
-        verticalMovement = Input.GetAxisRaw("Vertical");
-
-        moveDirection = orientation.forward * verticalMovement + orientation.right * horizontalMovement;
-    }
-
-    void Jump()
-    {
-        if (isGrounded)
+        if (_isGrounded && !OnSlope())
         {
-            rb.velocity = new Vector3(rb.velocity.x, 0, rb.velocity.z);
-            rb.AddForce(transform.up * jumpForce, ForceMode.Impulse);
+            _rigidbody.AddForce(_moveDirection.normalized * moveSpeed * MovementMultiplier, ForceMode.Acceleration);
+        }
+        else if (_isGrounded && OnSlope())
+        {
+            _rigidbody.AddForce(_slopeMoveDirection.normalized * moveSpeed * MovementMultiplier, ForceMode.Acceleration);
+        }
+        else if (!_isGrounded)
+        {
+            _rigidbody.AddForce(_moveDirection.normalized * moveSpeed * MovementMultiplier * airMultiplier, ForceMode.Acceleration);
         }
     }
-
-    void ControlSpeed()
+    
+    private void PlayerInput()
     {
-        if (Input.GetKey(_inputManager.SprintKey) && isGrounded)
+        _horizontalMovement = Input.GetAxisRaw("Horizontal");
+        _verticalMovement = Input.GetAxisRaw("Vertical");
+
+        _moveDirection = orientation.forward * _verticalMovement + orientation.right * _horizontalMovement;
+    }
+
+    private void Jump()
+    {
+        if (!_isGrounded)
+        {
+            return;
+        }
+        
+        _rigidbody.velocity = new Vector3(_rigidbody.velocity.x, 0, _rigidbody.velocity.z);
+        _rigidbody.AddForce(transform.up * jumpForce, ForceMode.Impulse);
+    }
+
+    private void ControlSpeed()
+    {
+        if (Input.GetKey(_inputManager.SprintKey) && _isGrounded)
         {
             moveSpeed = Mathf.Lerp(moveSpeed, sprintSpeed, acceleration * Time.deltaTime);
         }
@@ -115,32 +115,18 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void ControlDrag()
+    private void ControlDrag()
     {
-        if (isGrounded)
-        {
-            rb.drag = groundDrag;
-        }
-        else
-        {
-            rb.drag = airDrag;
-        }
+        _rigidbody.drag = _isGrounded ? groundDrag : airDrag;
     }
 
-    private void FixedUpdate()
+    private bool OnSlope()
     {
-        if (isGrounded && !OnSlope())
+        if (!Physics.Raycast(transform.position, Vector3.down, out _slopeHit, 1.5f))
         {
-            rb.AddForce(moveDirection.normalized * moveSpeed * movementMultiplier, ForceMode.Acceleration);
+            return false;
         }
-        else if (isGrounded && OnSlope())
-        {
-            rb.AddForce(slopeMoveDirection.normalized * moveSpeed * movementMultiplier, ForceMode.Acceleration);
-        }
-        else if (!isGrounded)
-        {
-            rb.AddForce(moveDirection.normalized * moveSpeed * movementMultiplier * airMultiplier,
-                ForceMode.Acceleration);
-        }
+
+        return _slopeHit.normal != Vector3.up;
     }
 }
