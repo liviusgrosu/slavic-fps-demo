@@ -37,6 +37,11 @@ public class PlayerController : MonoBehaviour
     private bool _isGrounded;
     private RaycastHit _slopeHit;
     
+    
+    // Debug Events
+    public static event Action<bool> IsGroundedEvent;
+    public static event Action<bool> IsOnSlope;
+
     // Components
     private Rigidbody _rigidbody;
     private PlayerInput _inputManager;
@@ -66,21 +71,24 @@ public class PlayerController : MonoBehaviour
         }
 
         _slopeMoveDirection = Vector3.ProjectOnPlane(_moveDirection, _slopeHit.normal);
+        
+        IsGroundedEvent?.Invoke(_isGrounded);
+        IsOnSlope?.Invoke(OnSlope());
     }
 
     private void FixedUpdate()
     {
         if (_isGrounded && !OnSlope())
         {
-            _rigidbody.AddForce(_moveDirection.normalized * moveSpeed * MovementMultiplier, ForceMode.Acceleration);
+            _rigidbody.AddForce(_moveDirection.normalized * moveSpeed * MovementMultiplier + Physics.gravity, ForceMode.Acceleration);
         }
         else if (_isGrounded && OnSlope())
         {
-            _rigidbody.AddForce(_slopeMoveDirection.normalized * moveSpeed * MovementMultiplier, ForceMode.Acceleration);
+            _rigidbody.AddForce(_slopeMoveDirection.normalized * moveSpeed * MovementMultiplier + -_slopeHit.normal * Physics.gravity.magnitude, ForceMode.Acceleration);
         }
         else if (!_isGrounded)
         {
-            _rigidbody.AddForce(_moveDirection.normalized * moveSpeed * MovementMultiplier * airMultiplier, ForceMode.Acceleration);
+            _rigidbody.AddForce(_moveDirection.normalized * moveSpeed * MovementMultiplier * airMultiplier + Physics.gravity, ForceMode.Acceleration);
         }
     }
     

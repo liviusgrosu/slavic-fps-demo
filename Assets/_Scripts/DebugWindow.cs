@@ -7,12 +7,14 @@ using UnityEngine.UI;
 
 public class DebugWindow : MonoBehaviour
 {
-    /*[SerializeField]
+    [SerializeField]
     private TMP_Text _isGroundedText;
     [SerializeField]
     private TMP_Text _isJumpingText;
     [SerializeField]
     private TMP_Text _isRunningText;
+    [SerializeField]
+    private TMP_Text _isOnSlope;
     [SerializeField]
     private TMP_Text _hasDashed;
     [SerializeField]
@@ -21,10 +23,7 @@ public class DebugWindow : MonoBehaviour
     private void Start()
     {
         PlayerController.IsGroundedEvent += UpdateGroundedText;
-        PlayerController.IsJumpingEvent += UpdateJumpingText;
-        PlayerController.IsRunningEvent += UpdateRunningText;
-        PlayerController.HasDashedEvent += UpdateDashedText;
-        PlayerController.GraceTimerEvent += UpdateGraceWindowText;
+        PlayerController.IsOnSlope += UpdateSlopeText;
     }
 
     private void UpdateGroundedText(bool state)
@@ -37,6 +36,11 @@ public class DebugWindow : MonoBehaviour
         _isJumpingText.text = $"Is Jumping: {DisplayBoolString(state)}";
     }
 
+    private void UpdateSlopeText(bool state)
+    {
+        _isOnSlope.text = $"Is On Slope: {DisplayBoolString(state)}";
+    }
+    
     private void UpdateRunningText(bool state)
     {
         _isRunningText.text = $"Is Running: {DisplayBoolString(state)}";
@@ -55,5 +59,5 @@ public class DebugWindow : MonoBehaviour
     private string DisplayBoolString(bool state)
     {
         return state ? $"<color=#26D73A>{state}</color>" : $"<color=#FF0000>{state}</color>"; 
-    }*/
+    }
 }
