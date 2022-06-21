@@ -86,7 +86,7 @@ public class PlayerController : MonoBehaviour
             Jump();
         }
 
-        if (Input.GetKeyDown(_inputManager.DashKey))
+        if (Input.GetKeyDown(_inputManager.DashKey) && _moveDirection != Vector3.zero)
         {
             Dash();
         }
@@ -113,10 +113,6 @@ public class PlayerController : MonoBehaviour
         else if (!_isGrounded)
         {
             _rigidbody.AddForce(_moveDirection.normalized * moveSpeed * MovementMultiplier * airMultiplier + _gravity, ForceMode.Acceleration);
-        }
-        else if (_isDashing)
-        {
-            //_rigidbody.AddForce(_moveDirection.normalized * moveSpeed * MovementMultiplier + _gravity, ForceMode.VelocityChange);
         }
     }
 
@@ -200,7 +196,7 @@ public class PlayerController : MonoBehaviour
 
     private void ControlDrag()
     {
-        _rigidbody.drag = _isGrounded ? groundDrag : airDrag;
+        _rigidbody.drag = _isGrounded && !_isDashing ? groundDrag : airDrag;
     }
 
     private bool OnSlope()
