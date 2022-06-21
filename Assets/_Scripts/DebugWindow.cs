@@ -23,7 +23,9 @@ public class DebugWindow : MonoBehaviour
     private void Start()
     {
         PlayerController.IsGroundedEvent += UpdateGroundedText;
-        PlayerController.IsOnSlope += UpdateSlopeText;
+        PlayerController.IsOnSlopeEvent += UpdateSlopeText;
+        PlayerController.IsJumpingEvent += UpdateJumpingText;
+        PlayerController.GraceTimerEvent += UpdateGraceWindowText;
     }
 
     private void UpdateGroundedText(bool state)

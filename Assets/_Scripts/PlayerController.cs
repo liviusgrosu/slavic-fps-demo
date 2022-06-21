@@ -24,8 +24,11 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float acceleration = 10f;
 
     [Header("Jumping")]
-    public float jumpForce = 5f;
-
+    [SerializeField] private float jumpForce = 5f;
+    [SerializeField] private float graceTimeMax = 1f;
+    private float _graceTimeCurrent;
+    private bool _isJumping;
+    
     [Header("Drag")]
     [SerializeField] private float groundDrag = 6f;
     [SerializeField] private float airDrag = 2f;
@@ -36,11 +39,15 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float groundDistance = 0.2f;
     private bool _isGrounded;
     private RaycastHit _slopeHit;
+    private float _ignoreGroundedMaxTime = 0.1f;
+    private float _ignoreGroundedCurrentTime = 0.1f;
     
     
     // Debug Events
     public static event Action<bool> IsGroundedEvent;
-    public static event Action<bool> IsOnSlope;
+    public static event Action<bool> IsOnSlopeEvent;
+    public static event Action<bool> IsJumpingEvent;
+    public static event Action<float> GraceTimerEvent;
 
     // Components
     private Rigidbody _rigidbody;
@@ -59,21 +66,22 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        _isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
-
         PlayerInput();
+        CheckGrounded();
         ControlDrag();
         ControlSpeed();
 
-        if (Input.GetKeyDown(_inputManager.JumpKey) && _isGrounded)
+        if (Input.GetKeyDown(_inputManager.JumpKey) && (_isGrounded || _graceTimeCurrent < graceTimeMax))
         {
             Jump();
         }
 
         _slopeMoveDirection = Vector3.ProjectOnPlane(_moveDirection, _slopeHit.normal);
-        
+
         IsGroundedEvent?.Invoke(_isGrounded);
-        IsOnSlope?.Invoke(OnSlope());
+        IsOnSlopeEvent?.Invoke(OnSlope());
+        IsJumpingEvent?.Invoke(_isJumping);
+        GraceTimerEvent?.Invoke(_graceTimeCurrent);
     }
 
     private void FixedUpdate()
@@ -91,6 +99,23 @@ public class PlayerController : MonoBehaviour
             _rigidbody.AddForce(_moveDirection.normalized * moveSpeed * MovementMultiplier * airMultiplier + Physics.gravity, ForceMode.Acceleration);
         }
     }
+
+    private void CheckGrounded()
+    {
+        _isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+        if (_isGrounded && _ignoreGroundedCurrentTime >= _ignoreGroundedMaxTime)
+        {
+            StopAllCoroutines();
+            
+            _graceTimeCurrent = 0f;
+            _isJumping = false;
+        }
+        else if (!_isGrounded && !_isJumping && _graceTimeCurrent == 0)
+        {
+            StartCoroutine(StartIgnoreGroundedTimer());
+            StartCoroutine(StartGraceTimer());
+        }
+    }
     
     private void PlayerInput()
     {
@@ -106,9 +131,14 @@ public class PlayerController : MonoBehaviour
         {
             return;
         }
+
+        StartCoroutine(StartIgnoreGroundedTimer());
         
         _rigidbody.velocity = new Vector3(_rigidbody.velocity.x, 0, _rigidbody.velocity.z);
         _rigidbody.AddForce(transform.up * jumpForce, ForceMode.Impulse);
+        
+        _graceTimeCurrent = graceTimeMax;
+        _isJumping = true;
     }
 
     private void ControlSpeed()
@@ -136,5 +166,24 @@ public class PlayerController : MonoBehaviour
         }
 
         return _slopeHit.normal != Vector3.up;
+    }
+    
+    private IEnumerator StartGraceTimer()
+    {
+        while (_graceTimeCurrent <= graceTimeMax)
+        {
+            _graceTimeCurrent += Time.deltaTime;
+            yield return null;
+        }
+    }
+    
+    private IEnumerator StartIgnoreGroundedTimer()
+    {
+        _ignoreGroundedCurrentTime = 0f;
+        while (_ignoreGroundedCurrentTime <= _ignoreGroundedMaxTime)
+        {
+            _ignoreGroundedCurrentTime += Time.deltaTime;
+            yield return null;
+        }
     }
 }
