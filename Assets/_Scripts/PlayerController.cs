@@ -36,9 +36,10 @@ public class PlayerController : MonoBehaviour
     private Vector3 _lockedMovementDirection;
     private bool _isDashing;
     
-    [Header("Drag")]
+    [Header("Physics")]
     [SerializeField] private float groundDrag = 6f;
     [SerializeField] private float airDrag = 2f;
+    private Vector3 _gravity;
 
     [Header("Ground Detection")]
     [SerializeField] private Transform groundCheck;
@@ -74,6 +75,7 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
+        AdjustGravity();
         GetMovementInput();
         CheckGrounded();
         ControlDrag();
@@ -102,22 +104,37 @@ public class PlayerController : MonoBehaviour
     {
         if (_isGrounded && !OnSlope())
         {
-            _rigidbody.AddForce(_moveDirection.normalized * moveSpeed * MovementMultiplier + Physics.gravity, ForceMode.Acceleration);
+            _rigidbody.AddForce(_moveDirection.normalized * moveSpeed * MovementMultiplier + _gravity, ForceMode.Acceleration);
         }
         else if (_isGrounded && OnSlope())
         {
-            _rigidbody.AddForce(_slopeMoveDirection.normalized * moveSpeed * MovementMultiplier + -_slopeHit.normal * Physics.gravity.magnitude, ForceMode.Acceleration);
+            _rigidbody.AddForce(_slopeMoveDirection.normalized * moveSpeed * MovementMultiplier + _gravity, ForceMode.Acceleration);
         }
         else if (!_isGrounded)
         {
-            _rigidbody.AddForce(_moveDirection.normalized * moveSpeed * MovementMultiplier * airMultiplier + Physics.gravity, ForceMode.Acceleration);
+            _rigidbody.AddForce(_moveDirection.normalized * moveSpeed * MovementMultiplier * airMultiplier + _gravity, ForceMode.Acceleration);
         }
         else if (_isDashing)
         {
-            _rigidbody.AddForce(_moveDirection.normalized * moveSpeed * MovementMultiplier, ForceMode.Acceleration);
+            //_rigidbody.AddForce(_moveDirection.normalized * moveSpeed * MovementMultiplier + _gravity, ForceMode.VelocityChange);
         }
     }
 
+    private void AdjustGravity()
+    {
+        _gravity = Physics.gravity;
+        
+        if (OnSlope())
+        {
+            _gravity = -_slopeHit.normal * Physics.gravity.magnitude;
+        }
+
+        if (_isDashing)
+        {
+            _gravity = Vector3.zero;
+        }
+    }
+    
     private void CheckGrounded()
     {
         _isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
@@ -207,14 +224,20 @@ public class PlayerController : MonoBehaviour
     
     private IEnumerator StartDashingTimer()
     {
+        Vector3 oldPlayerVelocity = _rigidbody.velocity;
+        _rigidbody.velocity = _moveDirection.normalized * dashSpeed * MovementMultiplier;
+        
         _dashTimeCurrent = 0f;
         _isDashing = true;
+        
         while (_dashTimeCurrent <= dashTimeMax)
         {
             _dashTimeCurrent += Time.deltaTime;
             yield return null;
         }
+        
         _isDashing = false;
+        _rigidbody.velocity = oldPlayerVelocity / 4f;
     }
 
     
