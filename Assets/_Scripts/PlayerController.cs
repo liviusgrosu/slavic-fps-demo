@@ -100,7 +100,7 @@ public class PlayerController : MonoBehaviour
             Dash();
         }
 
-        if (!_isGrounded && VaultableInFront())
+        if (!_isGrounded && !_isVaulting && _isJumping && VaultableInFront())
         {
             StartCoroutine(StartVaultingTimer());
         }
@@ -226,35 +226,31 @@ public class PlayerController : MonoBehaviour
     private bool VaultableInFront()
     {
         RaycastHit hit;
-        if (Physics.Raycast(transform.position, GetCameraForward(), out hit, minDistanceToVaultable))
+
+        if (!Physics.Raycast(transform.position, GetCameraForward(), out hit, minDistanceToVaultable) || 
+            !hit.transform.GetComponent<BoxCollider>())
         {
-            if (!hit.transform.GetComponent<BoxCollider>())
-            {
-                return false;
-            }
-            
-            // Get forward vector
-            float distanceToPoint = (hit.point - transform.position).magnitude + _collider.radius;
-            Vector3 forwardDisplacement = transform.position + (GetCameraForward() * distanceToPoint);
-            
-            // Get upward vector
-            float objectHeight = hit.transform.GetComponent<MeshRenderer>().bounds.size.y / 2f; 
-            Vector3 topOfCollider = hit.transform.position + new Vector3(0f, objectHeight, 0f);
+            return false;
+        }
 
-            Vector3 playerToColliderTop = new Vector3(forwardDisplacement.x, topOfCollider.y + _collider.height / 2f, forwardDisplacement.z);
-            float distanceToTop = Vector3.Distance(forwardDisplacement, playerToColliderTop);
+        // Get forward vector
+        float distanceToPoint = (hit.point - transform.position).magnitude + _collider.radius;
+        Vector3 forwardDisplacement = transform.position + (GetCameraForward() * distanceToPoint);
+        
+        // Get upward vector
+        float vaultObjectHeight = hit.transform.GetComponent<MeshRenderer>().bounds.size.y / 2f; 
+        Vector3 topOfCollider = hit.transform.position + new Vector3(0f, vaultObjectHeight, 0f);
 
-            Debug.DrawLine(transform.position, forwardDisplacement, Color.blue);
-            Debug.DrawLine(transform.position, transform.position + transform.up * distanceToTop, Color.green);
-            Debug.DrawLine(forwardDisplacement, playerToColliderTop, Color.magenta);
+        // Get top of vault object Y
+        float vaultObjectYTop = topOfCollider.y + _collider.height / 2f;
+        Vector3 playerToColliderTop = new Vector3(forwardDisplacement.x, vaultObjectYTop, forwardDisplacement.z);
 
-            if (distanceToTop <= _collider.height)
-            {
-                _startPoint = transform.position;
-                _middlePoint = transform.position + transform.up * distanceToTop;
-                _endPoint = playerToColliderTop;
-                return true;
-            }
+        if (Vector3.Distance(forwardDisplacement, playerToColliderTop) <= _collider.height)
+        {
+            _startPoint = transform.position;
+            _middlePoint = transform.position + transform.up * distanceToTop;
+            _endPoint = playerToColliderTop;
+            return true;
         }
 
         return false;
