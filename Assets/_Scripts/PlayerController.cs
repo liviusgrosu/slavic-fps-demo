@@ -1,7 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
+using System.Numerics;
+using UnityEditor;
 using UnityEngine;
+using Vector3 = UnityEngine.Vector3;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(PlayerInput))]
@@ -36,6 +40,9 @@ public class PlayerController : MonoBehaviour
     private Vector3 _lockedMovementDirection;
     private bool _isDashing;
     
+    [Header("Vaulting")]
+    [SerializeField] private float minDistanceToVaultable = 0.1f;
+    
     [Header("Physics")]
     [SerializeField] private float groundDrag = 6f;
     [SerializeField] private float airDrag = 2f;
@@ -50,7 +57,6 @@ public class PlayerController : MonoBehaviour
     private float _ignoreGroundedMaxTime = 0.1f;
     private float _ignoreGroundedCurrentTime = 0.1f;
     
-    
     // Debug Events
     public static event Action<bool> IsGroundedEvent;
     public static event Action<bool> IsOnSlopeEvent;
@@ -61,18 +67,17 @@ public class PlayerController : MonoBehaviour
     // Components
     private Rigidbody _rigidbody;
     private PlayerInput _inputManager;
+    private CapsuleCollider _collider;
 
     private void Awake()
     {
         _inputManager = GetComponent<PlayerInput>();
-    }
-
-    private void Start()
-    {
+        _collider = GetComponent<CapsuleCollider>();
         _rigidbody = GetComponent<Rigidbody>();
         _rigidbody.freezeRotation = true;
-    }
 
+    }
+    
     private void Update()
     {
         AdjustGravity();
@@ -91,6 +96,11 @@ public class PlayerController : MonoBehaviour
             Dash();
         }
 
+        if (!_isGrounded && VaultableInFront())
+        {
+            
+        }
+        
         _slopeMoveDirection = Vector3.ProjectOnPlane(_moveDirection, _slopeHit.normal);
 
         IsGroundedEvent?.Invoke(_isGrounded);
@@ -208,6 +218,40 @@ public class PlayerController : MonoBehaviour
 
         return _slopeHit.normal != Vector3.up;
     }
+
+    private bool VaultableInFront()
+    {
+        RaycastHit hit;
+        if (Physics.Raycast(transform.position, GetCameraForward(), out hit, minDistanceToVaultable))
+        {
+            if (!hit.transform.GetComponent<BoxCollider>())
+            {
+                return false;
+            }
+            
+            // Get forward vector
+            float distanceToPoint = (hit.point - transform.position).magnitude + _collider.radius;
+            Vector3 forwardDisplacement = transform.position + (GetCameraForward() * distanceToPoint);
+            
+            // Get upward vector
+            float objectHeight = hit.transform.GetComponent<MeshRenderer>().bounds.size.y / 2f; 
+            Vector3 topOfCollider = hit.transform.position + new Vector3(0f, objectHeight, 0f);
+
+            Vector3 playerToColliderTop = new Vector3(forwardDisplacement.x, topOfCollider.y + _collider.height / 2f, forwardDisplacement.z);
+            float distanceToTop = Vector3.Distance(forwardDisplacement, playerToColliderTop);
+
+            Debug.DrawLine(transform.position, forwardDisplacement, Color.blue);
+            Debug.DrawLine(forwardDisplacement, playerToColliderTop, Color.magenta);
+            
+            if (distanceToTop <= _collider.height)
+            {
+                _rigidbody.velocity = Vector3.zero;
+                transform.position = playerToColliderTop;
+            }
+        }
+
+        return false;
+    }
     
     private IEnumerator StartGraceTimer()
     {
@@ -236,6 +280,13 @@ public class PlayerController : MonoBehaviour
         _rigidbody.velocity = oldPlayerVelocity / 4f;
     }
 
+    private Vector3 GetCameraForward()
+    {
+        Vector3 cameraForward = Camera.main.transform.forward;
+        cameraForward.y = 0f;
+        cameraForward.Normalize();
+        return cameraForward;
+    }
     
     private IEnumerator StartIgnoreGroundedTimer()
     {
