@@ -42,7 +42,11 @@ public class PlayerController : MonoBehaviour
     
     [Header("Vaulting")]
     [SerializeField] private float minDistanceToVaultable = 0.1f;
-    
+    [SerializeField] private float vaultTimeMax = 1f;
+    private float _vaultTimeCurrent;
+    private Vector3 _startPoint, _middlePoint, _endPoint;
+    private bool _isVaulting;
+
     [Header("Physics")]
     [SerializeField] private float groundDrag = 6f;
     [SerializeField] private float airDrag = 2f;
@@ -98,7 +102,7 @@ public class PlayerController : MonoBehaviour
 
         if (!_isGrounded && VaultableInFront())
         {
-            
+            StartCoroutine(StartVaultingTimer());
         }
         
         _slopeMoveDirection = Vector3.ProjectOnPlane(_moveDirection, _slopeHit.normal);
@@ -241,16 +245,27 @@ public class PlayerController : MonoBehaviour
             float distanceToTop = Vector3.Distance(forwardDisplacement, playerToColliderTop);
 
             Debug.DrawLine(transform.position, forwardDisplacement, Color.blue);
+            Debug.DrawLine(transform.position, transform.position + transform.up * distanceToTop, Color.green);
             Debug.DrawLine(forwardDisplacement, playerToColliderTop, Color.magenta);
-            
+
             if (distanceToTop <= _collider.height)
             {
-                _rigidbody.velocity = Vector3.zero;
-                transform.position = playerToColliderTop;
+                _startPoint = transform.position;
+                _middlePoint = transform.position + transform.up * distanceToTop;
+                _endPoint = playerToColliderTop;
+                return true;
             }
         }
 
         return false;
+    }
+    
+    private Vector3 GetCameraForward()
+    {
+        Vector3 cameraForward = Camera.main.transform.forward;
+        cameraForward.y = 0f;
+        cameraForward.Normalize();
+        return cameraForward;
     }
     
     private IEnumerator StartGraceTimer()
@@ -280,14 +295,6 @@ public class PlayerController : MonoBehaviour
         _rigidbody.velocity = oldPlayerVelocity / 4f;
     }
 
-    private Vector3 GetCameraForward()
-    {
-        Vector3 cameraForward = Camera.main.transform.forward;
-        cameraForward.y = 0f;
-        cameraForward.Normalize();
-        return cameraForward;
-    }
-    
     private IEnumerator StartIgnoreGroundedTimer()
     {
         _ignoreGroundedCurrentTime = 0f;
@@ -296,5 +303,31 @@ public class PlayerController : MonoBehaviour
             _ignoreGroundedCurrentTime += Time.deltaTime;
             yield return null;
         }
+    }
+
+    private IEnumerator StartVaultingTimer()
+    {
+        _collider.isTrigger = true;
+        _rigidbody.isKinematic = true;
+        _isVaulting = true;
+
+        _vaultTimeCurrent = 0f;
+        while (_vaultTimeCurrent <= vaultTimeMax)
+        {
+            _vaultTimeCurrent += Time.deltaTime;
+            transform.position = EvaluateQuadratic(_startPoint, _middlePoint, _endPoint, _vaultTimeCurrent / vaultTimeMax);
+            yield return null;
+        }
+        
+        _collider.isTrigger = false;
+        _rigidbody.isKinematic = false;
+        _isVaulting = false;
+    }
+    
+    private Vector3 EvaluateQuadratic(Vector3 a, Vector3 b, Vector3 c, float t)
+    {
+        Vector3 p0 = Vector3.Lerp(a, b, t);
+        Vector3 p1 = Vector3.Lerp(b, c, t);
+        return Vector3.Lerp(p0, p1, t);
     }
 }
