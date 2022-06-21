@@ -29,6 +29,13 @@ public class PlayerController : MonoBehaviour
     private float _graceTimeCurrent;
     private bool _isJumping;
     
+    [Header("Dashing")]
+    [SerializeField] private float dashSpeed = 5f;
+    [SerializeField] private float dashTimeMax = 1f;
+    private float _dashTimeCurrent;
+    private Vector3 _lockedMovementDirection;
+    private bool _isDashing;
+    
     [Header("Drag")]
     [SerializeField] private float groundDrag = 6f;
     [SerializeField] private float airDrag = 2f;
@@ -48,6 +55,7 @@ public class PlayerController : MonoBehaviour
     public static event Action<bool> IsOnSlopeEvent;
     public static event Action<bool> IsJumpingEvent;
     public static event Action<float> GraceTimerEvent;
+    public static event Action<float> DashTimerEvent;
 
     // Components
     private Rigidbody _rigidbody;
@@ -66,7 +74,7 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        PlayerInput();
+        GetMovementInput();
         CheckGrounded();
         ControlDrag();
         ControlSpeed();
@@ -76,12 +84,18 @@ public class PlayerController : MonoBehaviour
             Jump();
         }
 
+        if (Input.GetKeyDown(_inputManager.DashKey))
+        {
+            Dash();
+        }
+
         _slopeMoveDirection = Vector3.ProjectOnPlane(_moveDirection, _slopeHit.normal);
 
         IsGroundedEvent?.Invoke(_isGrounded);
         IsOnSlopeEvent?.Invoke(OnSlope());
         IsJumpingEvent?.Invoke(_isJumping);
         GraceTimerEvent?.Invoke(_graceTimeCurrent);
+        DashTimerEvent?.Invoke(_dashTimeCurrent);
     }
 
     private void FixedUpdate()
@@ -98,6 +112,10 @@ public class PlayerController : MonoBehaviour
         {
             _rigidbody.AddForce(_moveDirection.normalized * moveSpeed * MovementMultiplier * airMultiplier + Physics.gravity, ForceMode.Acceleration);
         }
+        else if (_isDashing)
+        {
+            _rigidbody.AddForce(_moveDirection.normalized * moveSpeed * MovementMultiplier, ForceMode.Acceleration);
+        }
     }
 
     private void CheckGrounded()
@@ -105,8 +123,9 @@ public class PlayerController : MonoBehaviour
         _isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
         if (_isGrounded && _ignoreGroundedCurrentTime >= _ignoreGroundedMaxTime)
         {
-            StopAllCoroutines();
-            
+            StopCoroutine(StartIgnoreGroundedTimer());
+            StopCoroutine(StartGraceTimer());
+
             _graceTimeCurrent = 0f;
             _isJumping = false;
         }
@@ -117,8 +136,13 @@ public class PlayerController : MonoBehaviour
         }
     }
     
-    private void PlayerInput()
+    private void GetMovementInput()
     {
+        if (_isDashing)
+        {
+            return;
+        }
+        
         _horizontalMovement = Input.GetAxisRaw("Horizontal");
         _verticalMovement = Input.GetAxisRaw("Vertical");
 
@@ -127,11 +151,6 @@ public class PlayerController : MonoBehaviour
 
     private void Jump()
     {
-        if (!_isGrounded)
-        {
-            return;
-        }
-
         StartCoroutine(StartIgnoreGroundedTimer());
         
         _rigidbody.velocity = new Vector3(_rigidbody.velocity.x, 0, _rigidbody.velocity.z);
@@ -141,11 +160,20 @@ public class PlayerController : MonoBehaviour
         _isJumping = true;
     }
 
+    private void Dash()
+    {
+        StartCoroutine(StartDashingTimer());
+    }
+
     private void ControlSpeed()
     {
         if (Input.GetKey(_inputManager.SprintKey) && _isGrounded)
         {
             moveSpeed = Mathf.Lerp(moveSpeed, sprintSpeed, acceleration * Time.deltaTime);
+        }
+        else if (_isDashing)
+        {
+            moveSpeed = dashSpeed;
         }
         else
         {
@@ -176,6 +204,19 @@ public class PlayerController : MonoBehaviour
             yield return null;
         }
     }
+    
+    private IEnumerator StartDashingTimer()
+    {
+        _dashTimeCurrent = 0f;
+        _isDashing = true;
+        while (_dashTimeCurrent <= dashTimeMax)
+        {
+            _dashTimeCurrent += Time.deltaTime;
+            yield return null;
+        }
+        _isDashing = false;
+    }
+
     
     private IEnumerator StartIgnoreGroundedTimer()
     {
