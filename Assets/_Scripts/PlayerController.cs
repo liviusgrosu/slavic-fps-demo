@@ -68,9 +68,10 @@ public class PlayerController : MonoBehaviour
     public static event Action<bool> IsOnSlopeEvent;
     public static event Action<bool> IsJumpingEvent;
     public static event Action<float> GraceTimerEvent;
+    public static event Action<bool> DashEvent;
     public static event Action<float> DashTimerEvent;
     public static event Action<float> DashTimerCooldownEvent;
-
+    
     // Components
     private Rigidbody _rigidbody;
     private PlayerInput _inputManager;
@@ -321,6 +322,7 @@ public class PlayerController : MonoBehaviour
         _rigidbody.velocity = _moveDirection.normalized * dashSpeed * MovementMultiplier;
         
         _isDashing = true;
+        DashEvent?.Invoke(_isDashing);
         _dashTimeCurrent = 0f;
         
         while (_dashTimeCurrent <= dashTimeMax)
@@ -331,6 +333,7 @@ public class PlayerController : MonoBehaviour
         
         // Reduce players velocity by a quarter as they are coming off a dash
         _isDashing = false;
+        DashEvent?.Invoke(_isDashing);
         _rigidbody.velocity = oldPlayerVelocity / 4f;
         // Start cooldown of dash
         StartCoroutine(StartDashingCooldown());
