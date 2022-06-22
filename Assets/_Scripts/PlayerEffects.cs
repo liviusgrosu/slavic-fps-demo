@@ -5,41 +5,20 @@ using UnityEngine;
 
 public class PlayerEffects : MonoBehaviour
 {
+    [SerializeField] private Transform mainCamera;
+    
     [Header("Dashing")]
     [SerializeField] private Transform dashEffect;
     [SerializeField] private float dashEffectDistance = 1f;
-    [SerializeField] private float dashCameraFOV = 100f;
-    private float _currentCameraFOV;
 
-    [SerializeField] private Transform mainCamera;
-
-    private void Awake()
+    public void PerformDashEffect(Vector3 direction, float time)
     {
-        PlayerController.DashEvent += ToggleDashing;
-    }
-
-    private void Start()
-    {
-        _currentCameraFOV = mainCamera.GetComponent<Camera>().fieldOfView;
-    }
-    
-    private void Update()
-    {
-        dashEffect.position = mainCamera.position + (mainCamera.forward * dashEffectDistance);
+        dashEffect.position = mainCamera.position + (direction * dashEffectDistance);
         dashEffect.LookAt(mainCamera, transform.up);
-    }
 
-    private void ToggleDashing(bool state)
-    {
-        if (state)
-        {
-            mainCamera.GetComponent<Camera>().fieldOfView = dashCameraFOV;
-            dashEffect.gameObject.SetActive(true);
-        }
-        else
-        {
-            mainCamera.GetComponent<Camera>().fieldOfView = _currentCameraFOV;
-            dashEffect.gameObject.SetActive(false);
-        }
+        var main = dashEffect.GetComponent<ParticleSystem>().main;
+        main.duration = time * 0.75f;
+        
+        dashEffect.GetComponent<ParticleSystem>().Play();
     }
 }
