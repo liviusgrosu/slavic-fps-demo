@@ -2,37 +2,37 @@ using UnityEngine;
 
 public class CameraLook : MonoBehaviour
 {
-    [SerializeField] private float sensX = 100f;
-    [SerializeField] private float sensY = 100f;
+    [SerializeField] private float sensitivityX = 100f;
+    [SerializeField] private float sensitivityY = 100f;
+    [SerializeField] private Transform mainCamera = null;
 
-    [SerializeField] Transform cam = null;
-    [SerializeField] Transform orientation = null;
+    private float _mouseX, _mouseY;
+    private const float Multiplier = 0.01f;
 
-    float mouseX;
-    float mouseY;
-
-    float multiplier = 0.01f;
-
-    float xRotation;
-    float yRotation;
+    private float _xRotation;
+    private float _yRotation;
 
     private void Start()
     {
+        // Hide mouse and lock it to middle of screen
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
 
     private void Update()
     {
-        mouseX = Input.GetAxisRaw("Mouse X");
-        mouseY = Input.GetAxisRaw("Mouse Y");
+        // Get mouse input
+        _mouseX = Input.GetAxisRaw("Mouse X");
+        _mouseY = Input.GetAxisRaw("Mouse Y");
          
-        yRotation += mouseX * sensX * multiplier;
-        xRotation -= mouseY * sensY * multiplier;
+        // Apply sensitivity to input
+        _yRotation += _mouseX * sensitivityX * Multiplier;
+        _xRotation -= _mouseY * sensitivityY * Multiplier;
 
-        xRotation = Mathf.Clamp(xRotation, -90f, 90f);
+        // Clamp X rotation so that it the player cant look back infinitely
+        _xRotation = Mathf.Clamp(_xRotation, -90f, 90f);
 
-        cam.transform.rotation = Quaternion.Euler(xRotation, yRotation, 0);
-        orientation.transform.rotation = Quaternion.Euler(0, yRotation, 0);
+        // Apply rotation input to camera
+        mainCamera.transform.rotation = Quaternion.Euler(_xRotation, _yRotation, 0);
     }
 }

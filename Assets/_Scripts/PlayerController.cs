@@ -18,7 +18,7 @@ public class PlayerController : MonoBehaviour
     private float _horizontalMovement, _verticalMovement;
  
     [Header("Rotation")]
-    [SerializeField] private Transform orientation;
+    [SerializeField] private Transform mainCamera = null;
     private Vector3 _moveDirection;
     private Vector3 _slopeMoveDirection;
     
@@ -92,50 +92,42 @@ public class PlayerController : MonoBehaviour
         CheckGrounded();
         ControlDrag();
         ControlSpeed();
-
-        if (Input.GetKeyDown(_inputManager.JumpKey) && (_isGrounded || _graceTimeCurrent < graceTimeMax))
-        {
-            Jump();
-        }
-
-        if (Input.GetKeyDown(_inputManager.DashKey) && _dashTimeCooldownCurrent >= dashCooldownTimeMax && _moveDirection != Vector3.zero)
-        {
-            Dash();
-        }
-
-        if (!_isGrounded && !_isVaulting && _isJumping && VaultableInFront())
-        {
-            StartCoroutine(StartVaultingTimer());
-        }
+        CheckVaulting();
+        UpdateDebugWindow();
         
         _slopeMoveDirection = Vector3.ProjectOnPlane(_moveDirection, _slopeHit.normal);
-
-        IsGroundedEvent?.Invoke(_isGrounded);
-        IsOnSlopeEvent?.Invoke(OnSlope());
-        IsJumpingEvent?.Invoke(_isJumping);
-        GraceTimerEvent?.Invoke(_graceTimeCurrent);
-        DashTimerEvent?.Invoke(_dashTimeCurrent);
-        DashTimerCooldownEvent?.Invoke(_dashTimeCooldownCurrent);
     }
 
     private void FixedUpdate()
     {
+        // Apply movement force not on slope
         if (_isGrounded && !OnSlope())
         {
             _rigidbody.AddForce(_moveDirection.normalized * moveSpeed * MovementMultiplier + _gravity, ForceMode.Acceleration);
         }
+        // Apply movement force on slope
         else if (_isGrounded && OnSlope())
         {
             _rigidbody.AddForce(_slopeMoveDirection.normalized * moveSpeed * MovementMultiplier + _gravity, ForceMode.Acceleration);
         }
+        // Apply movement force when in the air
         else if (!_isGrounded)
         {
             _rigidbody.AddForce(_moveDirection.normalized * moveSpeed * MovementMultiplier * airMultiplier + _gravity, ForceMode.Acceleration);
         }
     }
 
+    private void CheckVaulting()
+    {
+        if (!_isGrounded && !_isVaulting && _isJumping && VaultableInFront())
+        {
+            StartCoroutine(StartVaultingTimer());
+        }
+    }
+    
     private void AdjustGravity()
     {
+        // Adjust gravity according to the surfaces normal so the player doesnt slide
         _gravity = Physics.gravity;
         
         if (OnSlope())
@@ -151,9 +143,11 @@ public class PlayerController : MonoBehaviour
     
     private void CheckGrounded()
     {
+        // Check if a sphere collides with the ground as the ground check
         _isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
         if (_isGrounded && _ignoreGroundedCurrentTime >= _ignoreGroundedMaxTime)
         {
+            // Stop any coroutines related to touching the ground
             StopCoroutine(StartIgnoreGroundedTimer());
             StopCoroutine(StartGraceTimer());
 
@@ -162,6 +156,7 @@ public class PlayerController : MonoBehaviour
         }
         else if (!_isGrounded && !_isJumping && _graceTimeCurrent == 0)
         {
+            // Start any coroutines related not touching the ground
             StartCoroutine(StartIgnoreGroundedTimer());
             StartCoroutine(StartGraceTimer());
         }
@@ -169,43 +164,61 @@ public class PlayerController : MonoBehaviour
     
     private void GetMovementInput()
     {
-        if (_isDashing)
+        // Regular movement input
+        if (!_isDashing)
         {
-            return;
+            _horizontalMovement = Input.GetAxisRaw("Horizontal");
+            _verticalMovement = Input.GetAxisRaw("Vertical");
+
+            _moveDirection = mainCamera.forward * _verticalMovement + mainCamera.right * _horizontalMovement;
         }
         
-        _horizontalMovement = Input.GetAxisRaw("Horizontal");
-        _verticalMovement = Input.GetAxisRaw("Vertical");
+        // Jumping input
+        if (Input.GetKeyDown(_inputManager.JumpKey) && (_isGrounded || _graceTimeCurrent < graceTimeMax))
+        {
+            Jump();
+        }
 
-        _moveDirection = orientation.forward * _verticalMovement + orientation.right * _horizontalMovement;
+        // Dashing input
+        if (Input.GetKeyDown(_inputManager.DashKey) && _dashTimeCooldownCurrent >= dashCooldownTimeMax && _moveDirection != Vector3.zero)
+        {
+            Dash();
+        }
     }
 
     private void Jump()
     {
+        // Ignore the ground so we can't jump twice
         StartCoroutine(StartIgnoreGroundedTimer());
         
+        // Add the jumping force to the rigidbody
         _rigidbody.velocity = new Vector3(_rigidbody.velocity.x, 0, _rigidbody.velocity.z);
         _rigidbody.AddForce(transform.up * jumpForce, ForceMode.Impulse);
         
+        // Ignore any grace jump timing
         _graceTimeCurrent = graceTimeMax;
         _isJumping = true;
     }
 
     private void Dash()
     {
+        // Start dashing
         StartCoroutine(StartDashingTimer());
     }
 
     private void ControlSpeed()
     {
+        // Change move speed if player is pressing on the spring key
         if (Input.GetKey(_inputManager.SprintKey) && _isGrounded)
         {
             moveSpeed = Mathf.Lerp(moveSpeed, sprintSpeed, acceleration * Time.deltaTime);
         }
+        // Dashing speed
         else if (_isDashing)
         {
             moveSpeed = dashSpeed;
         }
+        // Normal walking speed
         else
         {
             moveSpeed = Mathf.Lerp(moveSpeed, walkSpeed, acceleration * Time.deltaTime);
@@ -214,16 +227,18 @@ public class PlayerController : MonoBehaviour
 
     private void ControlDrag()
     {
+        // Apply drag depending if the player is in the air or not
         _rigidbody.drag = _isGrounded && !_isDashing ? groundDrag : airDrag;
     }
 
     private bool OnSlope()
     {
+        // Check if player is on a slope depending on the floors normal
         if (!Physics.Raycast(transform.position, Vector3.down, out _slopeHit, 1.5f))
         {
             return false;
         }
-
+        
         return _slopeHit.normal != Vector3.up;
     }
 
@@ -263,14 +278,35 @@ public class PlayerController : MonoBehaviour
     
     private Vector3 GetCameraForward()
     {
-        Vector3 cameraForward = Camera.main.transform.forward;
+        // Get the cameras forward direction in the xz plane
+        Vector3 cameraForward = mainCamera.forward;
         cameraForward.y = 0f;
         cameraForward.Normalize();
         return cameraForward;
     }
     
+    private static Vector3 EvaluateQuadratic(Vector3 a, Vector3 b, Vector3 c, float t)
+    {
+        // Quadratic equation to lerp between 3 points
+        Vector3 p0 = Vector3.Lerp(a, b, t);
+        Vector3 p1 = Vector3.Lerp(b, c, t);
+        return Vector3.Lerp(p0, p1, t);
+    }
+
+    private void UpdateDebugWindow()
+    {
+        // Update any states from this script onto a canvas for display 
+        IsGroundedEvent?.Invoke(_isGrounded);
+        IsOnSlopeEvent?.Invoke(OnSlope());
+        IsJumpingEvent?.Invoke(_isJumping);
+        GraceTimerEvent?.Invoke(_graceTimeCurrent);
+        DashTimerEvent?.Invoke(_dashTimeCurrent);
+        DashTimerCooldownEvent?.Invoke(_dashTimeCooldownCurrent);
+    }
+    
     private IEnumerator StartGraceTimer()
     {
+        // Start the grace timer
         while (_graceTimeCurrent <= graceTimeMax)
         {
             _graceTimeCurrent += Time.deltaTime;
@@ -280,11 +316,12 @@ public class PlayerController : MonoBehaviour
     
     private IEnumerator StartDashingTimer()
     {
+        // Store the players velocity as this will the direction of the dash
         Vector3 oldPlayerVelocity = _rigidbody.velocity;
         _rigidbody.velocity = _moveDirection.normalized * dashSpeed * MovementMultiplier;
         
-        _dashTimeCurrent = 0f;
         _isDashing = true;
+        _dashTimeCurrent = 0f;
         
         while (_dashTimeCurrent <= dashTimeMax)
         {
@@ -292,13 +329,16 @@ public class PlayerController : MonoBehaviour
             yield return null;
         }
         
+        // Reduce players velocity by a quarter as they are coming off a dash
         _isDashing = false;
         _rigidbody.velocity = oldPlayerVelocity / 4f;
+        // Start cooldown of dash
         StartCoroutine(StartDashingCooldown());
     }
 
     private IEnumerator StartDashingCooldown()
     {
+        // Perform the dashing process for some time
         _dashTimeCooldownCurrent = 0f;
         while (_dashTimeCooldownCurrent <= dashCooldownTimeMax)
         {
@@ -309,6 +349,7 @@ public class PlayerController : MonoBehaviour
 
     private IEnumerator StartIgnoreGroundedTimer()
     {
+        // Ignore the ground for some time
         _ignoreGroundedCurrentTime = 0f;
         while (_ignoreGroundedCurrentTime <= _ignoreGroundedMaxTime)
         {
@@ -319,10 +360,9 @@ public class PlayerController : MonoBehaviour
 
     private IEnumerator StartVaultingTimer()
     {
-        _collider.isTrigger = true;
-        _rigidbody.isKinematic = true;
-        _isVaulting = true;
+        ToggleVaultingParams(true);
 
+        // Start Lerping between start and end position of vault
         _vaultTimeCurrent = 0f;
         while (_vaultTimeCurrent <= vaultTimeMax)
         {
@@ -330,16 +370,15 @@ public class PlayerController : MonoBehaviour
             transform.position = EvaluateQuadratic(_startPoint, _middlePoint, _endPoint, _vaultTimeCurrent / vaultTimeMax);
             yield return null;
         }
-        
-        _collider.isTrigger = false;
-        _rigidbody.isKinematic = false;
-        _isVaulting = false;
+
+        ToggleVaultingParams(false);
     }
-    
-    private Vector3 EvaluateQuadratic(Vector3 a, Vector3 b, Vector3 c, float t)
+
+    private void ToggleVaultingParams(bool state)
     {
-        Vector3 p0 = Vector3.Lerp(a, b, t);
-        Vector3 p1 = Vector3.Lerp(b, c, t);
-        return Vector3.Lerp(p0, p1, t);
+        // Toggle vaulting paramters
+        _collider.isTrigger = state;
+        _rigidbody.isKinematic = state;
+        _isVaulting = state;
     }
 }
