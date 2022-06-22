@@ -14,17 +14,24 @@ public class DebugWindow : MonoBehaviour
     [SerializeField]
     private TMP_Text _isRunningText;
     [SerializeField]
+    private TMP_Text _isOnSlope;
+    [SerializeField]
     private TMP_Text _hasDashed;
     [SerializeField]
     private TMP_Text _graceWindowText;
+    [SerializeField]
+    private TMP_Text _dashTimeText;
+    [SerializeField]
+    private TMP_Text _dashTimeCooldownText;
 
     private void Start()
     {
         PlayerController.IsGroundedEvent += UpdateGroundedText;
+        PlayerController.IsOnSlopeEvent += UpdateSlopeText;
         PlayerController.IsJumpingEvent += UpdateJumpingText;
-        PlayerController.IsRunningEvent += UpdateRunningText;
-        PlayerController.HasDashedEvent += UpdateDashedText;
         PlayerController.GraceTimerEvent += UpdateGraceWindowText;
+        PlayerController.DashTimerEvent += UpdateDashTimeText;
+        PlayerController.DashTimerCooldownEvent += UpdateDashTimeCooldownText;
     }
 
     private void UpdateGroundedText(bool state)
@@ -37,6 +44,11 @@ public class DebugWindow : MonoBehaviour
         _isJumpingText.text = $"Is Jumping: {DisplayBoolString(state)}";
     }
 
+    private void UpdateSlopeText(bool state)
+    {
+        _isOnSlope.text = $"Is On Slope: {DisplayBoolString(state)}";
+    }
+    
     private void UpdateRunningText(bool state)
     {
         _isRunningText.text = $"Is Running: {DisplayBoolString(state)}";
@@ -50,6 +62,16 @@ public class DebugWindow : MonoBehaviour
     private void UpdateGraceWindowText(float time)
     {
         _graceWindowText.text = $"Grace Timer: {time:n2}";
+    }
+    
+    private void UpdateDashTimeText(float time)
+    {
+        _dashTimeText.text = $"Dash Timer: {time:n2}";
+    }
+    
+    private void UpdateDashTimeCooldownText(float time)
+    {
+        _dashTimeCooldownText.text = $"Dash Cooldown Timer: {time:n2}";
     }
 
     private string DisplayBoolString(bool state)

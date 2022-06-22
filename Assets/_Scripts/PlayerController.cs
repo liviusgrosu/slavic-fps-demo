@@ -1,181 +1,355 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
+using System.Numerics;
+using UnityEditor;
 using UnityEngine;
+using Vector3 = UnityEngine.Vector3;
 
+[RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(PlayerInput))]
 public class PlayerController : MonoBehaviour
 {
-    // General Movement
-    private float _horizontalMovement;
-    private float _verticalMovement;
+    [Header("Movement")]
+    [SerializeField] private float moveSpeed = 6f;
+    [SerializeField] private float airMultiplier = 0.4f;
+    private const float MovementMultiplier = 10f;
+    private float _horizontalMovement, _verticalMovement;
+ 
+    [Header("Rotation")]
+    [SerializeField] private Transform mainCamera = null;
     private Vector3 _moveDirection;
+    private Vector3 _slopeMoveDirection;
+    
+    [Header("Sprinting")]
+    [SerializeField] private float walkSpeed = 4f;
+    [SerializeField] private float sprintSpeed = 6f;
+    [SerializeField] private float acceleration = 10f;
 
-    // Movement Speeds
-    [SerializeField]
-    private float _walkSpeed;
-    [SerializeField]
-    private float _runSpeed;
-    [SerializeField]
-    private float _jumpSpeed;
-    [SerializeField] 
-    private float _fallRate;
-
-    // Camera
-    public float _lookSpeed = 2.0f;
-    public float _lookXLimit = 45.0f;
-    private float _rotationX = 0;
-
-    // Movement States
-    private bool _isRunning;
+    [Header("Jumping")]
+    [SerializeField] private float jumpForce = 5f;
+    [SerializeField] private float graceTimeMax = 1f;
+    private float _graceTimeCurrent;
     private bool _isJumping;
-    private bool _hasDashed;
+    
+    [Header("Dashing")]
+    [SerializeField] private float dashSpeed = 5f;
+    [SerializeField] private float dashTimeMax = 1f;
+    [SerializeField] private float dashCooldownTimeMax = 1f;
+    private float _dashTimeCurrent;
+    private float _dashTimeCooldownCurrent;
+    private Vector3 _lockedMovementDirection;
     private bool _isDashing;
+    
+    [Header("Vaulting")]
+    [SerializeField] private float minDistanceToVaultable = 0.1f;
+    [SerializeField] private float vaultTimeMax = 1f;
+    private float _vaultTimeCurrent;
+    private Vector3 _startPoint, _middlePoint, _endPoint;
+    private bool _isVaulting;
 
-    // Grounded Timer
+    [Header("Physics")]
+    [SerializeField] private float groundDrag = 6f;
+    [SerializeField] private float airDrag = 2f;
+    private Vector3 _gravity;
+
+    [Header("Ground Detection")]
+    [SerializeField] private Transform groundCheck;
+    [SerializeField] private LayerMask groundMask;
+    [SerializeField] private float groundDistance = 0.2f;
+    private bool _isGrounded;
+    private RaycastHit _slopeHit;
     private float _ignoreGroundedMaxTime = 0.1f;
     private float _ignoreGroundedCurrentTime = 0.1f;
-
-    // Dash
-    [SerializeField]
-    private float _dashSpeed;
-    [SerializeField]
-    private float _dashTimeMax;
-    private float _dashTimeCurrent;
-    private Vector3 _lockedMovementDirection;
-
-    // Collider and Rigidbody
-    private Rigidbody _rigidBody;
-    private CapsuleCollider _collider;
-    private float _distanceToFeet;
-
-    // Grace Jump
-    [SerializeField] private float _graceTimeMax;
-    private float _graceTimeCurrent;
-
+    
     // Debug Events
     public static event Action<bool> IsGroundedEvent;
+    public static event Action<bool> IsOnSlopeEvent;
     public static event Action<bool> IsJumpingEvent;
-    public static event Action<bool> IsRunningEvent;
-    public static event Action<bool> HasDashedEvent;
     public static event Action<float> GraceTimerEvent;
+    public static event Action<float> DashTimerEvent;
+    public static event Action<float> DashTimerCooldownEvent;
+
+    // Components
+    private Rigidbody _rigidbody;
+    private PlayerInput _inputManager;
+    private CapsuleCollider _collider;
 
     private void Awake()
     {
-        _rigidBody = GetComponent<Rigidbody>();
+        _inputManager = GetComponent<PlayerInput>();
         _collider = GetComponent<CapsuleCollider>();
-        _distanceToFeet = _collider.bounds.extents.y;
+        _rigidbody = GetComponent<Rigidbody>();
+        _rigidbody.freezeRotation = true;
+        _dashTimeCooldownCurrent = dashCooldownTimeMax;
     }
-
-    void Update()
+    
+    private void Update()
     {
-        _rotationX += -Input.GetAxis("Mouse Y") * _lookSpeed;
-        _rotationX = Mathf.Clamp(_rotationX, -_lookXLimit, _lookXLimit);
-        Camera.main.transform.localRotation = Quaternion.Euler(_rotationX, 0, 0);
-        transform.rotation *= Quaternion.Euler(0, Input.GetAxis("Mouse X") * _lookSpeed, 0);
-
-        _horizontalMovement = Input.GetAxis("Horizontal");
-        _verticalMovement = Input.GetAxis("Vertical");
-
-        _moveDirection = (_horizontalMovement * transform.right + _verticalMovement * transform.forward).normalized;
-
-        if (Input.GetKeyDown(KeyCode.Space) && (IsGrounded() || _graceTimeCurrent < _graceTimeMax))
-        {
-            // Allow jump in air to feel the same as on the ground
-            _rigidBody.velocity += new Vector3(0f, -_rigidBody.velocity.y, 0f);
-            
-            _isJumping = true;
-            StartCoroutine(StartIgnoreGroundedTimer());
-            Jump();
-
-            // Don't allow a second jump after the first grace jump
-            _graceTimeCurrent = _graceTimeMax;
-        }
-
-        if (!IsGrounded() && !_isJumping && _graceTimeCurrent == 0)
-        {
-            StartCoroutine(StartIgnoreGroundedTimer());
-            StartCoroutine(StartGraceTimer());
-        }
-
-        // Reset the jumping
-        if (IsGrounded())
-        {
-            if (_isJumping)
-            {
-                // Reset jump state
-                _isJumping = false;
-            }
-            _graceTimeCurrent = 0f;
-            StopAllCoroutines();
-            _hasDashed = false;
-            _isDashing = false;
-        }
-
-
-        if (Input.GetKeyDown(KeyCode.LeftShift))
-        {
-            if (IsGrounded())
-            {
-                _isRunning = true;
-            }
-            else if(!_hasDashed)
-            {
-                // Perfrom the swipe
-                _hasDashed = true;
-                _lockedMovementDirection = _moveDirection;
-                StartCoroutine(StartDashingTimer());
-            }
-        }
-        else if (!Input.GetKey(KeyCode.LeftShift) && IsGrounded())
-        {
-            _isRunning = false;
-        }
-
-        IsGroundedEvent?.Invoke(IsGrounded());
-        IsJumpingEvent?.Invoke(_isJumping);
-        IsRunningEvent?.Invoke(_isRunning);
-        GraceTimerEvent?.Invoke(_graceTimeCurrent);
-        HasDashedEvent?.Invoke(_hasDashed);
+        AdjustGravity();
+        GetMovementInput();
+        CheckGrounded();
+        ControlDrag();
+        ControlSpeed();
+        CheckVaulting();
+        UpdateDebugWindow();
+        
+        _slopeMoveDirection = Vector3.ProjectOnPlane(_moveDirection, _slopeHit.normal);
     }
 
     private void FixedUpdate()
     {
-        var movementSpeed = _isRunning ? _runSpeed : _walkSpeed;
-        var yAxisGravity = new Vector3(0, _rigidBody.velocity.y - _fallRate, 0);
+        // Apply movement force not on slope
+        if (_isGrounded && !OnSlope())
+        {
+            _rigidbody.AddForce(_moveDirection.normalized * moveSpeed * MovementMultiplier + _gravity, ForceMode.Acceleration);
+        }
+        // Apply movement force on slope
+        else if (_isGrounded && OnSlope())
+        {
+            _rigidbody.AddForce(_slopeMoveDirection.normalized * moveSpeed * MovementMultiplier + _gravity, ForceMode.Acceleration);
+        }
+        // Apply movement force when in the air
+        else if (!_isGrounded)
+        {
+            _rigidbody.AddForce(_moveDirection.normalized * moveSpeed * MovementMultiplier * airMultiplier + _gravity, ForceMode.Acceleration);
+        }
+    }
+
+    private void CheckVaulting()
+    {
+        if (!_isGrounded && !_isVaulting && _isJumping && VaultableInFront())
+        {
+            StartCoroutine(StartVaultingTimer());
+        }
+    }
+    
+    private void AdjustGravity()
+    {
+        // Adjust gravity according to the surfaces normal so the player doesnt slide
+        _gravity = Physics.gravity;
+        
+        if (OnSlope())
+        {
+            _gravity = -_slopeHit.normal * Physics.gravity.magnitude;
+        }
 
         if (_isDashing)
         {
-            movementSpeed = _dashSpeed;
-            yAxisGravity = Vector3.zero;
+            _gravity = Vector3.zero;
+        }
+    }
+    
+    private void CheckGrounded()
+    {
+        // Check if a sphere collides with the ground as the ground check
+        _isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+        if (_isGrounded && _ignoreGroundedCurrentTime >= _ignoreGroundedMaxTime)
+        {
+            // Stop any coroutines related to touching the ground
+            StopCoroutine(StartIgnoreGroundedTimer());
+            StopCoroutine(StartGraceTimer());
+
+            _graceTimeCurrent = 0f;
+            _isJumping = false;
+        }
+        else if (!_isGrounded && !_isJumping && _graceTimeCurrent == 0)
+        {
+            // Start any coroutines related not touching the ground
+            StartCoroutine(StartIgnoreGroundedTimer());
+            StartCoroutine(StartGraceTimer());
+        }
+    }
+    
+    private void GetMovementInput()
+    {
+        // Regular movement input
+        if (!_isDashing)
+        {
+            _horizontalMovement = Input.GetAxisRaw("Horizontal");
+            _verticalMovement = Input.GetAxisRaw("Vertical");
+
+            _moveDirection = mainCamera.forward * _verticalMovement + mainCamera.right * _horizontalMovement;
+        }
+        
+        // Jumping input
+        if (Input.GetKeyDown(_inputManager.JumpKey) && (_isGrounded || _graceTimeCurrent < graceTimeMax))
+        {
+            Jump();
         }
 
-        // Dash in the given direction
-        if (_isDashing)
+        // Dashing input
+        if (Input.GetKeyDown(_inputManager.DashKey) && _dashTimeCooldownCurrent >= dashCooldownTimeMax && _moveDirection != Vector3.zero)
         {
-            _rigidBody.velocity = (_lockedMovementDirection * movementSpeed * Time.deltaTime * 100f) + yAxisGravity;
-        }
-        else
-        {
-            _rigidBody.velocity = (_moveDirection * movementSpeed * Time.fixedDeltaTime  * 100f) + yAxisGravity;
+            Dash();
         }
     }
 
     private void Jump()
     {
-        _rigidBody.AddForce(Vector3.up * _jumpSpeed, ForceMode.Impulse);
+        // Ignore the ground so we can't jump twice
+        StartCoroutine(StartIgnoreGroundedTimer());
+        
+        // Add the jumping force to the rigidbody
+        _rigidbody.velocity = new Vector3(_rigidbody.velocity.x, 0, _rigidbody.velocity.z);
+        _rigidbody.AddForce(transform.up * jumpForce, ForceMode.Impulse);
+        
+        // Ignore any grace jump timing
+        _graceTimeCurrent = graceTimeMax;
+        _isJumping = true;
     }
 
+    private void Dash()
+    {
+        // Start dashing
+        StartCoroutine(StartDashingTimer());
+    }
+
+    private void ControlSpeed()
+    {
+        // Change move speed if player is pressing on the spring key
+        if (Input.GetKey(_inputManager.SprintKey) && _isGrounded)
+        {
+            moveSpeed = Mathf.Lerp(moveSpeed, sprintSpeed, acceleration * Time.deltaTime);
+        }
+        // Dashing speed
+        else if (_isDashing)
+        {
+            moveSpeed = dashSpeed;
+        }
+        // Normal walking speed
+        else
+        {
+            moveSpeed = Mathf.Lerp(moveSpeed, walkSpeed, acceleration * Time.deltaTime);
+        }
+    }
+
+    private void ControlDrag()
+    {
+        // Apply drag depending if the player is in the air or not
+        _rigidbody.drag = _isGrounded && !_isDashing ? groundDrag : airDrag;
+    }
+
+    private bool OnSlope()
+    {
+        // Check if player is on a slope depending on the floors normal
+        if (!Physics.Raycast(transform.position, Vector3.down, out _slopeHit, 1.5f))
+        {
+            return false;
+        }
+        
+        return _slopeHit.normal != Vector3.up;
+    }
+
+    private bool VaultableInFront()
+    {
+        RaycastHit hit;
+
+        if (!Physics.Raycast(transform.position, GetCameraForward(), out hit, minDistanceToVaultable) || 
+            !hit.transform.GetComponent<BoxCollider>())
+        {
+            return false;
+        }
+
+        // Get forward vector
+        float distanceToPoint = (hit.point - transform.position).magnitude + _collider.radius;
+        Vector3 forwardDisplacement = transform.position + (GetCameraForward() * distanceToPoint);
+        
+        // Get upward vector
+        float vaultObjectHeight = hit.transform.GetComponent<MeshRenderer>().bounds.size.y / 2f; 
+        Vector3 topOfCollider = hit.transform.position + new Vector3(0f, vaultObjectHeight, 0f);
+
+        // Get top of vault object Y
+        float vaultObjectYTop = topOfCollider.y + _collider.height / 2f;
+        Vector3 playerToColliderTop = new Vector3(forwardDisplacement.x, vaultObjectYTop, forwardDisplacement.z);
+        float distanceToTop = Vector3.Distance(forwardDisplacement, playerToColliderTop);
+        
+        if (distanceToTop <= _collider.height)
+        {
+            _startPoint = transform.position;
+            _middlePoint = transform.position + transform.up * distanceToTop;
+            _endPoint = playerToColliderTop;
+            return true;
+        }
+
+        return false;
+    }
+    
+    private Vector3 GetCameraForward()
+    {
+        // Get the cameras forward direction in the xz plane
+        Vector3 cameraForward = mainCamera.forward;
+        cameraForward.y = 0f;
+        cameraForward.Normalize();
+        return cameraForward;
+    }
+    
+    private static Vector3 EvaluateQuadratic(Vector3 a, Vector3 b, Vector3 c, float t)
+    {
+        // Quadratic equation to lerp between 3 points
+        Vector3 p0 = Vector3.Lerp(a, b, t);
+        Vector3 p1 = Vector3.Lerp(b, c, t);
+        return Vector3.Lerp(p0, p1, t);
+    }
+
+    private void UpdateDebugWindow()
+    {
+        // Update any states from this script onto a canvas for display 
+        IsGroundedEvent?.Invoke(_isGrounded);
+        IsOnSlopeEvent?.Invoke(OnSlope());
+        IsJumpingEvent?.Invoke(_isJumping);
+        GraceTimerEvent?.Invoke(_graceTimeCurrent);
+        DashTimerEvent?.Invoke(_dashTimeCurrent);
+        DashTimerCooldownEvent?.Invoke(_dashTimeCooldownCurrent);
+    }
+    
     private IEnumerator StartGraceTimer()
     {
-        while (_graceTimeCurrent <= _graceTimeMax)
+        // Start the grace timer
+        while (_graceTimeCurrent <= graceTimeMax)
         {
             _graceTimeCurrent += Time.deltaTime;
+            yield return null;
+        }
+    }
+    
+    private IEnumerator StartDashingTimer()
+    {
+        // Store the players velocity as this will the direction of the dash
+        Vector3 oldPlayerVelocity = _rigidbody.velocity;
+        _rigidbody.velocity = _moveDirection.normalized * dashSpeed * MovementMultiplier;
+        
+        _isDashing = true;
+        _dashTimeCurrent = 0f;
+        
+        while (_dashTimeCurrent <= dashTimeMax)
+        {
+            _dashTimeCurrent += Time.deltaTime;
+            yield return null;
+        }
+        
+        // Reduce players velocity by a quarter as they are coming off a dash
+        _isDashing = false;
+        _rigidbody.velocity = oldPlayerVelocity / 4f;
+        // Start cooldown of dash
+        StartCoroutine(StartDashingCooldown());
+    }
+
+    private IEnumerator StartDashingCooldown()
+    {
+        // Perform the dashing process for some time
+        _dashTimeCooldownCurrent = 0f;
+        while (_dashTimeCooldownCurrent <= dashCooldownTimeMax)
+        {
+            _dashTimeCooldownCurrent += Time.deltaTime;
             yield return null;
         }
     }
 
     private IEnumerator StartIgnoreGroundedTimer()
     {
+        // Ignore the ground for some time
         _ignoreGroundedCurrentTime = 0f;
         while (_ignoreGroundedCurrentTime <= _ignoreGroundedMaxTime)
         {
@@ -184,21 +358,27 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private IEnumerator StartDashingTimer()
+    private IEnumerator StartVaultingTimer()
     {
-        _dashTimeCurrent = 0f;
-        _isDashing = true;
-        while (_dashTimeCurrent <= _dashTimeMax)
+        ToggleVaultingParams(true);
+
+        // Start Lerping between start and end position of vault
+        _vaultTimeCurrent = 0f;
+        while (_vaultTimeCurrent <= vaultTimeMax)
         {
-            _dashTimeCurrent += Time.deltaTime;
+            _vaultTimeCurrent += Time.deltaTime;
+            transform.position = EvaluateQuadratic(_startPoint, _middlePoint, _endPoint, _vaultTimeCurrent / vaultTimeMax);
             yield return null;
         }
-        _isDashing = false;
+
+        ToggleVaultingParams(false);
     }
 
-    private bool IsGrounded()
+    private void ToggleVaultingParams(bool state)
     {
-        bool dontIgnoreGrounded = _ignoreGroundedCurrentTime >= _ignoreGroundedMaxTime;
-        return Physics.Raycast(transform.position, -Vector3.up, _distanceToFeet + 0.1f) && dontIgnoreGrounded;
+        // Toggle vaulting paramters
+        _collider.isTrigger = state;
+        _rigidbody.isKinematic = state;
+        _isVaulting = state;
     }
 }
