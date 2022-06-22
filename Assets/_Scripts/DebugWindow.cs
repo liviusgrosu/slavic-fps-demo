@@ -31,7 +31,7 @@ public class DebugWindow : MonoBehaviour
         PlayerController.IsJumpingEvent += UpdateJumpingText;
         PlayerController.GraceTimerEvent += UpdateGraceWindowText;
         PlayerController.DashTimerEvent += UpdateDashTimeText;
-        PlayerController.DashTimerCooldownEvent += UpdateDashTimeCooldownText;
+        PlayerController.DashDebugCooldownEvent += UpdateDashTimeCooldownText;
     }
 
     private void UpdateGroundedText(bool state)

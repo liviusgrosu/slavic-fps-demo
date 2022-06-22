@@ -70,7 +70,8 @@ public class PlayerController : MonoBehaviour
     public static event Action<bool> IsJumpingEvent;
     public static event Action<float> GraceTimerEvent;
     public static event Action<float> DashTimerEvent;
-    public static event Action<float> DashTimerCooldownEvent;
+    public static event Action<float, float> DashCooldownEvent;
+    public static event Action<float> DashDebugCooldownEvent;
     
     // Components
     private Rigidbody _rigidbody;
@@ -305,7 +306,7 @@ public class PlayerController : MonoBehaviour
         IsJumpingEvent?.Invoke(_isJumping);
         GraceTimerEvent?.Invoke(_graceTimeCurrent);
         DashTimerEvent?.Invoke(_dashTimeCurrent);
-        DashTimerCooldownEvent?.Invoke(_dashTimeCooldownCurrent);
+        DashDebugCooldownEvent?.Invoke(_dashTimeCooldownCurrent);
     }
     
     private IEnumerator StartGraceTimer()
@@ -347,6 +348,7 @@ public class PlayerController : MonoBehaviour
         while (_dashTimeCooldownCurrent <= dashCooldownTimeMax)
         {
             _dashTimeCooldownCurrent += Time.deltaTime;
+            DashCooldownEvent?.Invoke(_dashTimeCooldownCurrent, dashCooldownTimeMax);
             yield return null;
         }
     }
