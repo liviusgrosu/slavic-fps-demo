@@ -36,7 +36,9 @@ public class PlayerController : MonoBehaviour
     [Header("Dashing")]
     [SerializeField] private float dashSpeed = 5f;
     [SerializeField] private float dashTimeMax = 1f;
+    [SerializeField] private float dashCooldownTimeMax = 1f;
     private float _dashTimeCurrent;
+    private float _dashTimeCooldownCurrent;
     private Vector3 _lockedMovementDirection;
     private bool _isDashing;
     
@@ -67,6 +69,7 @@ public class PlayerController : MonoBehaviour
     public static event Action<bool> IsJumpingEvent;
     public static event Action<float> GraceTimerEvent;
     public static event Action<float> DashTimerEvent;
+    public static event Action<float> DashTimerCooldownEvent;
 
     // Components
     private Rigidbody _rigidbody;
@@ -79,7 +82,7 @@ public class PlayerController : MonoBehaviour
         _collider = GetComponent<CapsuleCollider>();
         _rigidbody = GetComponent<Rigidbody>();
         _rigidbody.freezeRotation = true;
-
+        _dashTimeCooldownCurrent = dashCooldownTimeMax;
     }
     
     private void Update()
@@ -95,7 +98,7 @@ public class PlayerController : MonoBehaviour
             Jump();
         }
 
-        if (Input.GetKeyDown(_inputManager.DashKey) && _moveDirection != Vector3.zero)
+        if (Input.GetKeyDown(_inputManager.DashKey) && _dashTimeCooldownCurrent >= dashCooldownTimeMax && _moveDirection != Vector3.zero)
         {
             Dash();
         }
@@ -112,6 +115,7 @@ public class PlayerController : MonoBehaviour
         IsJumpingEvent?.Invoke(_isJumping);
         GraceTimerEvent?.Invoke(_graceTimeCurrent);
         DashTimerEvent?.Invoke(_dashTimeCurrent);
+        DashTimerCooldownEvent?.Invoke(_dashTimeCooldownCurrent);
     }
 
     private void FixedUpdate()
@@ -244,8 +248,9 @@ public class PlayerController : MonoBehaviour
         // Get top of vault object Y
         float vaultObjectYTop = topOfCollider.y + _collider.height / 2f;
         Vector3 playerToColliderTop = new Vector3(forwardDisplacement.x, vaultObjectYTop, forwardDisplacement.z);
-
-        if (Vector3.Distance(forwardDisplacement, playerToColliderTop) <= _collider.height)
+        float distanceToTop = Vector3.Distance(forwardDisplacement, playerToColliderTop);
+        
+        if (distanceToTop <= _collider.height)
         {
             _startPoint = transform.position;
             _middlePoint = transform.position + transform.up * distanceToTop;
@@ -289,6 +294,17 @@ public class PlayerController : MonoBehaviour
         
         _isDashing = false;
         _rigidbody.velocity = oldPlayerVelocity / 4f;
+        StartCoroutine(StartDashingCooldown());
+    }
+
+    private IEnumerator StartDashingCooldown()
+    {
+        _dashTimeCooldownCurrent = 0f;
+        while (_dashTimeCooldownCurrent <= dashCooldownTimeMax)
+        {
+            _dashTimeCooldownCurrent += Time.deltaTime;
+            yield return null;
+        }
     }
 
     private IEnumerator StartIgnoreGroundedTimer()
