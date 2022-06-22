@@ -177,7 +177,7 @@ public class PlayerController : MonoBehaviour
         }
         
         // Jumping input
-        if (Input.GetKeyDown(_inputManager.JumpKey) && (_isGrounded || _graceTimeCurrent < graceTimeMax))
+        if (Input.GetKeyDown(_inputManager.JumpKey) && (_isGrounded || _graceTimeCurrent < graceTimeMax) && !_isDashing)
         {
             Jump();
         }
