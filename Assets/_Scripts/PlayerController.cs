@@ -77,6 +77,9 @@ public class PlayerController : MonoBehaviour
 
     
     // Components
+    [Header("Components")]
+    [SerializeField] private PlayerIKTarget leftArmTarget;
+
     private Rigidbody _rigidbody;
     private PlayerInput _inputManager;
     private PlayerEffects _playerEffects;
@@ -126,7 +129,8 @@ public class PlayerController : MonoBehaviour
 
     private void CheckVaulting()
     {
-        if (!_isGrounded && !_isVaulting && _isJumping && VaultableInFront())
+        //if (!_isGrounded && !_isVaulting && _isJumping && VaultableInFront())
+        if (!_isVaulting && VaultableInFront())
         {
             StartCoroutine(StartVaultingTimer());
         }
@@ -257,6 +261,7 @@ public class PlayerController : MonoBehaviour
         if (!Physics.Raycast(transform.position, GetCameraForward(), out hit, minDistanceToVaultable) || 
             !hit.transform.GetComponent<BoxCollider>())
         {
+            leftArmTarget.SetMiddleTarget(transform.position);
             return false;
         }
 
@@ -272,6 +277,8 @@ public class PlayerController : MonoBehaviour
         float vaultObjectYTop = topOfCollider.y + _collider.height / 2f;
         Vector3 playerToColliderTop = new Vector3(forwardDisplacement.x, vaultObjectYTop, forwardDisplacement.z);
         float distanceToTop = Vector3.Distance(forwardDisplacement, playerToColliderTop);
+
+        leftArmTarget.SetMiddleTarget(new Vector3(hit.point.x, topOfCollider.y, hit.point.z));
         
         if (distanceToTop <= _collider.height)
         {
