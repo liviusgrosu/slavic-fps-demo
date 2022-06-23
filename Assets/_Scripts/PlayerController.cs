@@ -69,9 +69,12 @@ public class PlayerController : MonoBehaviour
     public static event Action<bool> IsOnSlopeEvent;
     public static event Action<bool> IsJumpingEvent;
     public static event Action<float> GraceTimerEvent;
-    public static event Action<float> DashTimerEvent;
-    public static event Action<float, float> DashCooldownEvent;
     public static event Action<float> DashDebugCooldownEvent;
+    
+    // Dashing events
+    public static event Action<float, float> DashTimerEvent;
+    public static event Action<float, float> DashCooldownTimerEvent;
+
     
     // Components
     private Rigidbody _rigidbody;
@@ -184,7 +187,7 @@ public class PlayerController : MonoBehaviour
         }
 
         // Dashing input
-        if (Input.GetKeyDown(_inputManager.DashKey) && _dashTimeCooldownCurrent >= dashCooldownTimeMax && _moveDirection != Vector3.zero)
+        if (Input.GetKeyDown(_inputManager.DashKey) && _dashTimeCooldownCurrent >= dashCooldownTimeMax && !_isDashing && _moveDirection != Vector3.zero)
         {
             Dash();
         }
@@ -305,7 +308,6 @@ public class PlayerController : MonoBehaviour
         IsOnSlopeEvent?.Invoke(OnSlope());
         IsJumpingEvent?.Invoke(_isJumping);
         GraceTimerEvent?.Invoke(_graceTimeCurrent);
-        DashTimerEvent?.Invoke(_dashTimeCurrent);
         DashDebugCooldownEvent?.Invoke(_dashTimeCooldownCurrent);
     }
     
@@ -330,6 +332,7 @@ public class PlayerController : MonoBehaviour
         
         while (_dashTimeCurrent <= dashTimeMax)
         {
+            DashTimerEvent?.Invoke(_dashTimeCurrent, dashTimeMax);
             _dashTimeCurrent += Time.deltaTime;
             yield return null;
         }
@@ -348,7 +351,7 @@ public class PlayerController : MonoBehaviour
         while (_dashTimeCooldownCurrent <= dashCooldownTimeMax)
         {
             _dashTimeCooldownCurrent += Time.deltaTime;
-            DashCooldownEvent?.Invoke(_dashTimeCooldownCurrent, dashCooldownTimeMax);
+            DashCooldownTimerEvent?.Invoke(_dashTimeCooldownCurrent, dashCooldownTimeMax);
             yield return null;
         }
     }

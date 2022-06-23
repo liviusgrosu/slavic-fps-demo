@@ -84063,6 +84063,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8330c79306a488b8bcabd77d683c6ce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  fadeInMultiplier: 0.35
 --- !u!1 &4591865485264750409
 GameObject:
   m_ObjectHideFlags: 0

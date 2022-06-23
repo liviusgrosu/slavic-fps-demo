@@ -30,7 +30,6 @@ public class DebugWindow : MonoBehaviour
         PlayerController.IsOnSlopeEvent += UpdateSlopeText;
         PlayerController.IsJumpingEvent += UpdateJumpingText;
         PlayerController.GraceTimerEvent += UpdateGraceWindowText;
-        PlayerController.DashTimerEvent += UpdateDashTimeText;
         PlayerController.DashDebugCooldownEvent += UpdateDashTimeCooldownText;
     }
 

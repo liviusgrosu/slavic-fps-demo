@@ -13,6 +13,11 @@ public class PlayerEffects : MonoBehaviour
 
     public void PerformDashEffect(Vector3 direction, float time)
     {
+        if (dashEffect.GetComponent<ParticleSystem>().isPlaying)
+        {
+            return;
+        }
+        
         dashEffect.position = mainCamera.position + (direction * dashEffectDistance);
         dashEffect.LookAt(mainCamera, transform.up);
 
