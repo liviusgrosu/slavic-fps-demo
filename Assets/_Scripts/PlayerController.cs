@@ -261,7 +261,7 @@ public class PlayerController : MonoBehaviour
         if (!Physics.Raycast(transform.position, GetCameraForward(), out hit, minDistanceToVaultable) || 
             !hit.transform.GetComponent<BoxCollider>())
         {
-            leftArmTarget.SetMiddleTarget(transform.position);
+            leftArmTarget.SetMiddleTarget(transform.position, Vector3.zero);
             return false;
         }
 
@@ -278,7 +278,10 @@ public class PlayerController : MonoBehaviour
         Vector3 playerToColliderTop = new Vector3(forwardDisplacement.x, vaultObjectYTop, forwardDisplacement.z);
         float distanceToTop = Vector3.Distance(forwardDisplacement, playerToColliderTop);
 
-        leftArmTarget.SetMiddleTarget(new Vector3(hit.point.x, topOfCollider.y, hit.point.z));
+        
+        // Set the vaulting points for the arm
+        Vector3 wallLeft = Vector3.Cross(Vector3.up, hit.normal);
+        leftArmTarget.SetMiddleTarget(new Vector3(hit.point.x, topOfCollider.y, hit.point.z), wallLeft);
         
         if (distanceToTop <= _collider.height)
         {

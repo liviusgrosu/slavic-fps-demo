@@ -10,12 +10,16 @@ public class PlayerIKTarget : MonoBehaviour
      *      - the target 
      */
 
-    [SerializeReference] private Transform targetMiddle;
-    [SerializeReference] private Transform leftTarget, rightTarget;
+    [SerializeField] private Transform targetMiddle;
+    [SerializeField] private Transform leftTarget, rightTarget;
+    [Range(0.1f, 1.5f)]
+    [SerializeField] private float targetSpan = 1f;
 
-    public void SetMiddleTarget(Vector3 target)
+    public void SetMiddleTarget(Vector3 target, Vector3 left)
     {
         targetMiddle.position = target;
+        leftTarget.position = target + left * targetSpan;
+        rightTarget.position = target - left * targetSpan;
     }
 
     // [SerializeField] private Transform target;
