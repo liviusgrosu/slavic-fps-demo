@@ -12,6 +12,8 @@ public class CameraLook : MonoBehaviour
     private float _xRotation;
     private float _yRotation;
 
+    private bool _lockCamera;
+    
     private void Start()
     {
         // Hide mouse and lock it to middle of screen
@@ -21,6 +23,16 @@ public class CameraLook : MonoBehaviour
 
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            _lockCamera = !_lockCamera;
+        }
+
+        if (_lockCamera)
+        {
+            return;
+        }
+        
         // Get mouse input
         _mouseX = Input.GetAxisRaw("Mouse X");
         _mouseY = Input.GetAxisRaw("Mouse Y");

@@ -22,6 +22,11 @@ public class PlayerIKTarget : MonoBehaviour
         rightTarget.position = target - left * targetSpan;
     }
 
+    public void LockTarget()
+    {
+        
+    }
+
     // [SerializeField] private Transform target;
     // [SerializeField] private Transform anchor;
     // [SerializeField] private bool _isDummy;
