@@ -46,6 +46,7 @@ public class PlayerController : MonoBehaviour
     [Header("Vaulting")]
     [SerializeField] private float minDistanceToVaultable = 0.1f;
     [SerializeField] private float vaultTimeMax = 1f;
+    [SerializeField] private LayerMask playerMask;
     private float _vaultTimeCurrent;
     private Vector3 _startPoint, _middlePoint, _endPoint;
     private bool _isVaulting;
@@ -258,7 +259,7 @@ public class PlayerController : MonoBehaviour
     {
         RaycastHit hit;
 
-        if (!Physics.Raycast(transform.position, GetCameraForward(), out hit, minDistanceToVaultable) || 
+        if (!Physics.Raycast(transform.position, GetCameraForward(), out hit, minDistanceToVaultable, playerMask) || 
             !hit.transform.GetComponent<BoxCollider>())
         {
             leftArmTarget.SetMiddleTarget(transform.position, Vector3.zero);
@@ -281,8 +282,9 @@ public class PlayerController : MonoBehaviour
         
         // Set the vaulting points for the arm
         Vector3 wallLeft = Vector3.Cross(Vector3.up, hit.normal);
-        leftArmTarget.SetMiddleTarget(new Vector3(hit.point.x, topOfCollider.y, hit.point.z), wallLeft);
         
+        leftArmTarget.SetMiddleTarget(new Vector3(hit.point.x, topOfCollider.y, hit.point.z), wallLeft);
+
         if (distanceToTop <= _collider.height)
         {
             _startPoint = transform.position;
@@ -395,7 +397,7 @@ public class PlayerController : MonoBehaviour
 
     private void ToggleVaultingParams(bool state)
     {
-        // Toggle vaulting paramters
+        // Toggle vaulting parameters
         _collider.isTrigger = state;
         _rigidbody.isKinematic = state;
         _isVaulting = state;
