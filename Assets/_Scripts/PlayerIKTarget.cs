@@ -15,59 +15,26 @@ public class PlayerIKTarget : MonoBehaviour
     [Range(0.1f, 1.5f)]
     [SerializeField] private float targetSpan = 1f;
 
+    [SerializeField] private Transform leftIKTarget;
+    [SerializeField] private Transform defaultLeftIKTarget;
+    [HideInInspector] public bool lockState;
+    
+    private void Update()
+    {
+        if (lockState)
+        {
+            leftIKTarget.position = leftTarget.position;
+        }
+        else
+        {
+            leftIKTarget.position = defaultLeftIKTarget.position;
+        }
+    }
+    
     public void SetMiddleTarget(Vector3 target, Vector3 left)
     {
         targetMiddle.position = target;
         leftTarget.position = target + left * targetSpan;
         rightTarget.position = target - left * targetSpan;
     }
-
-    public void LockTarget()
-    {
-        
-    }
-
-    // [SerializeField] private Transform target;
-    // [SerializeField] private Transform anchor;
-    // [SerializeField] private bool _isDummy;
-    // private bool _isVaulting;
-    // private Vector3 _targetPosition;
-    // private Vector3 _restingOffset;
-    //
-    // private void Start()
-    // {
-    //     _restingOffset = target.position - anchor.position;
-    // }
-    //
-    // public void StartVaultingIK(Vector3 wallPoint, Vector3 topOfWall, Vector3 direction)
-    // {
-    //     Vector3 wallEdgePosition = new Vector3(wallPoint.x, topOfWall.y, wallPoint.z) + direction;
-    //     _isVaulting = true;
-    //     _targetPosition = wallEdgePosition;
-    // }
-    //
-    // public void StopVaultingIK()
-    // {
-    //     _isVaulting = false;
-    //     _targetPosition = _restingOffset + anchor.position;
-    // }
-    //
-    // private void Update()
-    // {
-    //     if (_isDummy)
-    //     {
-    //         return;
-    //     }
-    //     if (!_isVaulting)
-    //     {
-    //         _targetPosition = _restingOffset + anchor.position;
-    //         target.position = _targetPosition;
-    //     }
-    //     else
-    //     {
-    //         target.position = _targetPosition;
-    //         // Debug.Break();
-    //     }
-    //     
-    // }
 }

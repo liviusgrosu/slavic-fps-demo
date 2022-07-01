@@ -3384,7 +3384,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: d0d949eed376daa40865da56a1a1ea63, type: 3}
       propertyPath: m_RootOrder
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: d0d949eed376daa40865da56a1a1ea63, type: 3}
       propertyPath: m_LocalPosition.x
@@ -76393,6 +76393,37 @@ MonoBehaviour:
   m_SelectedFaces: 
   m_SelectedEdges: []
   m_SelectedVertices: 
+--- !u!1 &1453736249
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1453736250}
+  m_Layer: 0
+  m_Name: Left Arm Default Position
+  m_TagString: Untagged
+  m_Icon: {fileID: 6519382022992737161, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1453736250
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1453736249}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.126, y: 0.289, z: 0.145}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1942389643}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!43 &1454831411
 Mesh:
   m_ObjectHideFlags: 0
@@ -80579,7 +80610,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1942389643}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!23 &1838726819
 MeshRenderer:
@@ -81566,6 +81597,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1155172151}
+  - {fileID: 1453736250}
   - {fileID: 1657394223}
   - {fileID: 1838726817}
   m_Father: {fileID: 1264018690}
@@ -81587,6 +81619,9 @@ MonoBehaviour:
   leftTarget: {fileID: 945380011}
   rightTarget: {fileID: 1745460619}
   targetSpan: 0.51
+  leftIKTarget: {fileID: 1155172151}
+  defaultLeftIKTarget: {fileID: 1453736250}
+  lockState: 0
 --- !u!1 &1942678904
 GameObject:
   m_ObjectHideFlags: 0
@@ -84799,7 +84834,7 @@ MonoBehaviour:
   dashTimeMax: 0.3
   dashCooldownTimeMax: 1
   minDistanceToVaultable: 1
-  vaultTimeMax: 0.35
+  vaultTimeMax: 3
   playerMask:
     serializedVersion: 2
     m_Bits: 64

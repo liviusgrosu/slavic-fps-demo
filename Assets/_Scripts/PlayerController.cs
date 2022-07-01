@@ -401,5 +401,6 @@ public class PlayerController : MonoBehaviour
         _collider.isTrigger = state;
         _rigidbody.isKinematic = state;
         _isVaulting = state;
+        leftArmTarget.lockState = state;
     }
 }
