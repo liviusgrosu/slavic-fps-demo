@@ -20,7 +20,7 @@ public class PlayerController : MonoBehaviour
  
     [Header("Rotation")]
     [SerializeField] private Transform mainCamera = null;
-    private Vector3 _moveDirection;
+    [HideInInspector] public Vector3 moveDirection;
     private Vector3 _slopeMoveDirection;
     
     [Header("Sprinting")]
@@ -74,6 +74,9 @@ public class PlayerController : MonoBehaviour
     // Dashing events
     public static event Action<float, float> DashTimerEvent;
     public static event Action<float, float> DashCooldownTimerEvent;
+    
+    // Vaulting events
+    public static event Action VaultingEvent;
 
     
     // Components
@@ -102,7 +105,7 @@ public class PlayerController : MonoBehaviour
         CheckVaulting();
         UpdateDebugWindow();
         
-        _slopeMoveDirection = Vector3.ProjectOnPlane(_moveDirection, _slopeHit.normal);
+        _slopeMoveDirection = Vector3.ProjectOnPlane(moveDirection, _slopeHit.normal);
     }
 
     private void FixedUpdate()
@@ -110,7 +113,7 @@ public class PlayerController : MonoBehaviour
         // Apply movement force not on slope
         if (_isGrounded && !OnSlope())
         {
-            _rigidbody.AddForce(_moveDirection.normalized * moveSpeed * MovementMultiplier + _gravity, ForceMode.Acceleration);
+            _rigidbody.AddForce(moveDirection.normalized * moveSpeed * MovementMultiplier + _gravity, ForceMode.Acceleration);
         }
         // Apply movement force on slope
         else if (_isGrounded && OnSlope())
@@ -120,7 +123,7 @@ public class PlayerController : MonoBehaviour
         // Apply movement force when in the air
         else if (!_isGrounded)
         {
-            _rigidbody.AddForce(_moveDirection.normalized * moveSpeed * MovementMultiplier * airMultiplier + _gravity, ForceMode.Acceleration);
+            _rigidbody.AddForce(moveDirection.normalized * moveSpeed * MovementMultiplier * airMultiplier + _gravity, ForceMode.Acceleration);
         }
     }
 
@@ -177,7 +180,7 @@ public class PlayerController : MonoBehaviour
             _horizontalMovement = Input.GetAxisRaw("Horizontal");
             _verticalMovement = Input.GetAxisRaw("Vertical");
 
-            _moveDirection = mainCamera.forward * _verticalMovement + mainCamera.right * _horizontalMovement;
+            moveDirection = mainCamera.forward * _verticalMovement + mainCamera.right * _horizontalMovement;
         }
         
         // Jumping input
@@ -187,7 +190,7 @@ public class PlayerController : MonoBehaviour
         }
 
         // Dashing input
-        if (Input.GetKeyDown(_inputManager.DashKey) && _dashTimeCooldownCurrent >= dashCooldownTimeMax && !_isDashing && _moveDirection != Vector3.zero)
+        if (Input.GetKeyDown(_inputManager.DashKey) && _dashTimeCooldownCurrent >= dashCooldownTimeMax && !_isDashing && moveDirection != Vector3.zero)
         {
             Dash();
         }
@@ -209,7 +212,7 @@ public class PlayerController : MonoBehaviour
 
     private void Dash()
     {
-        _playerEffects.PerformDashEffect(_moveDirection, dashTimeMax);
+        _playerEffects.PerformDashEffect(moveDirection, dashTimeMax);
         // Start dashing
         StartCoroutine(StartDashingTimer());
     }
@@ -325,7 +328,7 @@ public class PlayerController : MonoBehaviour
     {
         // Store the players velocity as this will the direction of the dash
         Vector3 oldPlayerVelocity = _rigidbody.velocity;
-        _rigidbody.velocity = _moveDirection.normalized * dashSpeed * MovementMultiplier;
+        _rigidbody.velocity = moveDirection.normalized * dashSpeed * MovementMultiplier;
         
         _isDashing = true;
         _dashTimeCurrent = 0f;
@@ -370,6 +373,7 @@ public class PlayerController : MonoBehaviour
     private IEnumerator StartVaultingTimer()
     {
         ToggleVaultingParams(true);
+        VaultingEvent?.Invoke();
 
         // Start Lerping between start and end position of vault
         _vaultTimeCurrent = 0f;
