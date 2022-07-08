@@ -59,7 +59,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Transform groundCheck;
     [SerializeField] private LayerMask groundMask;
     [SerializeField] private float groundDistance = 0.2f;
-    private bool _isGrounded;
+    [HideInInspector] public bool isGrounded;
     private RaycastHit _slopeHit;
     private float _ignoreGroundedMaxTime = 0.1f;
     private float _ignoreGroundedCurrentTime = 0.1f;
@@ -111,17 +111,17 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate()
     {
         // Apply movement force not on slope
-        if (_isGrounded && !OnSlope())
+        if (isGrounded && !OnSlope())
         {
             _rigidbody.AddForce(moveDirection.normalized * moveSpeed * MovementMultiplier + _gravity, ForceMode.Acceleration);
         }
         // Apply movement force on slope
-        else if (_isGrounded && OnSlope())
+        else if (isGrounded && OnSlope())
         {
             _rigidbody.AddForce(_slopeMoveDirection.normalized * moveSpeed * MovementMultiplier + _gravity, ForceMode.Acceleration);
         }
         // Apply movement force when in the air
-        else if (!_isGrounded)
+        else if (!isGrounded)
         {
             _rigidbody.AddForce(moveDirection.normalized * moveSpeed * MovementMultiplier * airMultiplier + _gravity, ForceMode.Acceleration);
         }
@@ -129,7 +129,7 @@ public class PlayerController : MonoBehaviour
 
     private void CheckVaulting()
     {
-        if (!_isGrounded && !_isVaulting && _isJumping && VaultableInFront())
+        if (!isGrounded && !_isVaulting && _isJumping && VaultableInFront())
         {
             StartCoroutine(StartVaultingTimer());
         }
@@ -154,8 +154,8 @@ public class PlayerController : MonoBehaviour
     private void CheckGrounded()
     {
         // Check if a sphere collides with the ground as the ground check
-        _isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
-        if (_isGrounded && _ignoreGroundedCurrentTime >= _ignoreGroundedMaxTime)
+        isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+        if (isGrounded && _ignoreGroundedCurrentTime >= _ignoreGroundedMaxTime)
         {
             // Stop any coroutines related to touching the ground
             StopCoroutine(StartIgnoreGroundedTimer());
@@ -164,7 +164,7 @@ public class PlayerController : MonoBehaviour
             _graceTimeCurrent = 0f;
             _isJumping = false;
         }
-        else if (!_isGrounded && !_isJumping && _graceTimeCurrent == 0)
+        else if (!isGrounded && !_isJumping && _graceTimeCurrent == 0)
         {
             // Start any coroutines related not touching the ground
             StartCoroutine(StartIgnoreGroundedTimer());
@@ -184,7 +184,7 @@ public class PlayerController : MonoBehaviour
         }
         
         // Jumping input
-        if (Input.GetKeyDown(_inputManager.JumpKey) && (_isGrounded || _graceTimeCurrent < graceTimeMax) && !_isDashing)
+        if (Input.GetKeyDown(_inputManager.JumpKey) && (isGrounded || _graceTimeCurrent < graceTimeMax) && !_isDashing)
         {
             Jump();
         }
@@ -220,7 +220,7 @@ public class PlayerController : MonoBehaviour
     private void ControlSpeed()
     {
         // Change move speed if player is pressing on the spring key
-        if (Input.GetKey(_inputManager.SprintKey) && _isGrounded)
+        if (Input.GetKey(_inputManager.SprintKey) && isGrounded)
         {
             moveSpeed = Mathf.Lerp(moveSpeed, sprintSpeed, acceleration * Time.deltaTime);
         }
@@ -239,7 +239,7 @@ public class PlayerController : MonoBehaviour
     private void ControlDrag()
     {
         // Apply drag depending if the player is in the air or not
-        _rigidbody.drag = _isGrounded && !_isDashing ? groundDrag : airDrag;
+        _rigidbody.drag = isGrounded && !_isDashing ? groundDrag : airDrag;
     }
 
     private bool OnSlope()
@@ -307,7 +307,7 @@ public class PlayerController : MonoBehaviour
     private void UpdateDebugWindow()
     {
         // Update any states from this script onto a canvas for display 
-        IsGroundedEvent?.Invoke(_isGrounded);
+        IsGroundedEvent?.Invoke(isGrounded);
         IsOnSlopeEvent?.Invoke(OnSlope());
         IsJumpingEvent?.Invoke(_isJumping);
         GraceTimerEvent?.Invoke(_graceTimeCurrent);
@@ -393,5 +393,10 @@ public class PlayerController : MonoBehaviour
         _collider.isTrigger = state;
         _rigidbody.isKinematic = state;
         _isVaulting = state;
+    }
+
+    public float GetMovemenetSpeedPercent()
+    {
+        return moveSpeed / sprintSpeed;
     }
 }
