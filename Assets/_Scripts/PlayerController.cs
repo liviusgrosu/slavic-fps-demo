@@ -77,6 +77,7 @@ public class PlayerController : MonoBehaviour
     
     // Vaulting events
     public static event Action VaultingEvent;
+    public static event Action DashingEvent;
 
     
     // Components
@@ -212,6 +213,7 @@ public class PlayerController : MonoBehaviour
 
     private void Dash()
     {
+        DashingEvent?.Invoke();
         _playerEffects.PerformDashEffect(moveDirection, dashTimeMax);
         // Start dashing
         StartCoroutine(StartDashingTimer());
