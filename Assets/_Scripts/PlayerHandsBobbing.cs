@@ -39,15 +39,6 @@ public class PlayerHandsBobbing : MonoBehaviour
         bool isPlayerMovingHorizontally = Mathf.Abs(_playerController.moveDirection.x) > 0.1f ||
                                           Mathf.Abs(_playerController.moveDirection.z) > 0.1f;
         
-        Vector3 offsetDirection = Vector3.zero;
-        if (isPlayerMovingHorizontally)
-        {
-            offsetDirection = -(_rigidbody.velocity.normalized);
-        }
-        
-        Vector3 offsetTarget = _defaultPos + anchorPoint.position + (offsetDirection * _currentOffsetAmount);
-        playerArms.position = Vector3.Lerp(playerArms.position, offsetTarget, Time.deltaTime * offsetTimeMultiplier);
-        
         if(isPlayerMovingHorizontally && _playerController.isGrounded)
         {
             float bobbingPercentage = (_playerController.GetMovemenetSpeedPercent() * bobbingSpeed);
@@ -62,6 +53,15 @@ public class PlayerHandsBobbing : MonoBehaviour
             _timer = 0;
             playerArms.transform.localPosition = new Vector3(playerArms.transform.localPosition.x, Mathf.Lerp(playerArms.transform.localPosition.y, _defaultPosY, Time.deltaTime * bobbingSpeed), playerArms.transform.localPosition.z);
         }
+        
+        Vector3 offsetDirection = Vector3.zero;
+        if (isPlayerMovingHorizontally)
+        {
+            offsetDirection = -(_rigidbody.velocity.normalized);
+        }
+        
+        Vector3 offsetTarget = _defaultPos + anchorPoint.position + (offsetDirection * _currentOffsetAmount);
+        playerArms.position = Vector3.Lerp(playerArms.position, offsetTarget, Time.deltaTime * offsetTimeMultiplier);
     }
 
     private void ModifyOffsetAmount(float current, float max)
