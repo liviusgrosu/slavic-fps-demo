@@ -64,6 +64,9 @@ public class PlayerController : MonoBehaviour
     private float _ignoreGroundedMaxTime = 0.1f;
     private float _ignoreGroundedCurrentTime = 0.1f;
     
+    [Header("Misc.")]
+    [SerializeField] private InputQueueSystem inputQueue;
+    
     // Debug Events
     public static event Action<bool> IsGroundedEvent;
     public static event Action<bool> IsOnSlopeEvent;
@@ -184,15 +187,18 @@ public class PlayerController : MonoBehaviour
             moveDirection = mainCamera.forward * _verticalMovement + mainCamera.right * _horizontalMovement;
         }
         
-        // Jumping input
-        if (Input.GetKeyDown(_inputManager.JumpKey) && (isGrounded || _graceTimeCurrent < graceTimeMax) && !_isDashing)
+        // // Jumping input
+        if (inputQueue.GetNextMovementInput() == "Jump" && (isGrounded || _graceTimeCurrent < graceTimeMax) &&
+            !_isDashing)
         {
+            inputQueue.DequeueMovementInput();
             Jump();
         }
-
+        
         // Dashing input
-        if (Input.GetKeyDown(_inputManager.DashKey) && _dashTimeCooldownCurrent >= dashCooldownTimeMax && !_isDashing && moveDirection != Vector3.zero)
+        if (inputQueue.GetNextMovementInput() == "Dash" && _dashTimeCooldownCurrent >= dashCooldownTimeMax && !_isDashing && moveDirection != Vector3.zero)
         {
+            inputQueue.DequeueMovementInput();
             Dash();
         }
     }

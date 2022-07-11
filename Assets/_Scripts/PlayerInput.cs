@@ -14,6 +14,16 @@ public class PlayerInput : MonoBehaviour
 
     private void Update()
     {
+        if (Input.GetKeyDown(JumpKey))
+        {
+            inputQueue.EnqueueMovementInput("Jump");
+        }
+        
+        if (Input.GetKeyDown(DashKey))
+        {
+            inputQueue.EnqueueMovementInput("Dash");
+        } 
+        
         if (Input.GetKeyDown(LightAttackButton))
         {
             inputQueue.EnqueueAttackInput("Light Attack");

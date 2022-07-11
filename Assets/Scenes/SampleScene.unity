@@ -84432,7 +84432,7 @@ MonoBehaviour:
   inputQueue: {fileID: 1038737365}
   JumpKey: 32
   SprintKey: 304
-  DashKey: 308
+  DashKey: 306
   LightAttackButton: 323
 --- !u!1 &4591865486878809297
 GameObject:

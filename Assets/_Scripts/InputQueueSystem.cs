@@ -6,63 +6,76 @@ using UnityEngine;
 
 public class InputQueueSystem : MonoBehaviour
 {
-    [HideInInspector] public Queue<InputCode> attackInputQueue, movementInputQueue;
+    private Queue<InputCode> _attackInputQueue, _movementInputQueue;
     [SerializeField] private float actionLifeTime;
     
     private void Awake()
     {
-        attackInputQueue = new Queue<InputCode>();
-        movementInputQueue = new Queue<InputCode>();
+        _attackInputQueue = new Queue<InputCode>();
+        _movementInputQueue = new Queue<InputCode>();
     }
 
-    public void EnqueueAttackInput(String input)
+    public void EnqueueAttackInput(string input)
     {
         InputCode inputCode = new InputCode(input);
-        attackInputQueue.Enqueue(inputCode);
+        _attackInputQueue.Enqueue(inputCode);
     }
 
     public string GetNextAttackInput()
     {
-        if (attackInputQueue.Count != 0)
+        if (_attackInputQueue.Count == 0)
         {
-            if (Time.time - attackInputQueue.Peek().timeOfCreation > actionLifeTime)
-            {
-                DequeueAttackInput();
-            }
-            else
-            {
-                return attackInputQueue.Peek().inputName;
-            }
+            return "";
         }
-        return "";
+
+        if (Time.time - _attackInputQueue.Peek().timeOfCreation > actionLifeTime)
+        {
+            DequeueAttackInput();
+            return "";
+        }
+
+        return _attackInputQueue.Peek().inputName;
     }
 
     public void DequeueAttackInput()
     {
-        attackInputQueue.Dequeue();
+        _attackInputQueue.Dequeue();
     }
 
-    // private void Update()
-    // {
-    //     if (attackInputQueue.Count != 0)
-    //     {
-    //         //  Debug.Log(attackInputQueue.Count);
-    //         Debug.Log(Time.deltaTime - attackInputQueue.Peek().timeOfCreation);
-    //         if (Time.deltaTime - attackInputQueue.Peek().timeOfCreation > actionLifeTime)
-    //         {
-    //             Debug.Log($"Dequeing: {attackInputQueue.Peek().inputName}");
-    //             DequeueAttackInput();
-    //         }
-    //     }
-    // }
+    public void EnqueueMovementInput(string input)
+    {
+        InputCode inputCode = new InputCode(input);
+        _movementInputQueue.Enqueue(inputCode);
+    }
+    
+    public string GetNextMovementInput()
+    {
+        if (_movementInputQueue.Count == 0)
+        {
+            return "";
+        }
+
+        if (Time.time - _movementInputQueue.Peek().timeOfCreation > actionLifeTime)
+        {
+            DequeueMovementInput();
+            return "";
+        }
+
+        return _movementInputQueue.Peek().inputName;
+    }
+    
+    public void DequeueMovementInput()
+    {
+        _movementInputQueue.Dequeue();
+    }
 }
 
 public class InputCode
 {
-    public String inputName;
+    public string inputName;
     public float timeOfCreation;
 
-    public InputCode(String inputName)
+    public InputCode(string inputName)
     {
         this.inputName = inputName;
         this.timeOfCreation = Time.time;
