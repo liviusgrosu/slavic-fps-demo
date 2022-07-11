@@ -13,4 +13,9 @@ public class PlayerAnimationController : MonoBehaviour
     {
         _playerArms.SetTrigger("Vault");
     }
+
+    public void PlayLighAttackAnimation()
+    {
+        _playerArms.SetTrigger("Light Attack");
+    }
 }

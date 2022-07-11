@@ -104,7 +104,7 @@ ModelImporter:
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
       events:
-      - time: 0.9191919
+      - time: 0.759923
         functionName: LightAttackFinished
         data: 
         objectReferenceParameter: {fileID: 11500000, guid: 27850c84b94f4d8aa5442c859644788e, type: 3}
@@ -140,7 +140,7 @@ ModelImporter:
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
       events:
-      - time: 0.9191919
+      - time: 0.5954321
         functionName: LightAttackFinished
         data: 
         objectReferenceParameter: {fileID: 11500000, guid: 27850c84b94f4d8aa5442c859644788e, type: 3}
@@ -175,7 +175,14 @@ ModelImporter:
       mirror: 0
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
-      events: []
+      events:
+      - time: 0.91906005
+        functionName: LightAttackFinished
+        data: 
+        objectReferenceParameter: {fileID: 11500000, guid: 27850c84b94f4d8aa5442c859644788e, type: 3}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
       transformMask: []
       maskType: 3
       maskSource: {instanceID: 0}
