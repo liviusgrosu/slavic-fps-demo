@@ -57946,7 +57946,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b14c2c8b58b60f748b47b083205aa2ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  actionLifeTime: 0.1
+  actionLifeTime: 0.3
 --- !u!4 &1038737366
 Transform:
   m_ObjectHideFlags: 0
@@ -84304,11 +84304,11 @@ GameObject:
   - component: {fileID: 4591865485351635448}
   - component: {fileID: 4591865485351635449}
   - component: {fileID: 4591865485351635450}
-  - component: {fileID: 1242814073}
-  - component: {fileID: 1242814074}
   - component: {fileID: 4591865485351635452}
   - component: {fileID: 4591865485351635453}
   - component: {fileID: 4591865485351635454}
+  - component: {fileID: 1242814073}
+  - component: {fileID: 1242814074}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -84370,6 +84370,7 @@ MonoBehaviour:
     m_Bits: 64
   groundDistance: 0.2
   isGrounded: 0
+  inputQueue: {fileID: 1038737365}
 --- !u!114 &4591865485351635450
 MonoBehaviour:
   m_ObjectHideFlags: 0

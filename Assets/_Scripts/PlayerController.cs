@@ -185,6 +185,11 @@ public class PlayerController : MonoBehaviour
             _verticalMovement = Input.GetAxisRaw("Vertical");
 
             moveDirection = mainCamera.forward * _verticalMovement + mainCamera.right * _horizontalMovement;
+            if (isGrounded)
+            {
+                // Added so that players can bounce off the ground when looking down
+                moveDirection += new Vector3(0f, -moveDirection.y, 0f);
+            }
         }
         
         // // Jumping input
@@ -336,6 +341,11 @@ public class PlayerController : MonoBehaviour
     {
         // Store the players velocity as this will the direction of the dash
         Vector3 oldPlayerVelocity = _rigidbody.velocity;
+        // if (isGrounded)
+        // {
+        //     // Remove vertical velocity when grounded
+        //     oldPlayerVelocity += new Vector3(0, -oldPlayerVelocity.y, 0);
+        // }
         _rigidbody.velocity = moveDirection.normalized * dashSpeed * MovementMultiplier;
         
         _isDashing = true;

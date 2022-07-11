@@ -30,7 +30,7 @@ public class CameraLook : MonoBehaviour
         _xRotation -= _mouseY * sensitivityY * Multiplier;
 
         // Clamp X rotation so that it the player cant look back infinitely
-        _xRotation = Mathf.Clamp(_xRotation, -90f, 90f);
+        _xRotation = Mathf.Clamp(_xRotation, -80f, 80f);
 
         // Apply rotation input to camera
         mainCamera.transform.rotation = Quaternion.Euler(_xRotation, _yRotation, 0);

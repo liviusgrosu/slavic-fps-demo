@@ -78,6 +78,6 @@ public class InputCode
     public InputCode(string inputName)
     {
         this.inputName = inputName;
-        this.timeOfCreation = Time.time;
+        timeOfCreation = Time.time;
     }
 }
