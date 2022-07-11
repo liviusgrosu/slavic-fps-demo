@@ -82,7 +82,6 @@ public class PlayerController : MonoBehaviour
     public static event Action VaultingEvent;
     public static event Action DashingEvent;
 
-    
     // Components
     private Rigidbody _rigidbody;
     private PlayerInput _inputManager;
@@ -183,7 +182,7 @@ public class PlayerController : MonoBehaviour
         {
             _horizontalMovement = Input.GetAxisRaw("Horizontal");
             _verticalMovement = Input.GetAxisRaw("Vertical");
-
+            
             moveDirection = mainCamera.forward * _verticalMovement + mainCamera.right * _horizontalMovement;
             if (isGrounded)
             {
@@ -193,17 +192,17 @@ public class PlayerController : MonoBehaviour
         }
         
         // // Jumping input
-        if (inputQueue.GetNextMovementInput() == "Jump" && (isGrounded || _graceTimeCurrent < graceTimeMax) &&
+        if (inputQueue.movementInputQueue.GetNextInput() == "Jump" && (isGrounded || _graceTimeCurrent < graceTimeMax) &&
             !_isDashing)
         {
-            inputQueue.DequeueMovementInput();
+            inputQueue.movementInputQueue.DequeueInput();
             Jump();
         }
         
         // Dashing input
-        if (inputQueue.GetNextMovementInput() == "Dash" && _dashTimeCooldownCurrent >= dashCooldownTimeMax && !_isDashing && moveDirection != Vector3.zero)
+        if (inputQueue.movementInputQueue.GetNextInput() == "Dash" && _dashTimeCooldownCurrent >= dashCooldownTimeMax && !_isDashing && moveDirection != Vector3.zero)
         {
-            inputQueue.DequeueMovementInput();
+            inputQueue.movementInputQueue.DequeueInput();
             Dash();
         }
     }

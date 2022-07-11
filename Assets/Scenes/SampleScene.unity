@@ -57946,7 +57946,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b14c2c8b58b60f748b47b083205aa2ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  actionLifeTime: 0.3
+  attackActionLifeTime: 0.3
+  movementActionLifeTime: 0.15
 --- !u!4 &1038737366
 Transform:
   m_ObjectHideFlags: 0
@@ -84431,6 +84432,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   inputQueue: {fileID: 1038737365}
+  controller: {fileID: 0}
   JumpKey: 32
   SprintKey: 304
   DashKey: 306

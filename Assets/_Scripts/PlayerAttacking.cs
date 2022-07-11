@@ -12,10 +12,10 @@ public class PlayerAttacking : MonoBehaviour
 
     private void Update()
     {
-        if (inputQueue.GetNextAttackInput() == "Light Attack" && !_isAttacking)
+        if (inputQueue.attackInputQueue.GetNextInput() == "Light Attack" && !_isAttacking)
         {
             _isAttacking = true;
-            inputQueue.DequeueAttackInput();
+            inputQueue.attackInputQueue.DequeueInput();
             animatorController.PlayLighAttackAnimation();
         }
     }
