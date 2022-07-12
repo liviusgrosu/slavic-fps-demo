@@ -3,8 +3,8 @@ using UnityEngine;
 
 public class InputCode
 {
-    public string inputName;
-    public float timeOfCreation;
+    public readonly string inputName;
+    public readonly float timeOfCreation;
 
     public InputCode(string inputName)
     {
@@ -15,40 +15,40 @@ public class InputCode
 
 public class InputQueue
 {
-    private Queue<InputCode> queue;
-    private float actionLifeTime;
+    private Queue<InputCode> _queue;
+    private readonly float _actionLifeTime;
 
     public InputQueue(float actionLifeTime)
     {
-        queue = new Queue<InputCode>();
-        this.actionLifeTime = actionLifeTime;
+        _queue = new Queue<InputCode>();
+        _actionLifeTime = actionLifeTime;
     }
 
     public void EnqueueInput(string input)
     {
         InputCode inputCode = new InputCode(input);
-        queue.Enqueue(inputCode);
+        _queue.Enqueue(inputCode);
     }
 
     public void DequeueInput()
     {
-        queue.Dequeue();
+        _queue.Dequeue();
     }
     
     public string GetNextInput()
     {
-        if (queue.Count == 0)
+        if (_queue.Count == 0)
         {
             return "";
         }
 
-        if (Time.time - queue.Peek().timeOfCreation > actionLifeTime)
+        if (Time.time - _queue.Peek().timeOfCreation > _actionLifeTime)
         {
             DequeueInput();
             return "";
         }
 
-        return queue.Peek().inputName;
+        return _queue.Peek().inputName;
     }
 }
 
@@ -57,11 +57,11 @@ public class InputQueueSystem : MonoBehaviour
     [SerializeField] private float attackActionLifeTime = 0.3f;
     [SerializeField] private float movementActionLifeTime = 0.2f;
 
-    [HideInInspector] public InputQueue attackInputQueue, movementInputQueue;
+    [HideInInspector] public InputQueue AttackInputQueue, MovementInputQueue;
     
     private void Awake()
     {
-        attackInputQueue = new InputQueue(attackActionLifeTime);
-        movementInputQueue = new InputQueue(movementActionLifeTime);
+        AttackInputQueue = new InputQueue(attackActionLifeTime);
+        MovementInputQueue = new InputQueue(movementActionLifeTime);
     }
 }

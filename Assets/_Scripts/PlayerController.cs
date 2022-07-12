@@ -192,17 +192,17 @@ public class PlayerController : MonoBehaviour
         }
         
         // // Jumping input
-        if (inputQueue.movementInputQueue.GetNextInput() == "Jump" && (isGrounded || _graceTimeCurrent < graceTimeMax) &&
+        if (inputQueue.MovementInputQueue.GetNextInput() == "Jump" && (isGrounded || _graceTimeCurrent < graceTimeMax) &&
             !_isDashing)
         {
-            inputQueue.movementInputQueue.DequeueInput();
+            inputQueue.MovementInputQueue.DequeueInput();
             Jump();
         }
         
         // Dashing input
-        if (inputQueue.movementInputQueue.GetNextInput() == "Dash" && _dashTimeCooldownCurrent >= dashCooldownTimeMax && !_isDashing && moveDirection != Vector3.zero)
+        if (inputQueue.MovementInputQueue.GetNextInput() == "Dash" && _dashTimeCooldownCurrent >= dashCooldownTimeMax && !_isDashing && moveDirection != Vector3.zero)
         {
-            inputQueue.movementInputQueue.DequeueInput();
+            inputQueue.MovementInputQueue.DequeueInput();
             Dash();
         }
     }
@@ -340,11 +340,6 @@ public class PlayerController : MonoBehaviour
     {
         // Store the players velocity as this will the direction of the dash
         Vector3 oldPlayerVelocity = _rigidbody.velocity;
-        // if (isGrounded)
-        // {
-        //     // Remove vertical velocity when grounded
-        //     oldPlayerVelocity += new Vector3(0, -oldPlayerVelocity.y, 0);
-        // }
         _rigidbody.velocity = moveDirection.normalized * dashSpeed * MovementMultiplier;
         
         _isDashing = true;
