@@ -193,7 +193,7 @@ public class PlayerController : MonoBehaviour
         
         // // Jumping input
         if (inputQueue.MovementInputQueue.GetNextInput() == "Jump" && (isGrounded || _graceTimeCurrent < graceTimeMax) &&
-            !_isDashing)
+            !_isDashing && !_isJumping)
         {
             inputQueue.MovementInputQueue.DequeueInput();
             Jump();
