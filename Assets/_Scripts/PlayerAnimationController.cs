@@ -23,4 +23,9 @@ public class PlayerAnimationController : MonoBehaviour
     {
         _playerArms.SetTrigger("Heavy Attack");
     }
+    
+    public void PlayAerialAttackAnimation()
+    {
+        _playerArms.SetTrigger("Aerial Attack");
+    }
 }

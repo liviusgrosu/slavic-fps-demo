@@ -15,12 +15,23 @@ public class PlayerAttacking : MonoBehaviour
         if (inputQueue.AttackInputQueue.GetNextInput() == "Light Attack" && !_isAttacking)
         {
             _isAttacking = true;
+            PlayerState.IsAttacking = _isAttacking;
+            
             inputQueue.AttackInputQueue.DequeueInput();
-            animatorController.PlayLightAttackAnimation();
+            if (!PlayerState.IsGrounded)
+            {
+                animatorController.PlayAerialAttackAnimation();
+            }
+            else
+            {
+                animatorController.PlayLightAttackAnimation();
+            }
         }
         else if (inputQueue.AttackInputQueue.GetNextInput() == "Heavy Attack" && !_isAttacking)
         {
             _isAttacking = true;
+            PlayerState.IsAttacking = _isAttacking;
+            
             inputQueue.AttackInputQueue.DequeueInput();
             animatorController.PlayHeavyAttackAnimation();
         }
@@ -29,5 +40,6 @@ public class PlayerAttacking : MonoBehaviour
     public void AttackPieceFinished()
     {
         _isAttacking = false;
+        PlayerState.IsAttacking = _isAttacking;
     }
 }

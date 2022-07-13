@@ -152,12 +152,18 @@ public class PlayerController : MonoBehaviour
         {
             _gravity = Vector3.zero;
         }
+
+        // if (PlayerState.IsAttacking)
+        // {
+        //     _rigidbody.velocity /= 2f;
+        // }
     }
     
     private void CheckGrounded()
     {
         // Check if a sphere collides with the ground as the ground check
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+        PlayerState.IsGrounded = isGrounded;
         if (isGrounded && _ignoreGroundedCurrentTime >= _ignoreGroundedMaxTime)
         {
             // Stop any coroutines related to touching the ground
