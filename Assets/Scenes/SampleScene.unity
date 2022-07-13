@@ -57952,7 +57952,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   attackActionLifeTime: 0.3
-  movementActionLifeTime: 0.01
+  movementActionLifeTime: 0.2
 --- !u!4 &1038737366
 Transform:
   m_ObjectHideFlags: 0
@@ -76391,7 +76391,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh20692
+  m_Name: pb_Mesh20718
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
