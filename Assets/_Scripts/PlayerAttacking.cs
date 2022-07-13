@@ -8,14 +8,16 @@ public class PlayerAttacking : MonoBehaviour
     [SerializeField] private PlayerAnimationController animatorController;
     [SerializeField] private InputQueueSystem inputQueue;
 
-    private bool _isAttacking;
-
     private void Update()
     {
-        if (inputQueue.AttackInputQueue.GetNextInput() == "Light Attack" && !_isAttacking)
+        if (PlayerState.IsVaulting)
         {
-            _isAttacking = true;
-            PlayerState.IsAttacking = _isAttacking;
+            return;
+        }
+        
+        if (inputQueue.AttackInputQueue.GetNextInput() == "Light Attack" && !PlayerState.IsAttacking)
+        {
+            PlayerState.IsAttacking = true;
             
             inputQueue.AttackInputQueue.DequeueInput();
             if (!PlayerState.IsGrounded)
@@ -27,10 +29,9 @@ public class PlayerAttacking : MonoBehaviour
                 animatorController.PlayLightAttackAnimation();
             }
         }
-        else if (inputQueue.AttackInputQueue.GetNextInput() == "Heavy Attack" && !_isAttacking)
+        else if (inputQueue.AttackInputQueue.GetNextInput() == "Heavy Attack" && !PlayerState.IsAttacking)
         {
-            _isAttacking = true;
-            PlayerState.IsAttacking = _isAttacking;
+            PlayerState.IsAttacking = true;
             
             inputQueue.AttackInputQueue.DequeueInput();
             animatorController.PlayHeavyAttackAnimation();
@@ -39,7 +40,6 @@ public class PlayerAttacking : MonoBehaviour
 
     public void AttackPieceFinished()
     {
-        _isAttacking = false;
-        PlayerState.IsAttacking = _isAttacking;
+        PlayerState.IsAttacking = false;
     }
 }

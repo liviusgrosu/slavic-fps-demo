@@ -39,7 +39,7 @@ public class PlayerHandsBobbing : MonoBehaviour
         bool isPlayerMovingHorizontally = Mathf.Abs(_playerController.moveDirection.x) > 0.1f ||
                                           Mathf.Abs(_playerController.moveDirection.z) > 0.1f;
         
-        if(isPlayerMovingHorizontally && _playerController.isGrounded)
+        if(isPlayerMovingHorizontally && PlayerState.IsGrounded)
         {
             float bobbingPercentage = (_playerController.GetMovemenetSpeedPercent() * bobbingSpeed);
             
