@@ -16,11 +16,17 @@ public class PlayerAttacking : MonoBehaviour
         {
             _isAttacking = true;
             inputQueue.AttackInputQueue.DequeueInput();
-            animatorController.PlayLighAttackAnimation();
+            animatorController.PlayLightAttackAnimation();
+        }
+        else if (inputQueue.AttackInputQueue.GetNextInput() == "Heavy Attack" && !_isAttacking)
+        {
+            _isAttacking = true;
+            inputQueue.AttackInputQueue.DequeueInput();
+            animatorController.PlayHeavyAttackAnimation();
         }
     }
 
-    public void LightAttackFinished()
+    public void AttackPieceFinished()
     {
         _isAttacking = false;
     }

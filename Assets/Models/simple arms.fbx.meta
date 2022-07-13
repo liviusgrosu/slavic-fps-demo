@@ -114,7 +114,7 @@ ModelImporter:
       curves: []
       events:
       - time: 0.759923
-        functionName: LightAttackFinished
+        functionName: AttackPieceFinished
         data: 
         objectReferenceParameter: {fileID: 11500000, guid: 27850c84b94f4d8aa5442c859644788e, type: 3}
         floatParameter: 0
@@ -150,7 +150,7 @@ ModelImporter:
       curves: []
       events:
       - time: 0.5954321
-        functionName: LightAttackFinished
+        functionName: AttackPieceFinished
         data: 
         objectReferenceParameter: {fileID: 11500000, guid: 27850c84b94f4d8aa5442c859644788e, type: 3}
         floatParameter: 0
@@ -186,7 +186,7 @@ ModelImporter:
       curves: []
       events:
       - time: 0.91906005
-        functionName: LightAttackFinished
+        functionName: AttackPieceFinished
         data: 
         objectReferenceParameter: {fileID: 11500000, guid: 27850c84b94f4d8aa5442c859644788e, type: 3}
         floatParameter: 0
@@ -222,7 +222,7 @@ ModelImporter:
       curves: []
       events:
       - time: 0.7992653
-        functionName: HeavyAttackFinished
+        functionName: AttackPieceFinished
         data: 
         objectReferenceParameter: {fileID: 11500000, guid: 27850c84b94f4d8aa5442c859644788e, type: 3}
         floatParameter: 0
@@ -257,8 +257,8 @@ ModelImporter:
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
       events:
-      - time: 0
-        functionName: HeavyAttackFinished
+      - time: 0.6790458
+        functionName: AttackPieceFinished
         data: 
         objectReferenceParameter: {fileID: 11500000, guid: 27850c84b94f4d8aa5442c859644788e, type: 3}
         floatParameter: 0
@@ -292,7 +292,14 @@ ModelImporter:
       mirror: 0
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
-      events: []
+      events:
+      - time: 0.818015
+        functionName: AttackPieceFinished
+        data: 
+        objectReferenceParameter: {fileID: 11500000, guid: 27850c84b94f4d8aa5442c859644788e, type: 3}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
       transformMask: []
       maskType: 3
       maskSource: {instanceID: 0}

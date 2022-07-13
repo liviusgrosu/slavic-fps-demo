@@ -13,6 +13,7 @@ public class PlayerInput : MonoBehaviour
     
     // Attacking input
     public KeyCode LightAttackButton = KeyCode.Mouse0;
+    public KeyCode RightAttackButton = KeyCode.Mouse1;
     private void Update()
     {
         if (Input.GetKeyDown(JumpKey))
@@ -28,6 +29,11 @@ public class PlayerInput : MonoBehaviour
         if (Input.GetKeyDown(LightAttackButton))
         {
             inputQueue.AttackInputQueue.EnqueueInput("Light Attack");
+        }
+        
+        if (Input.GetKeyDown(RightAttackButton))
+        {
+            inputQueue.AttackInputQueue.EnqueueInput("Heavy Attack");
         }
     }
 }
