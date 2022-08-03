@@ -14,11 +14,9 @@ public class PlayerAttacking : MonoBehaviour
         {
             return;
         }
-        
         if (inputQueue.AttackInputQueue.GetNextInput() == "Light Attack" && !PlayerState.IsAttacking)
         {
             PlayerState.IsAttacking = true;
-            
             inputQueue.AttackInputQueue.DequeueInput();
             if (!PlayerState.IsGrounded)
             {
