@@ -7,7 +7,6 @@ public class EnemyStats : ScriptableObject
 {
     [Header("General")]
     public float maxHealth = 100f;
-    public float movementSpeed = 1f;
     public float attackDamage = 10f;
     public float attackDelay = 0.1f;
 
@@ -15,4 +14,9 @@ public class EnemyStats : ScriptableObject
     public int areaMask = -1;
     public float radius = 0.5f;
     public float stoppingDistance = 0.5f;
+    
+    [Header("Movement")]
+    public float movementSpeed = 1f;
+    public float pursueRadius = 10f;
+    public float engageRadius = 2f;
 }
