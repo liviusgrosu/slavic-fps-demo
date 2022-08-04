@@ -12,7 +12,6 @@ public class EnemyStats : ScriptableObject
 
     [Header("Nav Mesh")]
     public int areaMask = -1;
-    public float radius = 0.5f;
     public float stoppingDistance = 0.5f;
     
     [Header("Movement")]

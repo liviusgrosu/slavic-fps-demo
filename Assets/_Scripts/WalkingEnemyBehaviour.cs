@@ -13,6 +13,7 @@ public class WalkingEnemyBehaviour : EnemyBehaviour
     {
         base.Start();
         _agent = GetComponent<NavMeshAgent>();
+        _agent.speed = stats.movementSpeed;
     }
     
     public override void Patrol()
@@ -22,7 +23,8 @@ public class WalkingEnemyBehaviour : EnemyBehaviour
     
     public override void Pursue()
     {
-        
+        // Follow the player
+        _agent.SetDestination(LevelInitialization.PlayerInstance.transform.position);
     }
     
     public override void Engage()

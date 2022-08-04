@@ -1,11 +1,6 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Data;
-using System.Numerics;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using Vector3 = UnityEngine.Vector3;
 
 [RequireComponent(typeof(Rigidbody))]
@@ -162,7 +157,6 @@ public class PlayerController : MonoBehaviour
     {
         // Check if a sphere collides with the ground as the ground check
         PlayerState.IsGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
-        PlayerState.IsGrounded = PlayerState.IsGrounded;
         if (PlayerState.IsGrounded && _ignoreGroundedCurrentTime >= _ignoreGroundedMaxTime)
         {
             // Stop any coroutines related to touching the ground

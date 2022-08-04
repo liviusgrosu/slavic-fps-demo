@@ -25,6 +25,7 @@ public class EnemyBehaviour : MonoBehaviour
     protected void Start()
     {
         _currentState = State.Patrolling;
+        Debug.Log(gameObject.name);
     }
     
     private void Update()
