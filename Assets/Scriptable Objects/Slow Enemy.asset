@@ -17,6 +17,9 @@ MonoBehaviour:
   attackDelay: 2
   areaMask: -1
   stoppingDistance: 0.5
-  movementSpeed: 0.5
+  targetMask:
+    serializedVersion: 2
+    m_Bits: 256
+  movementSpeed: 2
   pursueRadius: 15
   engageRadius: 1

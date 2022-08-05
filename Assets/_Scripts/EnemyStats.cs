@@ -12,7 +12,7 @@ public class EnemyStats : ScriptableObject
 
     [Header("Nav Mesh")]
     public int areaMask = -1;
-    public float stoppingDistance = 0.5f;
+    public LayerMask targetMask;
     
     [Header("Movement")]
     public float movementSpeed = 1f;

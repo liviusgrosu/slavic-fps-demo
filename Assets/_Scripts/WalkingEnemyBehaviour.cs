@@ -14,21 +14,24 @@ public class WalkingEnemyBehaviour : EnemyBehaviour
         base.Start();
         _agent = GetComponent<NavMeshAgent>();
         _agent.speed = stats.movementSpeed;
+        _agent.stoppingDistance = stats.engageRadius;
     }
     
     public override void Patrol()
     {
-        
+        // Do nothing for now...
     }
     
     public override void Pursue()
     {
+        _agent.isStopped = false;
         // Follow the player
-        _agent.SetDestination(LevelInitialization.PlayerInstance.transform.position);
+        _agent.destination = LevelInitialization.PlayerInstance.transform.position;
     }
     
     public override void Engage()
     {
-        
+        _agent.isStopped = true;
+        // TODO: Start attacking
     }
 }
