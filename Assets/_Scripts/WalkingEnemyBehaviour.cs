@@ -24,8 +24,8 @@ public class WalkingEnemyBehaviour : EnemyBehaviour
     
     public override void Pursue()
     {
-        _agent.isStopped = false;
         // Follow the player
+        _agent.isStopped = false;
         _agent.destination = LevelInitialization.PlayerInstance.transform.position;
     }
     

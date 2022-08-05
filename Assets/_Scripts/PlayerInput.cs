@@ -4,7 +4,6 @@ using UnityEngine;
 public class PlayerInput : MonoBehaviour
 {
     [SerializeField] private InputQueueSystem inputQueue;
-    [SerializeField] private PlayerController controller;
     
     // Movement input
     public KeyCode JumpKey = KeyCode.Space;
