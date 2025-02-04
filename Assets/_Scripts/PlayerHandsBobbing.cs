@@ -41,10 +41,8 @@ public class PlayerHandsBobbing : MonoBehaviour
         
         if(isPlayerMovingHorizontally && PlayerState.IsGrounded)
         {
-            float bobbingPercentage = (_playerController.GetMovemenetSpeedPercent() * bobbingSpeed);
-            
             //Player is moving
-            _timer += Time.deltaTime * bobbingPercentage;
+            _timer += Time.deltaTime * bobbingSpeed;
             playerArms.transform.localPosition = new Vector3(playerArms.transform.localPosition.x, _defaultPosY + Mathf.Sin(_timer) * bobbingAmount, playerArms.transform.localPosition.z);
         }
         else

@@ -14,20 +14,18 @@ public class PlayerController : MonoBehaviour
 {
     [Header("Movement")]
     [SerializeField] private float moveSpeed = 6f;
+    [SerializeField] private float walkingSpeed = 4f;
+    [SerializeField] private float acceleration = 10f;
     [SerializeField] private float airMultiplier = 0.4f;
     private const float MovementMultiplier = 10f;
     private float _horizontalMovement, _verticalMovement;
- 
+
+
     [Header("Rotation")]
     [SerializeField] private Transform mainCamera = null;
     [HideInInspector] public Vector3 moveDirection;
     private Vector3 _slopeMoveDirection;
     
-    [Header("Sprinting")]
-    [SerializeField] private float walkSpeed = 4f;
-    [SerializeField] private float sprintSpeed = 6f;
-    [SerializeField] private float acceleration = 10f;
-
     [Header("Jumping")]
     [SerializeField] private float jumpForce = 5f;
     [SerializeField] private float graceTimeMax = 1f;
@@ -236,20 +234,15 @@ public class PlayerController : MonoBehaviour
 
     private void ControlSpeed()
     {
-        // Change move speed if player is pressing on the spring key
-        if (Input.GetKey(_inputManager.SprintKey) && PlayerState.IsGrounded)
-        {
-            moveSpeed = Mathf.Lerp(moveSpeed, sprintSpeed, acceleration * Time.deltaTime);
-        }
         // Dashing speed
-        else if (_isDashing)
+        if (_isDashing)
         {
             moveSpeed = dashSpeed;
         }
         // Normal walking speed
         else
         {
-            moveSpeed = Mathf.Lerp(moveSpeed, walkSpeed, acceleration * Time.deltaTime);
+            moveSpeed = Mathf.Lerp(moveSpeed, walkingSpeed, acceleration * Time.deltaTime);
         }
     }
 
@@ -411,10 +404,5 @@ public class PlayerController : MonoBehaviour
         _rigidbody.isKinematic = state;
         _isVaulting = state;
         PlayerState.IsVaulting = state;
-    }
-
-    public float GetMovemenetSpeedPercent()
-    {
-        return moveSpeed / sprintSpeed;
     }
 }
