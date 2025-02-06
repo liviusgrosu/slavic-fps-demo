@@ -58030,6 +58030,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1038737366}
   - component: {fileID: 1038737365}
+  - component: {fileID: 1038737367}
   m_Layer: 0
   m_Name: Game Manager
   m_TagString: Untagged
@@ -58065,6 +58066,19 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1038737367
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1038737364}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 250dc77bd2858ec49b21a63620d33ca6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  runningCoroutinesNames: []
 --- !u!1 &1040632042
 GameObject:
   m_ObjectHideFlags: 0
@@ -83988,7 +84002,12 @@ MonoBehaviour:
   graceTimeMax: 0.2
   dashSpeed: 5
   dashTimeMax: 0.3
-  dashCooldownTimeMax: 0.5
+  dashAmount: 3
+  dashCooldownTime: 0.5
+  dashCooldownDelayTime: 0.5
+  _dashCurrentAmount: 0
+  _dashCurrentCooldownTime: 0
+  _dashCurrentCooldownDelayTime: 0
   minDistanceToVaultable: 1
   vaultTimeMax: 0.35
   groundDrag: 10

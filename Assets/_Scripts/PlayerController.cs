@@ -36,16 +36,16 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float dashSpeed = 5f;
     [SerializeField] private float dashTimeMax = 1f;
     private float _dashTimeCurrent;
-    private bool _isDashing;
 
     [Header("Dashing - Timers")]
-    [SerializeField] private int dashAmount = 3;
+    [SerializeField] private int dashMaxPoints = 3;
     [SerializeField] private float dashCooldownTime = 0.5f;
-    [SerializeField] private float dashCooldownDelayTime = 0.5f; // Delay before recharge starts
-    [SerializeField] private float _dashCurrentAmount;
-    [SerializeField] private float _dashCurrentCooldownTime;
-    [SerializeField] private float _dashCurrentCooldownDelayTime;
-    private bool _canDash => _dashCurrentAmount > 0 && !_isDashing;
+    private float _dashCurrentPoints;
+    private float _dashCurrentCooldownTime;
+    private bool _isDashing;
+    private bool _canDash => _dashCurrentPoints > 0 && !_isDashing;
+
+    private Coroutine _cooldownCoroutine;
 
     [Header("Vaulting")]
     [SerializeField] private float minDistanceToVaultable = 0.1f;
@@ -69,6 +69,7 @@ public class PlayerController : MonoBehaviour
     
     [Header("Misc.")]
     [SerializeField] private InputQueueSystem inputQueue;
+    public Dictionary<string, int > runningCoroutines = new Dictionary<string, int>();
     
     // Debug Events
     public static event Action<bool> IsGroundedEvent;
@@ -97,7 +98,7 @@ public class PlayerController : MonoBehaviour
         _rigidbody = GetComponent<Rigidbody>();
         _playerEffects = FindObjectOfType<PlayerEffects>();
         _rigidbody.freezeRotation = true;
-        _dashCurrentAmount = dashAmount;
+        _dashCurrentPoints = dashMaxPoints;
     }
     
     private void Update()
@@ -339,19 +340,13 @@ public class PlayerController : MonoBehaviour
     private IEnumerator StartDashingTimer()
     {
         _isDashing = true;
-        _dashCurrentAmount--;
-
-        // Stop all dashing timers
-        // TODO: We can spam dash because of this
-        StopCoroutine(StartDashCooldownDelay());
-        StopCoroutine(StartDashingCooldown());
+        _dashCurrentPoints--;
 
         // Store the players velocity as this will the direction of the dash
         Vector3 oldPlayerVelocity = _rigidbody.velocity;
         _rigidbody.velocity = moveDirection.normalized * dashSpeed * MovementMultiplier;
         
         _dashTimeCurrent = 0f;
-
         while (_dashTimeCurrent <= dashTimeMax)
         {
             DashTimerEvent?.Invoke(_dashTimeCurrent, dashTimeMax);
@@ -363,36 +358,25 @@ public class PlayerController : MonoBehaviour
         _isDashing = false;
         _rigidbody.velocity = oldPlayerVelocity / 4f;
         // Start delay to start dash cooldown
-        StartCoroutine(StartDashCooldownDelay());
-    }
-    private IEnumerator StartDashCooldownDelay()
-    {
-        // Begin the dash recharge delay
-        _dashCurrentCooldownDelayTime = 0f;
-
-        while (_dashCurrentCooldownDelayTime <= dashCooldownDelayTime)
-        {
-            _dashCurrentCooldownDelayTime += Time.deltaTime;
-            yield return null;
-        }
-        // Allow dash to start recharging
-        StartCoroutine(StartDashingCooldown());
+        if (_cooldownCoroutine != null) StopCoroutine(_cooldownCoroutine);
+        _cooldownCoroutine = StartCoroutine(StartDashingCooldown());    
     }
 
     private IEnumerator StartDashingCooldown()
     {
-        // Perform the dashing process for some time
+        // Recharge dashing points
         _dashCurrentCooldownTime = 0f;
-        while (_dashCurrentAmount < dashAmount)
+        while (_dashCurrentPoints < dashMaxPoints)
         {
             _dashCurrentCooldownTime += Time.deltaTime;
             if (_dashCurrentCooldownTime >= dashCooldownTime)
             {
                 _dashCurrentCooldownTime = 0f;
-                _dashCurrentAmount++;
+                _dashCurrentPoints++;
             }
             yield return null;
         }
+        _cooldownCoroutine = null;
     }
 
     private IEnumerator StartIgnoreGroundedTimer()
