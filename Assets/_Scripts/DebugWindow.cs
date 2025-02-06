@@ -30,7 +30,6 @@ public class DebugWindow : MonoBehaviour
         PlayerController.IsOnSlopeEvent += UpdateSlopeText;
         PlayerController.IsJumpingEvent += UpdateJumpingText;
         PlayerController.GraceTimerEvent += UpdateGraceWindowText;
-        PlayerController.DashDebugCooldownEvent += UpdateDashTimeCooldownText;
     }
 
     private void UpdateGroundedText(bool state)
@@ -68,11 +67,6 @@ public class DebugWindow : MonoBehaviour
         _dashTimeText.text = $"Dash Timer: {time:n2}";
     }
     
-    private void UpdateDashTimeCooldownText(float time)
-    {
-        _dashTimeCooldownText.text = $"Dash Cooldown Timer: {time:n2}";
-    }
-
     private string DisplayBoolString(bool state)
     {
         return state ? $"<color=#26D73A>{state}</color>" : $"<color=#FF0000>{state}</color>"; 

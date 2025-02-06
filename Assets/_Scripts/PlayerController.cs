@@ -40,12 +40,22 @@ public class PlayerController : MonoBehaviour
     private float _dashTimeCurrent;
 
     [Header("Dashing - Timers")]
-    [SerializeField] private int dashMaxPoints = 3;
+    [SerializeField] public int DashMaxPoints = 3;
     [SerializeField] private float dashCooldownTime = 0.5f;
-    private float _dashCurrentPoints;
+    private int _dashCurrentPoints;
+    public static event Action<int> DashCooldownEvent;
+    public int DashCurrentPoints
+    {
+        get => _dashCurrentPoints;
+        set
+        {
+            _dashCurrentPoints = value;
+            DashCooldownEvent?.Invoke(value);
+        }
+    }
     private float _dashCurrentCooldownTime;
     private bool _isDashing;
-    private bool _canDash => _dashCurrentPoints > 0 && !_isDashing;
+    private bool _canDash => DashCurrentPoints > 0 && !_isDashing;
 
     private Coroutine _cooldownCoroutine;
 
@@ -78,12 +88,11 @@ public class PlayerController : MonoBehaviour
     public static event Action<bool> IsOnSlopeEvent;
     public static event Action<bool> IsJumpingEvent;
     public static event Action<float> GraceTimerEvent;
-    public static event Action<float> DashDebugCooldownEvent;
 
     // Dashing events
     public static event Action<float, float> DashTimerEvent;
-    public static event Action<float, float> DashCooldownTimerEvent;
-    
+
+
     // Vaulting events
     public static event Action VaultingEvent;
 
@@ -110,7 +119,7 @@ public class PlayerController : MonoBehaviour
         _rigidbody = GetComponent<Rigidbody>();
         _playerEffects = FindObjectOfType<PlayerEffects>();
         _rigidbody.freezeRotation = true;
-        _dashCurrentPoints = dashMaxPoints;
+        DashCurrentPoints = DashMaxPoints;
     }
     
     private void Update()
@@ -352,7 +361,7 @@ public class PlayerController : MonoBehaviour
     private IEnumerator StartDashingTimer()
     {
         _isDashing = true;
-        _dashCurrentPoints--;
+        DashCurrentPoints--;
 
         // Store the players velocity as this will the direction of the dash
         Vector3 oldPlayerVelocity = _rigidbody.velocity;
@@ -378,13 +387,13 @@ public class PlayerController : MonoBehaviour
     {
         // Recharge dashing points
         _dashCurrentCooldownTime = 0f;
-        while (_dashCurrentPoints < dashMaxPoints)
+        while (DashCurrentPoints < DashMaxPoints)
         {
             _dashCurrentCooldownTime += Time.deltaTime;
             if (_dashCurrentCooldownTime >= dashCooldownTime)
             {
                 _dashCurrentCooldownTime = 0f;
-                _dashCurrentPoints++;
+                DashCurrentPoints++;
             }
             yield return null;
         }
