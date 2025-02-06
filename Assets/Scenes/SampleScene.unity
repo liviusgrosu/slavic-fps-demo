@@ -82772,7 +82772,7 @@ MonoBehaviour:
   dashCooldownTime: 1
   minDistanceToVaultable: 1
   vaultTimeMax: 0.35
-  groundDrag: 3
+  groundDrag: 10
   airDrag: 1
   groundCheck: {fileID: 379442290}
   groundMask:
