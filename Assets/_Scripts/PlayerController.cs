@@ -35,12 +35,18 @@ public class PlayerController : MonoBehaviour
     [Header("Dashing")]
     [SerializeField] private float dashSpeed = 5f;
     [SerializeField] private float dashTimeMax = 1f;
-    [SerializeField] private float dashCooldownTimeMax = 1f;
     private float _dashTimeCurrent;
-    private float _dashTimeCooldownCurrent;
-    private Vector3 _lockedMovementDirection;
     private bool _isDashing;
-    
+
+    [Header("Dashing - Timers")]
+    [SerializeField] private int dashAmount = 3;
+    [SerializeField] private float dashCooldownTime = 0.5f;
+    [SerializeField] private float dashCooldownDelayTime = 0.5f; // Delay before recharge starts
+    [SerializeField] private float _dashCurrentAmount;
+    [SerializeField] private float _dashCurrentCooldownTime;
+    [SerializeField] private float _dashCurrentCooldownDelayTime;
+    private bool _canDash => _dashCurrentAmount > 0 && !_isDashing;
+
     [Header("Vaulting")]
     [SerializeField] private float minDistanceToVaultable = 0.1f;
     [SerializeField] private float vaultTimeMax = 1f;
@@ -70,14 +76,13 @@ public class PlayerController : MonoBehaviour
     public static event Action<bool> IsJumpingEvent;
     public static event Action<float> GraceTimerEvent;
     public static event Action<float> DashDebugCooldownEvent;
-    
+
     // Dashing events
     public static event Action<float, float> DashTimerEvent;
     public static event Action<float, float> DashCooldownTimerEvent;
     
     // Vaulting events
     public static event Action VaultingEvent;
-    public static event Action DashingEvent;
 
     // Components
     private Rigidbody _rigidbody;
@@ -92,7 +97,7 @@ public class PlayerController : MonoBehaviour
         _rigidbody = GetComponent<Rigidbody>();
         _playerEffects = FindObjectOfType<PlayerEffects>();
         _rigidbody.freezeRotation = true;
-        _dashTimeCooldownCurrent = dashCooldownTimeMax;
+        _dashCurrentAmount = dashAmount;
     }
     
     private void Update()
@@ -149,11 +154,6 @@ public class PlayerController : MonoBehaviour
         {
             _gravity = Vector3.zero;
         }
-
-        // if (PlayerState.IsAttacking)
-        // {
-        //     _rigidbody.velocity /= 2f;
-        // }
     }
     
     private void CheckGrounded()
@@ -195,15 +195,19 @@ public class PlayerController : MonoBehaviour
         }
         
         // Jumping input
-        if (inputQueue.MovementInputQueue.GetNextInput() == "Jump" && (PlayerState.IsGrounded || _graceTimeCurrent < graceTimeMax) &&
-            !_isDashing && !_isJumping)
+        if (inputQueue.MovementInputQueue.GetNextInput() == "Jump" && 
+            (PlayerState.IsGrounded || _graceTimeCurrent < graceTimeMax) &&
+            !_isDashing && 
+            !_isJumping)
         {
             inputQueue.MovementInputQueue.DequeueInput();
             Jump();
         }
         
         // Dashing input
-        if (inputQueue.MovementInputQueue.GetNextInput() == "Dash" && _dashTimeCooldownCurrent >= dashCooldownTimeMax && !_isDashing && moveDirection != Vector3.zero)
+        if (inputQueue.MovementInputQueue.GetNextInput() == "Dash" && 
+            _canDash && 
+            moveDirection != Vector3.zero)
         {
             inputQueue.MovementInputQueue.DequeueInput();
             Dash();
@@ -226,7 +230,6 @@ public class PlayerController : MonoBehaviour
 
     private void Dash()
     {
-        DashingEvent?.Invoke();
         _playerEffects.PerformDashEffect(moveDirection, dashTimeMax);
         // Start dashing
         StartCoroutine(StartDashingTimer());
@@ -321,9 +324,8 @@ public class PlayerController : MonoBehaviour
         IsOnSlopeEvent?.Invoke(OnSlope());
         IsJumpingEvent?.Invoke(_isJumping);
         GraceTimerEvent?.Invoke(_graceTimeCurrent);
-        DashDebugCooldownEvent?.Invoke(_dashTimeCooldownCurrent);
     }
-    
+
     private IEnumerator StartGraceTimer()
     {
         // Start the grace timer
@@ -333,16 +335,23 @@ public class PlayerController : MonoBehaviour
             yield return null;
         }
     }
-    
+
     private IEnumerator StartDashingTimer()
     {
+        _isDashing = true;
+        _dashCurrentAmount--;
+
+        // Stop all dashing timers
+        // TODO: We can spam dash because of this
+        StopCoroutine(StartDashCooldownDelay());
+        StopCoroutine(StartDashingCooldown());
+
         // Store the players velocity as this will the direction of the dash
         Vector3 oldPlayerVelocity = _rigidbody.velocity;
         _rigidbody.velocity = moveDirection.normalized * dashSpeed * MovementMultiplier;
         
-        _isDashing = true;
         _dashTimeCurrent = 0f;
-        
+
         while (_dashTimeCurrent <= dashTimeMax)
         {
             DashTimerEvent?.Invoke(_dashTimeCurrent, dashTimeMax);
@@ -353,18 +362,35 @@ public class PlayerController : MonoBehaviour
         // Reduce players velocity by a quarter as they are coming off a dash
         _isDashing = false;
         _rigidbody.velocity = oldPlayerVelocity / 4f;
-        // Start cooldown of dash
+        // Start delay to start dash cooldown
+        StartCoroutine(StartDashCooldownDelay());
+    }
+    private IEnumerator StartDashCooldownDelay()
+    {
+        // Begin the dash recharge delay
+        _dashCurrentCooldownDelayTime = 0f;
+
+        while (_dashCurrentCooldownDelayTime <= dashCooldownDelayTime)
+        {
+            _dashCurrentCooldownDelayTime += Time.deltaTime;
+            yield return null;
+        }
+        // Allow dash to start recharging
         StartCoroutine(StartDashingCooldown());
     }
 
     private IEnumerator StartDashingCooldown()
     {
         // Perform the dashing process for some time
-        _dashTimeCooldownCurrent = 0f;
-        while (_dashTimeCooldownCurrent <= dashCooldownTimeMax)
+        _dashCurrentCooldownTime = 0f;
+        while (_dashCurrentAmount < dashAmount)
         {
-            _dashTimeCooldownCurrent += Time.deltaTime;
-            DashCooldownTimerEvent?.Invoke(_dashTimeCooldownCurrent, dashCooldownTimeMax);
+            _dashCurrentCooldownTime += Time.deltaTime;
+            if (_dashCurrentCooldownTime >= dashCooldownTime)
+            {
+                _dashCurrentCooldownTime = 0f;
+                _dashCurrentAmount++;
+            }
             yield return null;
         }
     }

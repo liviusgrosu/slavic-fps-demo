@@ -8,8 +8,7 @@ public class PlayerInput : MonoBehaviour
     
     // Movement input
     public KeyCode JumpKey = KeyCode.Space;
-    public KeyCode SprintKey = KeyCode.LeftShift;
-    public KeyCode DashKey = KeyCode.LeftAlt;
+    public KeyCode DashKey = KeyCode.LeftShift;
     
     // Attacking input
     public KeyCode LightAttackButton = KeyCode.Mouse0;
