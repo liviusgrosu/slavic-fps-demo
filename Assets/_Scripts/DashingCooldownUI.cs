@@ -1,37 +1,46 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class DashingCooldownUI : MonoBehaviour
 {
-    [Range(0, 1)]
-    [SerializeField] private float fadeInMultiplier = 1f; 
-    private Image _radialImage;
-    private float _alpha;
+    [SerializeField] private float spacing;
+    private GameObject _pointUIPrefab;
+    private List<GameObject> _pointObjects;
+    private int _remainingPoints;
 
     private void Awake()
     {
-        _radialImage = GetComponent<Image>();
-        _alpha = _radialImage.color.a;
+        _pointUIPrefab = Resources.Load("Prefabs/Dashing Point") as GameObject;
+        _pointObjects = new List<GameObject>();
     }
 
     private void Start()
     {
-        PlayerController.DashCooldownTimerEvent += UpdateRadialProgress;
-        PlayerController.DashTimerEvent += UpdateFadeIn;
-    }
+        var dashPoints = PlayerController.Instance.DashMaxPoints;
+        var startX = -(dashPoints - 1) / 2f * spacing;
 
-    private void UpdateFadeIn(float current, float max)
-    {
-        _radialImage.fillAmount = 1;
-        Color c = _radialImage.color;
-        _radialImage.color = new Color(c.r, c.g, c.b, Mathf.Clamp01(current / (max * fadeInMultiplier)) * _alpha);
+        for (var i = 0; i < PlayerController.Instance.DashMaxPoints; i++)
+        {
+            var offset = startX + (i * spacing);
+            var newPosition = transform.position + new Vector3(offset, 0, 0);
+
+            var dashPoint = Instantiate(_pointUIPrefab, transform);
+            dashPoint.GetComponent<RectTransform>().position = newPosition;
+            _pointObjects.Add(dashPoint);
+        }
+
+        _remainingPoints = dashPoints;
+        PlayerController.DashCooldownEvent += UpdateDashPoint;
+
     }
-    
-    private void UpdateRadialProgress(float current, float max)
+    private void UpdateDashPoint(int amount)
     {
-        _radialImage.fillAmount = 1 - current / max;
+        // TODO: Refine this
+        _pointObjects.ForEach(p => p.GetComponent<Toggle>().isOn = false);
+        _pointObjects.Take(amount).ToList().ForEach(p => p.GetComponent<Toggle>().isOn = true);
+
+        _remainingPoints = amount;
     }
 }

@@ -12,6 +12,8 @@ using Vector3 = UnityEngine.Vector3;
 [RequireComponent(typeof(PlayerInput))]
 public class PlayerController : MonoBehaviour
 {
+    [HideInInspector] public static PlayerController Instance;
+
     [Header("Movement")]
     [SerializeField] private float moveSpeed = 6f;
     [SerializeField] private float walkingSpeed = 4f;
@@ -35,12 +37,28 @@ public class PlayerController : MonoBehaviour
     [Header("Dashing")]
     [SerializeField] private float dashSpeed = 5f;
     [SerializeField] private float dashTimeMax = 1f;
-    [SerializeField] private float dashCooldownTimeMax = 1f;
     private float _dashTimeCurrent;
-    private float _dashTimeCooldownCurrent;
-    private Vector3 _lockedMovementDirection;
+
+    [Header("Dashing - Timers")]
+    [SerializeField] public int DashMaxPoints = 3;
+    [SerializeField] private float dashCooldownTime = 0.5f;
+    private int _dashCurrentPoints;
+    public static event Action<int> DashCooldownEvent;
+    public int DashCurrentPoints
+    {
+        get => _dashCurrentPoints;
+        set
+        {
+            _dashCurrentPoints = value;
+            DashCooldownEvent?.Invoke(value);
+        }
+    }
+    private float _dashCurrentCooldownTime;
     private bool _isDashing;
-    
+    private bool _canDash => DashCurrentPoints > 0 && !_isDashing;
+
+    private Coroutine _cooldownCoroutine;
+
     [Header("Vaulting")]
     [SerializeField] private float minDistanceToVaultable = 0.1f;
     [SerializeField] private float vaultTimeMax = 1f;
@@ -63,21 +81,20 @@ public class PlayerController : MonoBehaviour
     
     [Header("Misc.")]
     [SerializeField] private InputQueueSystem inputQueue;
+    public Dictionary<string, int > runningCoroutines = new Dictionary<string, int>();
     
     // Debug Events
     public static event Action<bool> IsGroundedEvent;
     public static event Action<bool> IsOnSlopeEvent;
     public static event Action<bool> IsJumpingEvent;
     public static event Action<float> GraceTimerEvent;
-    public static event Action<float> DashDebugCooldownEvent;
-    
+
     // Dashing events
     public static event Action<float, float> DashTimerEvent;
-    public static event Action<float, float> DashCooldownTimerEvent;
-    
+
+
     // Vaulting events
     public static event Action VaultingEvent;
-    public static event Action DashingEvent;
 
     // Components
     private Rigidbody _rigidbody;
@@ -87,12 +104,22 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(Instance);
+            return;
+        }
+
+        Instance = this;
+        // Might not need this but might be useful
+        //DontDestroyOnLoad(Instance);
+
         _inputManager = GetComponent<PlayerInput>();
         _collider = GetComponent<CapsuleCollider>();
         _rigidbody = GetComponent<Rigidbody>();
         _playerEffects = FindObjectOfType<PlayerEffects>();
         _rigidbody.freezeRotation = true;
-        _dashTimeCooldownCurrent = dashCooldownTimeMax;
+        DashCurrentPoints = DashMaxPoints;
     }
     
     private void Update()
@@ -149,11 +176,6 @@ public class PlayerController : MonoBehaviour
         {
             _gravity = Vector3.zero;
         }
-
-        // if (PlayerState.IsAttacking)
-        // {
-        //     _rigidbody.velocity /= 2f;
-        // }
     }
     
     private void CheckGrounded()
@@ -195,15 +217,19 @@ public class PlayerController : MonoBehaviour
         }
         
         // Jumping input
-        if (inputQueue.MovementInputQueue.GetNextInput() == "Jump" && (PlayerState.IsGrounded || _graceTimeCurrent < graceTimeMax) &&
-            !_isDashing && !_isJumping)
+        if (inputQueue.MovementInputQueue.GetNextInput() == "Jump" && 
+            (PlayerState.IsGrounded || _graceTimeCurrent < graceTimeMax) &&
+            !_isDashing && 
+            !_isJumping)
         {
             inputQueue.MovementInputQueue.DequeueInput();
             Jump();
         }
         
         // Dashing input
-        if (inputQueue.MovementInputQueue.GetNextInput() == "Dash" && _dashTimeCooldownCurrent >= dashCooldownTimeMax && !_isDashing && moveDirection != Vector3.zero)
+        if (inputQueue.MovementInputQueue.GetNextInput() == "Dash" && 
+            _canDash && 
+            moveDirection != Vector3.zero)
         {
             inputQueue.MovementInputQueue.DequeueInput();
             Dash();
@@ -226,7 +252,6 @@ public class PlayerController : MonoBehaviour
 
     private void Dash()
     {
-        DashingEvent?.Invoke();
         _playerEffects.PerformDashEffect(moveDirection, dashTimeMax);
         // Start dashing
         StartCoroutine(StartDashingTimer());
@@ -321,9 +346,8 @@ public class PlayerController : MonoBehaviour
         IsOnSlopeEvent?.Invoke(OnSlope());
         IsJumpingEvent?.Invoke(_isJumping);
         GraceTimerEvent?.Invoke(_graceTimeCurrent);
-        DashDebugCooldownEvent?.Invoke(_dashTimeCooldownCurrent);
     }
-    
+
     private IEnumerator StartGraceTimer()
     {
         // Start the grace timer
@@ -333,16 +357,17 @@ public class PlayerController : MonoBehaviour
             yield return null;
         }
     }
-    
+
     private IEnumerator StartDashingTimer()
     {
+        _isDashing = true;
+        DashCurrentPoints--;
+
         // Store the players velocity as this will the direction of the dash
         Vector3 oldPlayerVelocity = _rigidbody.velocity;
         _rigidbody.velocity = moveDirection.normalized * dashSpeed * MovementMultiplier;
         
-        _isDashing = true;
         _dashTimeCurrent = 0f;
-        
         while (_dashTimeCurrent <= dashTimeMax)
         {
             DashTimerEvent?.Invoke(_dashTimeCurrent, dashTimeMax);
@@ -353,20 +378,26 @@ public class PlayerController : MonoBehaviour
         // Reduce players velocity by a quarter as they are coming off a dash
         _isDashing = false;
         _rigidbody.velocity = oldPlayerVelocity / 4f;
-        // Start cooldown of dash
-        StartCoroutine(StartDashingCooldown());
+        // Start delay to start dash cooldown
+        if (_cooldownCoroutine != null) StopCoroutine(_cooldownCoroutine);
+        _cooldownCoroutine = StartCoroutine(StartDashingCooldown());    
     }
 
     private IEnumerator StartDashingCooldown()
     {
-        // Perform the dashing process for some time
-        _dashTimeCooldownCurrent = 0f;
-        while (_dashTimeCooldownCurrent <= dashCooldownTimeMax)
+        // Recharge dashing points
+        _dashCurrentCooldownTime = 0f;
+        while (DashCurrentPoints < DashMaxPoints)
         {
-            _dashTimeCooldownCurrent += Time.deltaTime;
-            DashCooldownTimerEvent?.Invoke(_dashTimeCooldownCurrent, dashCooldownTimeMax);
+            _dashCurrentCooldownTime += Time.deltaTime;
+            if (_dashCurrentCooldownTime >= dashCooldownTime)
+            {
+                _dashCurrentCooldownTime = 0f;
+                DashCurrentPoints++;
+            }
             yield return null;
         }
+        _cooldownCoroutine = null;
     }
 
     private IEnumerator StartIgnoreGroundedTimer()
