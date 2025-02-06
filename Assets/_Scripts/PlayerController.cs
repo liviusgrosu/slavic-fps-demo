@@ -12,6 +12,8 @@ using Vector3 = UnityEngine.Vector3;
 [RequireComponent(typeof(PlayerInput))]
 public class PlayerController : MonoBehaviour
 {
+    [HideInInspector] public static PlayerController Instance;
+
     [Header("Movement")]
     [SerializeField] private float moveSpeed = 6f;
     [SerializeField] private float walkingSpeed = 4f;
@@ -93,6 +95,16 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(Instance);
+            return;
+        }
+
+        Instance = this;
+        // Might not need this but might be useful
+        //DontDestroyOnLoad(Instance);
+
         _inputManager = GetComponent<PlayerInput>();
         _collider = GetComponent<CapsuleCollider>();
         _rigidbody = GetComponent<Rigidbody>();
