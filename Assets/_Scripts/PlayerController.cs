@@ -85,6 +85,7 @@ public class PlayerController : MonoBehaviour
     public static event Action<bool> IsOnSlopeEvent;
     public static event Action<bool> IsJumpingEvent;
     public static event Action<float> GraceTimerEvent;
+    public static event Action<Vector3> RigidbodySpeedEvents;
 
     // Dashing events
     public static event Action<float, float> DashTimerEvent;
@@ -148,6 +149,8 @@ public class PlayerController : MonoBehaviour
         {
             _rigidbody.AddForce(moveDirection.normalized * moveSpeed * MovementMultiplier * airMultiplier + _gravity, ForceMode.Acceleration);
         }
+
+        RigidbodySpeedEvents?.Invoke(_rigidbody.velocity);
     }
 
     private void CheckVaulting()
@@ -206,8 +209,10 @@ public class PlayerController : MonoBehaviour
         {
             _horizontalMovement = Input.GetAxisRaw("Horizontal");
             _verticalMovement = Input.GetAxisRaw("Vertical");
+
+            var camNotY = Vector3.ProjectOnPlane(mainCamera.forward, Vector3.up).normalized;
             
-            moveDirection = mainCamera.forward * _verticalMovement + mainCamera.right * _horizontalMovement;
+            moveDirection = camNotY * _verticalMovement + mainCamera.right * _horizontalMovement;
             if (PlayerState.IsGrounded)
             {
                 // Added so that players can bounce off the ground when looking down
@@ -336,7 +341,10 @@ public class PlayerController : MonoBehaviour
 
         // Store the players velocity as this will the direction of the dash
         Vector3 oldPlayerVelocity = _rigidbody.velocity;
-        _rigidbody.velocity = moveDirection.normalized * dashSpeed * MovementMultiplier;
+        // We do this because we ignore y axis when moving in air but we want it for dashing
+        var moveDirectionWithY = mainCamera.forward * _verticalMovement 
+                                + mainCamera.right * _horizontalMovement;
+        _rigidbody.velocity = moveDirectionWithY.normalized * dashSpeed * MovementMultiplier;
         
         _dashTimeCurrent = 0f;
         while (_dashTimeCurrent <= dashTimeMax)
