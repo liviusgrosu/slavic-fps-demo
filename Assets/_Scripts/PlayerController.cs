@@ -279,7 +279,7 @@ public class PlayerController : MonoBehaviour
     private bool OnSlope()
     {
         // Check if player is on a slope depending on the floors normal
-        if (!Physics.Raycast(transform.position, Vector3.down, out _slopeHit, 1.5f))
+        if (!Physics.Raycast(transform.position, Vector3.down, out _slopeHit, 1.5f, ~LayerMask.GetMask("Ignore Ledge")))
         {
             return false;
         }
@@ -290,7 +290,7 @@ public class PlayerController : MonoBehaviour
     private bool VaultableInFront()
     {
         // Check from top forward of the player to see if there is a vaultable object in front of the player
-        if (!Physics.Raycast(_vaultingDetectionPoint.position, -Vector3.up, out var hit, 0.6f))
+        if (!Physics.Raycast(_vaultingDetectionPoint.position, -Vector3.up, out var hit, 0.6f, ~LayerMask.GetMask("Ignore Ledge")))
         {
             return false;
         }
