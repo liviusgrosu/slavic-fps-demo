@@ -19,6 +19,8 @@ public class DebugWindow : MonoBehaviour
     private TMP_Text _dashTimeText;
     [SerializeField]
     private TMP_Text _dashTimeCooldownText;
+    [SerializeField]
+    private TMP_Text _rigidbodySpeedText;
 
     private void Start()
     {
@@ -26,6 +28,7 @@ public class DebugWindow : MonoBehaviour
         PlayerController.IsOnSlopeEvent += UpdateSlopeText;
         PlayerController.IsJumpingEvent += UpdateJumpingText;
         PlayerController.GraceTimerEvent += UpdateGraceWindowText;
+        PlayerController.RigidbodySpeedEvents += UpdatePlayerSpeed;
     }
 
     private void UpdateGroundedText(bool state)
@@ -57,7 +60,11 @@ public class DebugWindow : MonoBehaviour
     {
         _graceWindowText.text = $"Grace Timer: {time:n2}";
     }
-    
+    private void UpdatePlayerSpeed(Vector3 speed)
+    {
+        _rigidbodySpeedText.text = $"Speed X: {speed.x:F1}, Y: {speed.y:F1}, Z: {speed.z:F1}";
+    }
+
     private void UpdateDashTimeText(float time)
     {
         _dashTimeText.text = $"Dash Timer: {time:n2}";
