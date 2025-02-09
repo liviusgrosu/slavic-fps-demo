@@ -12,13 +12,11 @@ public class DebugWindow : MonoBehaviour
     [SerializeField]
     private TMP_Text _isOnSlope;
     [SerializeField]
+    private TMP_Text _isVaultingText;
+    [SerializeField]
     private TMP_Text _hasDashed;
     [SerializeField]
     private TMP_Text _graceWindowText;
-    [SerializeField]
-    private TMP_Text _dashTimeText;
-    [SerializeField]
-    private TMP_Text _dashTimeCooldownText;
     [SerializeField]
     private TMP_Text _rigidbodySpeedText;
 
@@ -29,31 +27,31 @@ public class DebugWindow : MonoBehaviour
         PlayerController.IsJumpingEvent += UpdateJumpingText;
         PlayerController.GraceTimerEvent += UpdateGraceWindowText;
         PlayerController.RigidbodySpeedEvents += UpdatePlayerSpeed;
+        PlayerController.IsVaultingEvent += UpdateVaultingText;
     }
 
     private void UpdateGroundedText(bool state)
     {
-        _isGroundedText.text = $"Is Grounded: {DisplayBoolString(state)}";
+        _isGroundedText.text = $"Grounded: {DisplayBoolString(state)}";
     }
 
     private void UpdateJumpingText(bool state)
     {
-        _isJumpingText.text = $"Is Jumping: {DisplayBoolString(state)}";
+        _isJumpingText.text = $"Jumping: {DisplayBoolString(state)}";
     }
 
     private void UpdateSlopeText(bool state)
     {
-        _isOnSlope.text = $"Is On Slope: {DisplayBoolString(state)}";
+        _isOnSlope.text = $"On Slope: {DisplayBoolString(state)}";
     }
-    
-    private void UpdateRunningText(bool state)
+    private void UpdateVaultingText(bool state)
     {
-        _isRunningText.text = $"Is Running: {DisplayBoolString(state)}";
+        _isVaultingText.text = $"Vaulting: {DisplayBoolString(state)}";
     }
 
-    private void UpdateDashedText(bool state)
+    private void UpdateRunningText(bool state)
     {
-        _hasDashed.text = $"Has Dashed: {DisplayBoolString(state)}";
+        _isRunningText.text = $"Running: {DisplayBoolString(state)}";
     }
 
     private void UpdateGraceWindowText(float time)
@@ -62,12 +60,9 @@ public class DebugWindow : MonoBehaviour
     }
     private void UpdatePlayerSpeed(Vector3 speed)
     {
-        _rigidbodySpeedText.text = $"Speed X: {speed.x:F1}, Y: {speed.y:F1}, Z: {speed.z:F1}";
-    }
-
-    private void UpdateDashTimeText(float time)
-    {
-        _dashTimeText.text = $"Dash Timer: {time:n2}";
+        _rigidbodySpeedText.text = $"Speed X: <color=#ff0000>{speed.x:F1}</color>, " +
+                                    $"Y: <color=#26D73A>{speed.y:F1}</color>, " +
+                                    $"Z: <color=#0004ff>{speed.z:F1}</color>";
     }
 
     private string DisplayBoolString(bool state)
