@@ -1,11 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Data;
-using System.Numerics;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using Vector3 = UnityEngine.Vector3;
 
 [RequireComponent(typeof(Rigidbody))]
@@ -65,6 +61,7 @@ public class PlayerController : MonoBehaviour
     private float _vaultTimeCurrent;
     private Vector3 _startPoint, _middlePoint, _endPoint;
     private bool _isVaulting;
+    private Transform _vaultingDetectionPoint;
 
     [Header("Physics")]
     [SerializeField] private float groundDrag = 6f;
@@ -98,7 +95,6 @@ public class PlayerController : MonoBehaviour
 
     // Components
     private Rigidbody _rigidbody;
-    private PlayerInput _inputManager;
     private PlayerEffects _playerEffects;
     private CapsuleCollider _collider;
 
@@ -114,10 +110,10 @@ public class PlayerController : MonoBehaviour
         // Might not need this but might be useful
         //DontDestroyOnLoad(Instance);
 
-        _inputManager = GetComponent<PlayerInput>();
         _collider = GetComponent<CapsuleCollider>();
         _rigidbody = GetComponent<Rigidbody>();
         _playerEffects = FindObjectOfType<PlayerEffects>();
+        _vaultingDetectionPoint = transform.Find("Vault Detection Point");
         _rigidbody.freezeRotation = true;
         DashCurrentPoints = DashMaxPoints;
     }
@@ -156,7 +152,11 @@ public class PlayerController : MonoBehaviour
 
     private void CheckVaulting()
     {
-        if (!PlayerState.IsGrounded && !_isVaulting && _isJumping && !PlayerState.IsAttacking && VaultableInFront())
+        if (!PlayerState.IsGrounded &&
+            !PlayerState.IsAttacking &&
+            !_isVaulting && 
+            _isJumping && 
+            VaultableInFront())
         {
             StartCoroutine(StartVaultingTimer());
         }
@@ -182,7 +182,6 @@ public class PlayerController : MonoBehaviour
     {
         // Check if a sphere collides with the ground as the ground check
         PlayerState.IsGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
-        PlayerState.IsGrounded = PlayerState.IsGrounded;
         if (PlayerState.IsGrounded && _ignoreGroundedCurrentTime >= _ignoreGroundedMaxTime)
         {
             // Stop any coroutines related to touching the ground
@@ -290,47 +289,19 @@ public class PlayerController : MonoBehaviour
 
     private bool VaultableInFront()
     {
-        RaycastHit hit;
-
-        if (!Physics.Raycast(transform.position, GetCameraForward(), out hit, minDistanceToVaultable) || 
-            !hit.transform.GetComponent<BoxCollider>())
+        // Check from top forward of the player to see if there is a vaultable object in front of the player
+        if (!Physics.Raycast(_vaultingDetectionPoint.position, -Vector3.up, out var hit, 0.6f))
         {
             return false;
         }
 
-        // Get forward vector
-        float distanceToPoint = (hit.point - transform.position).magnitude + _collider.radius;
-        Vector3 forwardDisplacement = transform.position + (GetCameraForward() * distanceToPoint);
-        
-        // Get upward vector
-        float vaultObjectHeight = hit.transform.GetComponent<MeshRenderer>().bounds.size.y / 2f; 
-        Vector3 topOfCollider = hit.transform.position + new Vector3(0f, vaultObjectHeight, 0f);
+        _startPoint = transform.position;
+        _endPoint = hit.point + Vector3.up * _collider.height / 2f;
+        _middlePoint = Vector3.ProjectOnPlane(transform.position - _endPoint, Vector3.up) + _endPoint;
 
-        // Get top of vault object Y
-        float vaultObjectYTop = topOfCollider.y + _collider.height / 2f;
-        Vector3 playerToColliderTop = new Vector3(forwardDisplacement.x, vaultObjectYTop, forwardDisplacement.z);
-        float distanceToTop = Vector3.Distance(forwardDisplacement, playerToColliderTop);
-        
-        if (distanceToTop <= _collider.height)
-        {
-            _startPoint = transform.position;
-            _middlePoint = transform.position + transform.up * distanceToTop;
-            _endPoint = playerToColliderTop;
-            return true;
-        }
+        return true;
+    }
 
-        return false;
-    }
-    
-    private Vector3 GetCameraForward()
-    {
-        // Get the cameras forward direction in the xz plane
-        Vector3 cameraForward = mainCamera.forward;
-        cameraForward.y = 0f;
-        cameraForward.Normalize();
-        return cameraForward;
-    }
-    
     private static Vector3 EvaluateQuadratic(Vector3 a, Vector3 b, Vector3 c, float t)
     {
         // Quadratic equation to lerp between 3 points
