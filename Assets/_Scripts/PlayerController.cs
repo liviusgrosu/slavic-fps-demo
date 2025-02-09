@@ -58,6 +58,8 @@ public class PlayerController : MonoBehaviour
     [Header("Vaulting")]
     [SerializeField] private float minDistanceToVaultable = 0.1f;
     [SerializeField] private float vaultTimeMax = 1f;
+    [Tooltip("How much distance from the vault point to the collider will a vault trigger")]
+    [SerializeField] private float vaultDistanceTolerance = 1f;
     private float _vaultTimeCurrent;
     private Vector3 _startPoint, _middlePoint, _endPoint;
     private bool _isVaulting;
@@ -247,7 +249,7 @@ public class PlayerController : MonoBehaviour
         StartCoroutine(StartIgnoreGroundedTimer());
         
         // Add the jumping force to the rigidbody
-        _rigidbody.velocity = new Vector3(_rigidbody.velocity.x, 0, _rigidbody.velocity.z);
+        _rigidbody.velocity = Vector3.ProjectOnPlane(_rigidbody.velocity, Vector3.up);
         _rigidbody.AddForce(transform.up * jumpForce, ForceMode.Impulse);
         
         // Ignore any grace jump timing
