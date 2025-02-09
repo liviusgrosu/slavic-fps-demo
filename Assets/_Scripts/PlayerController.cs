@@ -232,7 +232,8 @@ public class PlayerController : MonoBehaviour
         
         // Dashing input
         if (inputQueue.MovementInputQueue.GetNextInput() == "Dash" && 
-            _canDash && 
+            _canDash &&
+            !_isVaulting &&
             moveDirection != Vector3.zero)
         {
             inputQueue.MovementInputQueue.DequeueInput();
