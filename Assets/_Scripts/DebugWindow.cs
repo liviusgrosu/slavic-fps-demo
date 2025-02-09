@@ -1,9 +1,5 @@
 using TMPro;
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class DebugWindow : MonoBehaviour
 {
@@ -66,7 +62,7 @@ public class DebugWindow : MonoBehaviour
     {
         _dashTimeText.text = $"Dash Timer: {time:n2}";
     }
-    
+
     private string DisplayBoolString(bool state)
     {
         return state ? $"<color=#26D73A>{state}</color>" : $"<color=#FF0000>{state}</color>"; 
