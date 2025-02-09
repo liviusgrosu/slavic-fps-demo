@@ -19,6 +19,8 @@ public class DebugWindow : MonoBehaviour
     private TMP_Text _graceWindowText;
     [SerializeField]
     private TMP_Text _rigidbodySpeedText;
+    [SerializeField]
+    private TMP_Text _vaultingTimeText;
 
     private void Start()
     {
@@ -28,6 +30,7 @@ public class DebugWindow : MonoBehaviour
         PlayerController.GraceTimerEvent += UpdateGraceWindowText;
         PlayerController.RigidbodySpeedEvents += UpdatePlayerSpeed;
         PlayerController.IsVaultingEvent += UpdateVaultingText;
+        PlayerController.VaultTimeEvent += UpdateVaultTimeText;
     }
 
     private void UpdateGroundedText(bool state)
@@ -47,6 +50,11 @@ public class DebugWindow : MonoBehaviour
     private void UpdateVaultingText(bool state)
     {
         _isVaultingText.text = $"Vaulting: {DisplayBoolString(state)}";
+    }
+
+    private void UpdateVaultTimeText(float current, float max)
+    {
+        _vaultingTimeText.text = $"Vault curr: {current:F2}, max: {max:F2}";
     }
 
     private void UpdateRunningText(bool state)

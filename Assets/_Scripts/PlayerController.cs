@@ -56,10 +56,13 @@ public class PlayerController : MonoBehaviour
     private Coroutine _cooldownCoroutine;
 
     [Header("Vaulting")]
-    [SerializeField] private float minDistanceToVaultable = 0.1f;
-    [SerializeField] private float vaultTimeMax = 1f;
     [Tooltip("How much distance from the vault point to the collider will a vault trigger")]
     [SerializeField] private float vaultDistanceTolerance = 1f;
+    [Tooltip("Most amount of time it takes to vault")]
+    [SerializeField] private float vaultTimeMax = 1f;
+    [Tooltip("Least amount of time it takes to vault")]
+    [SerializeField] private float vaultTimeMin = 0.1f;
+    private float _currentVaultTimeMax;
     private float _vaultTimeCurrent;
     private Vector3 _startPoint, _middlePoint, _endPoint;
     private bool _isVaulting;
@@ -92,10 +95,10 @@ public class PlayerController : MonoBehaviour
     // Dashing events
     public static event Action<float, float> DashTimerEvent;
 
-
     // Vaulting events
     public static event Action VaultingEvent;
     public static event Action<bool> IsVaultingEvent;
+    public static event Action<float, float> VaultTimeEvent;
 
     // Components
     private Rigidbody _rigidbody;
@@ -113,7 +116,7 @@ public class PlayerController : MonoBehaviour
         Instance = this;
         // Might not need this but might be useful
         //DontDestroyOnLoad(Instance);
-
+         
         _collider = GetComponent<CapsuleCollider>();
         _rigidbody = GetComponent<Rigidbody>();
         _playerEffects = FindObjectOfType<PlayerEffects>();
@@ -121,7 +124,7 @@ public class PlayerController : MonoBehaviour
         _rigidbody.freezeRotation = true;
         DashCurrentPoints = DashMaxPoints;
     }
-    
+
     private void Update()
     {
         AdjustGravity();
@@ -309,6 +312,10 @@ public class PlayerController : MonoBehaviour
         _endPoint = hit.point + Vector3.up * _collider.height / 2f;
         _middlePoint = Vector3.ProjectOnPlane(transform.position - _endPoint, Vector3.up) + _endPoint;
 
+        // TODO: Need to introduce the min when calculating the ratio instead of clamping it
+        _currentVaultTimeMax = (vaultDistanceTolerance - (hit.point - _vaultingDetectionPoint.position).magnitude) / vaultDistanceTolerance * vaultTimeMax;
+        _currentVaultTimeMax = Mathf.Max(_currentVaultTimeMax, vaultTimeMin);
+        VaultTimeEvent?.Invoke(_currentVaultTimeMax, vaultTimeMax);
         return true;
     }
 
@@ -402,10 +409,10 @@ public class PlayerController : MonoBehaviour
 
         // Start Lerping between start and end position of vault
         _vaultTimeCurrent = 0f;
-        while (_vaultTimeCurrent <= vaultTimeMax)
+        while (_vaultTimeCurrent <= _currentVaultTimeMax)
         {
             _vaultTimeCurrent += Time.deltaTime;
-            transform.position = EvaluateQuadratic(_startPoint, _middlePoint, _endPoint, _vaultTimeCurrent / vaultTimeMax);
+            transform.position = EvaluateQuadratic(_startPoint, _middlePoint, _endPoint, _vaultTimeCurrent / _currentVaultTimeMax);
             yield return null;
         }
 
