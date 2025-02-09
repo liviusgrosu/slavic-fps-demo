@@ -95,6 +95,7 @@ public class PlayerController : MonoBehaviour
 
     // Vaulting events
     public static event Action VaultingEvent;
+    public static event Action<bool> IsVaultingEvent;
 
     // Components
     private Rigidbody _rigidbody;
@@ -298,7 +299,8 @@ public class PlayerController : MonoBehaviour
     private bool VaultableInFront()
     {
         // Check from top forward of the player to see if there is a vaultable object in front of the player
-        if (!Physics.Raycast(_vaultingDetectionPoint.position, -Vector3.up, out var hit, 0.6f, ~LayerMask.GetMask("Ignore Ledge")))
+        if (!Physics.Raycast(_vaultingDetectionPoint.position, -Vector3.up, out var hit, vaultDistanceTolerance, ~LayerMask.GetMask("Ignore Ledge")) ||
+            hit.normal.y < 0.6f)
         {
             return false;
         }
@@ -396,7 +398,7 @@ public class PlayerController : MonoBehaviour
     private IEnumerator StartVaultingTimer()
     {
         ToggleVaultingParams(true);
-        VaultingEvent?.Invoke();
+        //VaultingEvent?.Invoke();
 
         // Start Lerping between start and end position of vault
         _vaultTimeCurrent = 0f;
@@ -416,6 +418,7 @@ public class PlayerController : MonoBehaviour
         _collider.isTrigger = state;
         _rigidbody.isKinematic = state;
         _isVaulting = state;
+        IsVaultingEvent?.Invoke(state);
         PlayerState.IsVaulting = state;
     }
 }
