@@ -1,11 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Data;
-using System.Numerics;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using Vector3 = UnityEngine.Vector3;
 
 [RequireComponent(typeof(Rigidbody))]
@@ -60,11 +56,17 @@ public class PlayerController : MonoBehaviour
     private Coroutine _cooldownCoroutine;
 
     [Header("Vaulting")]
-    [SerializeField] private float minDistanceToVaultable = 0.1f;
+    [Tooltip("How much distance from the vault point to the collider will a vault trigger")]
+    [SerializeField] private float vaultDistanceTolerance = 1f;
+    [Tooltip("Most amount of time it takes to vault")]
     [SerializeField] private float vaultTimeMax = 1f;
+    [Tooltip("Least amount of time it takes to vault")]
+    [SerializeField] private float vaultTimeMin = 0.1f;
+    private float _currentVaultTimeMax;
     private float _vaultTimeCurrent;
     private Vector3 _startPoint, _middlePoint, _endPoint;
     private bool _isVaulting;
+    private Transform _vaultingDetectionPoint;
 
     [Header("Physics")]
     [SerializeField] private float groundDrag = 6f;
@@ -88,17 +90,18 @@ public class PlayerController : MonoBehaviour
     public static event Action<bool> IsOnSlopeEvent;
     public static event Action<bool> IsJumpingEvent;
     public static event Action<float> GraceTimerEvent;
+    public static event Action<Vector3> RigidbodySpeedEvents;
 
     // Dashing events
     public static event Action<float, float> DashTimerEvent;
 
-
     // Vaulting events
     public static event Action VaultingEvent;
+    public static event Action<bool> IsVaultingEvent;
+    public static event Action<float, float> VaultTimeEvent;
 
     // Components
     private Rigidbody _rigidbody;
-    private PlayerInput _inputManager;
     private PlayerEffects _playerEffects;
     private CapsuleCollider _collider;
 
@@ -113,15 +116,15 @@ public class PlayerController : MonoBehaviour
         Instance = this;
         // Might not need this but might be useful
         //DontDestroyOnLoad(Instance);
-
-        _inputManager = GetComponent<PlayerInput>();
+         
         _collider = GetComponent<CapsuleCollider>();
         _rigidbody = GetComponent<Rigidbody>();
         _playerEffects = FindObjectOfType<PlayerEffects>();
+        _vaultingDetectionPoint = transform.Find("Vault Detection Point");
         _rigidbody.freezeRotation = true;
         DashCurrentPoints = DashMaxPoints;
     }
-    
+
     private void Update()
     {
         AdjustGravity();
@@ -152,52 +155,8 @@ public class PlayerController : MonoBehaviour
         {
             _rigidbody.AddForce(moveDirection.normalized * moveSpeed * MovementMultiplier * airMultiplier + _gravity, ForceMode.Acceleration);
         }
-    }
 
-    private void CheckVaulting()
-    {
-        if (!PlayerState.IsGrounded && !_isVaulting && _isJumping && !PlayerState.IsAttacking && VaultableInFront())
-        {
-            StartCoroutine(StartVaultingTimer());
-        }
-    }
-    
-    private void AdjustGravity()
-    {
-        // Adjust gravity according to the surfaces normal so the player doesnt slide
-        _gravity = Physics.gravity;
-        
-        if (OnSlope())
-        {
-            _gravity = -_slopeHit.normal * Physics.gravity.magnitude;
-        }
-
-        if (_isDashing)
-        {
-            _gravity = Vector3.zero;
-        }
-    }
-    
-    private void CheckGrounded()
-    {
-        // Check if a sphere collides with the ground as the ground check
-        PlayerState.IsGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
-        PlayerState.IsGrounded = PlayerState.IsGrounded;
-        if (PlayerState.IsGrounded && _ignoreGroundedCurrentTime >= _ignoreGroundedMaxTime)
-        {
-            // Stop any coroutines related to touching the ground
-            StopCoroutine(StartIgnoreGroundedTimer());
-            StopCoroutine(StartGraceTimer());
-
-            _graceTimeCurrent = 0f;
-            _isJumping = false;
-        }
-        else if (!PlayerState.IsGrounded && !_isJumping && _graceTimeCurrent == 0)
-        {
-            // Start any coroutines related not touching the ground
-            StartCoroutine(StartIgnoreGroundedTimer());
-            StartCoroutine(StartGraceTimer());
-        }
+        RigidbodySpeedEvents?.Invoke(_rigidbody.velocity);
     }
     
     private void GetMovementInput()
@@ -207,8 +166,10 @@ public class PlayerController : MonoBehaviour
         {
             _horizontalMovement = Input.GetAxisRaw("Horizontal");
             _verticalMovement = Input.GetAxisRaw("Vertical");
+
+            var camNotY = Vector3.ProjectOnPlane(mainCamera.forward, Vector3.up).normalized;
             
-            moveDirection = mainCamera.forward * _verticalMovement + mainCamera.right * _horizontalMovement;
+            moveDirection = camNotY * _verticalMovement + mainCamera.right * _horizontalMovement;
             if (PlayerState.IsGrounded)
             {
                 // Added so that players can bounce off the ground when looking down
@@ -228,7 +189,8 @@ public class PlayerController : MonoBehaviour
         
         // Dashing input
         if (inputQueue.MovementInputQueue.GetNextInput() == "Dash" && 
-            _canDash && 
+            _canDash &&
+            !_isVaulting &&
             moveDirection != Vector3.zero)
         {
             inputQueue.MovementInputQueue.DequeueInput();
@@ -236,25 +198,39 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    #region Physics
+    private IEnumerator StartGraceTimer()
+    {
+        // Start the grace timer
+        while (_graceTimeCurrent <= graceTimeMax)
+        {
+            _graceTimeCurrent += Time.deltaTime;
+            yield return null;
+        }
+    }
+
+    private IEnumerator StartIgnoreGroundedTimer()
+    {
+        // Ignore the ground for some time
+        _ignoreGroundedCurrentTime = 0f;
+        while (_ignoreGroundedCurrentTime <= _ignoreGroundedMaxTime)
+        {
+            _ignoreGroundedCurrentTime += Time.deltaTime;
+            yield return null;
+        }
+    }
     private void Jump()
     {
         // Ignore the ground so we can't jump twice
         StartCoroutine(StartIgnoreGroundedTimer());
-        
+
         // Add the jumping force to the rigidbody
-        _rigidbody.velocity = new Vector3(_rigidbody.velocity.x, 0, _rigidbody.velocity.z);
+        _rigidbody.velocity = Vector3.ProjectOnPlane(_rigidbody.velocity, Vector3.up);
         _rigidbody.AddForce(transform.up * jumpForce, ForceMode.Impulse);
-        
+
         // Ignore any grace jump timing
         _graceTimeCurrent = graceTimeMax;
         _isJumping = true;
-    }
-
-    private void Dash()
-    {
-        _playerEffects.PerformDashEffect(moveDirection, dashTimeMax);
-        // Start dashing
-        StartCoroutine(StartDashingTimer());
     }
 
     private void ControlSpeed()
@@ -280,82 +256,57 @@ public class PlayerController : MonoBehaviour
     private bool OnSlope()
     {
         // Check if player is on a slope depending on the floors normal
-        if (!Physics.Raycast(transform.position, Vector3.down, out _slopeHit, 1.5f))
+        if (!Physics.Raycast(transform.position, Vector3.down, out _slopeHit, 1.5f, ~LayerMask.GetMask("Ignore Ledge")))
         {
             return false;
         }
-        
+
         return _slopeHit.normal != Vector3.up;
     }
-
-    private bool VaultableInFront()
+    private void AdjustGravity()
     {
-        RaycastHit hit;
+        // Adjust gravity according to the surfaces normal so the player doesnt slide
+        _gravity = Physics.gravity;
 
-        if (!Physics.Raycast(transform.position, GetCameraForward(), out hit, minDistanceToVaultable) || 
-            !hit.transform.GetComponent<BoxCollider>())
+        if (OnSlope())
         {
-            return false;
+            _gravity = -_slopeHit.normal * Physics.gravity.magnitude;
         }
 
-        // Get forward vector
-        float distanceToPoint = (hit.point - transform.position).magnitude + _collider.radius;
-        Vector3 forwardDisplacement = transform.position + (GetCameraForward() * distanceToPoint);
-        
-        // Get upward vector
-        float vaultObjectHeight = hit.transform.GetComponent<MeshRenderer>().bounds.size.y / 2f; 
-        Vector3 topOfCollider = hit.transform.position + new Vector3(0f, vaultObjectHeight, 0f);
-
-        // Get top of vault object Y
-        float vaultObjectYTop = topOfCollider.y + _collider.height / 2f;
-        Vector3 playerToColliderTop = new Vector3(forwardDisplacement.x, vaultObjectYTop, forwardDisplacement.z);
-        float distanceToTop = Vector3.Distance(forwardDisplacement, playerToColliderTop);
-        
-        if (distanceToTop <= _collider.height)
+        if (_isDashing)
         {
-            _startPoint = transform.position;
-            _middlePoint = transform.position + transform.up * distanceToTop;
-            _endPoint = playerToColliderTop;
-            return true;
+            _gravity = Vector3.zero;
         }
-
-        return false;
-    }
-    
-    private Vector3 GetCameraForward()
-    {
-        // Get the cameras forward direction in the xz plane
-        Vector3 cameraForward = mainCamera.forward;
-        cameraForward.y = 0f;
-        cameraForward.Normalize();
-        return cameraForward;
-    }
-    
-    private static Vector3 EvaluateQuadratic(Vector3 a, Vector3 b, Vector3 c, float t)
-    {
-        // Quadratic equation to lerp between 3 points
-        Vector3 p0 = Vector3.Lerp(a, b, t);
-        Vector3 p1 = Vector3.Lerp(b, c, t);
-        return Vector3.Lerp(p0, p1, t);
     }
 
-    private void UpdateDebugWindow()
+    private void CheckGrounded()
     {
-        // Update any states from this script onto a canvas for display 
-        IsGroundedEvent?.Invoke(PlayerState.IsGrounded);
-        IsOnSlopeEvent?.Invoke(OnSlope());
-        IsJumpingEvent?.Invoke(_isJumping);
-        GraceTimerEvent?.Invoke(_graceTimeCurrent);
-    }
-
-    private IEnumerator StartGraceTimer()
-    {
-        // Start the grace timer
-        while (_graceTimeCurrent <= graceTimeMax)
+        // Check if a sphere collides with the ground as the ground check
+        PlayerState.IsGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+        if (PlayerState.IsGrounded && _ignoreGroundedCurrentTime >= _ignoreGroundedMaxTime)
         {
-            _graceTimeCurrent += Time.deltaTime;
-            yield return null;
+            // Stop any coroutines related to touching the ground
+            StopCoroutine(StartIgnoreGroundedTimer());
+            StopCoroutine(StartGraceTimer());
+
+            _graceTimeCurrent = 0f;
+            _isJumping = false;
         }
+        else if (!PlayerState.IsGrounded && !_isJumping && _graceTimeCurrent == 0)
+        {
+            // Start any coroutines related not touching the ground
+            StartCoroutine(StartIgnoreGroundedTimer());
+            StartCoroutine(StartGraceTimer());
+        }
+    }
+    #endregion
+
+    #region Dashing
+    private void Dash()
+    {
+        _playerEffects.PerformDashEffect(moveDirection, dashTimeMax);
+        // Start dashing
+        StartCoroutine(StartDashingTimer());
     }
 
     private IEnumerator StartDashingTimer()
@@ -365,8 +316,11 @@ public class PlayerController : MonoBehaviour
 
         // Store the players velocity as this will the direction of the dash
         Vector3 oldPlayerVelocity = _rigidbody.velocity;
-        _rigidbody.velocity = moveDirection.normalized * dashSpeed * MovementMultiplier;
-        
+        // We do this because we ignore y axis when moving in air but we want it for dashing
+        var moveDirectionWithY = mainCamera.forward * _verticalMovement
+                                + mainCamera.right * _horizontalMovement;
+        _rigidbody.velocity = moveDirectionWithY.normalized * dashSpeed * MovementMultiplier;
+
         _dashTimeCurrent = 0f;
         while (_dashTimeCurrent <= dashTimeMax)
         {
@@ -374,13 +328,13 @@ public class PlayerController : MonoBehaviour
             _dashTimeCurrent += Time.deltaTime;
             yield return null;
         }
-        
+
         // Reduce players velocity by a quarter as they are coming off a dash
         _isDashing = false;
         _rigidbody.velocity = oldPlayerVelocity / 4f;
         // Start delay to start dash cooldown
         if (_cooldownCoroutine != null) StopCoroutine(_cooldownCoroutine);
-        _cooldownCoroutine = StartCoroutine(StartDashingCooldown());    
+        _cooldownCoroutine = StartCoroutine(StartDashingCooldown());
     }
 
     private IEnumerator StartDashingCooldown()
@@ -399,33 +353,19 @@ public class PlayerController : MonoBehaviour
         }
         _cooldownCoroutine = null;
     }
+    #endregion
 
-    private IEnumerator StartIgnoreGroundedTimer()
+    #region Vaulting
+    private void CheckVaulting()
     {
-        // Ignore the ground for some time
-        _ignoreGroundedCurrentTime = 0f;
-        while (_ignoreGroundedCurrentTime <= _ignoreGroundedMaxTime)
+        if (!PlayerState.IsGrounded &&
+            !PlayerState.IsAttacking &&
+            !_isVaulting &&
+            _isJumping &&
+            VaultableInFront())
         {
-            _ignoreGroundedCurrentTime += Time.deltaTime;
-            yield return null;
+            StartCoroutine(StartVaultingTimer());
         }
-    }
-
-    private IEnumerator StartVaultingTimer()
-    {
-        ToggleVaultingParams(true);
-        VaultingEvent?.Invoke();
-
-        // Start Lerping between start and end position of vault
-        _vaultTimeCurrent = 0f;
-        while (_vaultTimeCurrent <= vaultTimeMax)
-        {
-            _vaultTimeCurrent += Time.deltaTime;
-            transform.position = EvaluateQuadratic(_startPoint, _middlePoint, _endPoint, _vaultTimeCurrent / vaultTimeMax);
-            yield return null;
-        }
-
-        ToggleVaultingParams(false);
     }
 
     private void ToggleVaultingParams(bool state)
@@ -434,6 +374,63 @@ public class PlayerController : MonoBehaviour
         _collider.isTrigger = state;
         _rigidbody.isKinematic = state;
         _isVaulting = state;
+        IsVaultingEvent?.Invoke(state);
         PlayerState.IsVaulting = state;
+    }
+
+    private IEnumerator StartVaultingTimer()
+    {
+        ToggleVaultingParams(true);
+        //VaultingEvent?.Invoke();
+
+        // Start Lerping between start and end position of vault
+        _vaultTimeCurrent = 0f;
+        while (_vaultTimeCurrent <= _currentVaultTimeMax)
+        {
+            _vaultTimeCurrent += Time.deltaTime;
+            transform.position = EvaluateQuadratic(_startPoint, _middlePoint, _endPoint, _vaultTimeCurrent / _currentVaultTimeMax);
+            yield return null;
+        }
+
+        ToggleVaultingParams(false);
+    }
+
+    private bool VaultableInFront()
+    {
+        // Check from top forward of the player to see if there is a vaultable object in front of the player
+        if (!Physics.SphereCast(_vaultingDetectionPoint.position, 0.3f, -Vector3.up, out var hit, vaultDistanceTolerance, ~LayerMask.GetMask("Ignore Ledge")) ||
+            hit.normal.y < 0.6f)
+        {
+            return false;
+        }
+
+        _startPoint = transform.position;
+        _endPoint = hit.point + Vector3.up * _collider.height / 2f;
+        _middlePoint = Vector3.ProjectOnPlane(transform.position - _endPoint, Vector3.up) + _endPoint;
+
+        // TODO: Need to introduce the min when calculating the ratio instead of clamping it
+        _currentVaultTimeMax = (vaultDistanceTolerance - (hit.point - _vaultingDetectionPoint.position).magnitude) / vaultDistanceTolerance * vaultTimeMax;
+        _currentVaultTimeMax = Mathf.Max(_currentVaultTimeMax, vaultTimeMin);
+        VaultTimeEvent?.Invoke(_currentVaultTimeMax, vaultTimeMax);
+        return true;
+    }
+
+    #endregion
+
+    private static Vector3 EvaluateQuadratic(Vector3 a, Vector3 b, Vector3 c, float t)
+    {
+        // Quadratic equation to lerp between 3 points
+        Vector3 p0 = Vector3.Lerp(a, b, t);
+        Vector3 p1 = Vector3.Lerp(b, c, t);
+        return Vector3.Lerp(p0, p1, t);
+    }
+
+    private void UpdateDebugWindow()
+    {
+        // Update any states from this script onto a canvas for display 
+        IsGroundedEvent?.Invoke(PlayerState.IsGrounded);
+        IsOnSlopeEvent?.Invoke(OnSlope());
+        IsJumpingEvent?.Invoke(_isJumping);
+        GraceTimerEvent?.Invoke(_graceTimeCurrent);
     }
 }

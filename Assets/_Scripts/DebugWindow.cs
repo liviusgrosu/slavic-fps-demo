@@ -1,9 +1,5 @@
 using TMPro;
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class DebugWindow : MonoBehaviour
 {
@@ -16,13 +12,15 @@ public class DebugWindow : MonoBehaviour
     [SerializeField]
     private TMP_Text _isOnSlope;
     [SerializeField]
+    private TMP_Text _isVaultingText;
+    [SerializeField]
     private TMP_Text _hasDashed;
     [SerializeField]
     private TMP_Text _graceWindowText;
     [SerializeField]
-    private TMP_Text _dashTimeText;
+    private TMP_Text _rigidbodySpeedText;
     [SerializeField]
-    private TMP_Text _dashTimeCooldownText;
+    private TMP_Text _vaultingTimeText;
 
     private void Start()
     {
@@ -30,43 +28,51 @@ public class DebugWindow : MonoBehaviour
         PlayerController.IsOnSlopeEvent += UpdateSlopeText;
         PlayerController.IsJumpingEvent += UpdateJumpingText;
         PlayerController.GraceTimerEvent += UpdateGraceWindowText;
+        PlayerController.RigidbodySpeedEvents += UpdatePlayerSpeed;
+        PlayerController.IsVaultingEvent += UpdateVaultingText;
+        PlayerController.VaultTimeEvent += UpdateVaultTimeText;
     }
 
     private void UpdateGroundedText(bool state)
     {
-        _isGroundedText.text = $"Is Grounded: {DisplayBoolString(state)}";
+        _isGroundedText.text = $"Grounded: {DisplayBoolString(state)}";
     }
 
     private void UpdateJumpingText(bool state)
     {
-        _isJumpingText.text = $"Is Jumping: {DisplayBoolString(state)}";
+        _isJumpingText.text = $"Jumping: {DisplayBoolString(state)}";
     }
 
     private void UpdateSlopeText(bool state)
     {
-        _isOnSlope.text = $"Is On Slope: {DisplayBoolString(state)}";
+        _isOnSlope.text = $"On Slope: {DisplayBoolString(state)}";
     }
-    
-    private void UpdateRunningText(bool state)
+    private void UpdateVaultingText(bool state)
     {
-        _isRunningText.text = $"Is Running: {DisplayBoolString(state)}";
+        _isVaultingText.text = $"Vaulting: {DisplayBoolString(state)}";
     }
 
-    private void UpdateDashedText(bool state)
+    private void UpdateVaultTimeText(float current, float max)
     {
-        _hasDashed.text = $"Has Dashed: {DisplayBoolString(state)}";
+        _vaultingTimeText.text = $"Vault curr: {current:F2}, max: {max:F2}";
+    }
+
+    private void UpdateRunningText(bool state)
+    {
+        _isRunningText.text = $"Running: {DisplayBoolString(state)}";
     }
 
     private void UpdateGraceWindowText(float time)
     {
         _graceWindowText.text = $"Grace Timer: {time:n2}";
     }
-    
-    private void UpdateDashTimeText(float time)
+    private void UpdatePlayerSpeed(Vector3 speed)
     {
-        _dashTimeText.text = $"Dash Timer: {time:n2}";
+        _rigidbodySpeedText.text = $"Speed X: <color=#ff0000>{speed.x:F1}</color>, " +
+                                    $"Y: <color=#26D73A>{speed.y:F1}</color>, " +
+                                    $"Z: <color=#0004ff>{speed.z:F1}</color>";
     }
-    
+
     private string DisplayBoolString(bool state)
     {
         return state ? $"<color=#26D73A>{state}</color>" : $"<color=#FF0000>{state}</color>"; 

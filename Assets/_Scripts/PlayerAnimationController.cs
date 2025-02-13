@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 public class PlayerAnimationController : MonoBehaviour
 {
     [SerializeField] private Animator _playerArms;
