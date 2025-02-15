@@ -33,7 +33,7 @@ public class PlayerAttacking : MonoBehaviour
             PlayerAnimationController.Instance.PlayHeavyAttackAnimation();
         }
     }
-
+    
     public void AttackPieceFinished()
     {
         PlayerState.IsAttacking = false;

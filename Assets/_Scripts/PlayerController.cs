@@ -282,6 +282,7 @@ public class PlayerController : MonoBehaviour
     private void CheckGrounded()
     {
         // Check if a sphere collides with the ground as the ground check
+        // TODO: might change this to avoid certain layers rather then looking for a layer
         PlayerState.IsGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
         if (PlayerState.IsGrounded && _ignoreGroundedCurrentTime >= _ignoreGroundedMaxTime)
         {
@@ -398,7 +399,7 @@ public class PlayerController : MonoBehaviour
     private bool VaultableInFront()
     {
         // Check from top forward of the player to see if there is a vaultable object in front of the player
-        if (!Physics.SphereCast(_vaultingDetectionPoint.position, 0.3f, -Vector3.up, out var hit, vaultDistanceTolerance, ~LayerMask.GetMask("Ignore Ledge")) ||
+        if (!Physics.SphereCast(_vaultingDetectionPoint.position, 0.3f, -Vector3.up, out var hit, vaultDistanceTolerance, LayerMask.GetMask("Environment")) ||
             hit.normal.y < 0.6f)
         {
             return false;
