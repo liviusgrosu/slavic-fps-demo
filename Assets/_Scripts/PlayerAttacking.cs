@@ -16,7 +16,9 @@ public class PlayerAttacking : MonoBehaviour
             InputQueueSystem.Instance.AttackInputQueue.DequeueInput();
             if (!PlayerState.IsGrounded)
             {
-                PlayerAnimationController.Instance.PlayAerialAttackAnimation();
+                // TODO: this needs to be removed because once we create the animation then we can rely on its event to set IsAttacking back to false
+                PlayerState.IsAttacking = false;
+                //PlayerAnimationController.Instance.PlayAerialAttackAnimation();
             }
             else
             {
