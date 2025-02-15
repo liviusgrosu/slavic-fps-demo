@@ -1,7 +1,7 @@
 fileFormatVersion: 2
 guid: 67944538953eb874eaddcc09675ab5d5
 ModelImporter:
-  serializedVersion: 21202
+  serializedVersion: 19301
   internalIDToNameTable:
   - first:
       74: 6859930251793160146
@@ -41,7 +41,6 @@ ModelImporter:
     bakeSimulation: 0
     resampleCurves: 1
     optimizeGameObjects: 0
-    removeConstantScaleCurves: 1
     motionNodeName: 
     rigImportErrors: 
     rigImportWarnings: 
@@ -116,7 +115,8 @@ ModelImporter:
       - time: 0.759923
         functionName: AttackPieceFinished
         data: 
-        objectReferenceParameter: {fileID: 11500000, guid: 27850c84b94f4d8aa5442c859644788e, type: 3}
+        objectReferenceParameter: {fileID: 11500000, guid: 27850c84b94f4d8aa5442c859644788e,
+          type: 3}
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
@@ -152,7 +152,8 @@ ModelImporter:
       - time: 0.5954321
         functionName: AttackPieceFinished
         data: 
-        objectReferenceParameter: {fileID: 11500000, guid: 27850c84b94f4d8aa5442c859644788e, type: 3}
+        objectReferenceParameter: {fileID: 11500000, guid: 27850c84b94f4d8aa5442c859644788e,
+          type: 3}
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
@@ -188,7 +189,8 @@ ModelImporter:
       - time: 0.91906005
         functionName: AttackPieceFinished
         data: 
-        objectReferenceParameter: {fileID: 11500000, guid: 27850c84b94f4d8aa5442c859644788e, type: 3}
+        objectReferenceParameter: {fileID: 11500000, guid: 27850c84b94f4d8aa5442c859644788e,
+          type: 3}
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
@@ -224,7 +226,8 @@ ModelImporter:
       - time: 0.7992653
         functionName: AttackPieceFinished
         data: 
-        objectReferenceParameter: {fileID: 11500000, guid: 27850c84b94f4d8aa5442c859644788e, type: 3}
+        objectReferenceParameter: {fileID: 11500000, guid: 27850c84b94f4d8aa5442c859644788e,
+          type: 3}
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
@@ -260,7 +263,8 @@ ModelImporter:
       - time: 0.6790458
         functionName: AttackPieceFinished
         data: 
-        objectReferenceParameter: {fileID: 11500000, guid: 27850c84b94f4d8aa5442c859644788e, type: 3}
+        objectReferenceParameter: {fileID: 11500000, guid: 27850c84b94f4d8aa5442c859644788e,
+          type: 3}
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
@@ -296,7 +300,8 @@ ModelImporter:
       - time: 0.818015
         functionName: AttackPieceFinished
         data: 
-        objectReferenceParameter: {fileID: 11500000, guid: 27850c84b94f4d8aa5442c859644788e, type: 3}
+        objectReferenceParameter: {fileID: 11500000, guid: 27850c84b94f4d8aa5442c859644788e,
+          type: 3}
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
@@ -345,27 +350,21 @@ ModelImporter:
     importBlendShapes: 1
     importCameras: 1
     importLights: 1
-    nodeNameCollisionStrategy: 1
     fileIdsGeneration: 2
     swapUVChannels: 0
     generateSecondaryUV: 0
     useFileUnits: 1
     keepQuads: 0
     weldVertices: 1
-    bakeAxisConversion: 0
     preserveHierarchy: 0
     skinWeightsMode: 0
     maxBonesPerVertex: 4
     minBoneWeight: 0.001
-    optimizeBones: 1
     meshOptimizationFlags: -1
     indexFormat: 0
     secondaryUVAngleDistortion: 8
     secondaryUVAreaDistortion: 15.000001
     secondaryUVHardAngle: 88
-    secondaryUVMarginMethod: 1
-    secondaryUVMinLightmapResolution: 40
-    secondaryUVMinObjectScale: 1
     secondaryUVPackMargin: 4
     useFileScale: 1
   tangentSpace:
@@ -399,7 +398,6 @@ ModelImporter:
   animationType: 2
   humanoidOversampling: 1
   avatarSetup: 0
-  addHumanoidExtraRootOnlyWhenUsingAvatar: 1
   additionalBone: 0
   userData: 
   assetBundleName: 
