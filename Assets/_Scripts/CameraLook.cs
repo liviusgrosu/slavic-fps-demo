@@ -4,7 +4,7 @@ public class CameraLook : MonoBehaviour
 {
     [SerializeField] private float sensitivityX = 100f;
     [SerializeField] private float sensitivityY = 100f;
-    [SerializeField] private Transform mainCamera = null;
+    private Transform _mainCamera;
 
     private float _mouseX, _mouseY;
     private const float Multiplier = 0.01f;
@@ -14,6 +14,7 @@ public class CameraLook : MonoBehaviour
 
     private void Start()
     {
+        _mainCamera = Camera.main.transform;
         // Hide mouse and lock it to middle of screen
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -33,6 +34,6 @@ public class CameraLook : MonoBehaviour
         _xRotation = Mathf.Clamp(_xRotation, -80f, 80f);
 
         // Apply rotation input to camera
-        mainCamera.transform.rotation = Quaternion.Euler(_xRotation, _yRotation, 0);
+        _mainCamera.transform.rotation = Quaternion.Euler(_xRotation, _yRotation, 0);
     }
 }

@@ -2,6 +2,18 @@
 public class PlayerAnimationController : MonoBehaviour
 {
     [SerializeField] private Animator _playerArms;
+    public static PlayerAnimationController Instance;
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(Instance);
+            return;
+        }
+
+        Instance = this;
+    }
 
     private void Start()
     {

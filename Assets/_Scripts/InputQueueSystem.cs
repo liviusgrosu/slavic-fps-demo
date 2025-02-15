@@ -58,9 +58,18 @@ public class InputQueueSystem : MonoBehaviour
     [SerializeField] private float movementActionLifeTime = 0.2f;
 
     [HideInInspector] public InputQueue AttackInputQueue, MovementInputQueue;
-    
+    public static InputQueueSystem Instance;
+
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(Instance);
+            return;
+        }
+
+        Instance = this;
+
         AttackInputQueue = new InputQueue(attackActionLifeTime);
         MovementInputQueue = new InputQueue(movementActionLifeTime);
     }

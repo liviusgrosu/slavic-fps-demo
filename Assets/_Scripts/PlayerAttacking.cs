@@ -2,9 +2,6 @@
 
 public class PlayerAttacking : MonoBehaviour
 {
-    [SerializeField] private PlayerAnimationController animatorController;
-    [SerializeField] private InputQueueSystem inputQueue;
-
     private void Update()
     {
         if (PlayerState.IsVaulting)
@@ -12,26 +9,26 @@ public class PlayerAttacking : MonoBehaviour
             return;
         }
         
-        if (inputQueue.AttackInputQueue.GetNextInput() == "Light Attack" && !PlayerState.IsAttacking)
+        if (InputQueueSystem.Instance.AttackInputQueue.GetNextInput() == "Light Attack" && !PlayerState.IsAttacking)
         {
             PlayerState.IsAttacking = true;
             
-            inputQueue.AttackInputQueue.DequeueInput();
+            InputQueueSystem.Instance.AttackInputQueue.DequeueInput();
             if (!PlayerState.IsGrounded)
             {
-                animatorController.PlayAerialAttackAnimation();
+                PlayerAnimationController.Instance.PlayAerialAttackAnimation();
             }
             else
             {
-                animatorController.PlayLightAttackAnimation();
+                PlayerAnimationController.Instance.PlayLightAttackAnimation();
             }
         }
-        else if (inputQueue.AttackInputQueue.GetNextInput() == "Heavy Attack" && !PlayerState.IsAttacking)
+        else if (InputQueueSystem.Instance.AttackInputQueue.GetNextInput() == "Heavy Attack" && !PlayerState.IsAttacking)
         {
             PlayerState.IsAttacking = true;
             
-            inputQueue.AttackInputQueue.DequeueInput();
-            animatorController.PlayHeavyAttackAnimation();
+            InputQueueSystem.Instance.AttackInputQueue.DequeueInput();
+            PlayerAnimationController.Instance.PlayHeavyAttackAnimation();
         }
     }
 

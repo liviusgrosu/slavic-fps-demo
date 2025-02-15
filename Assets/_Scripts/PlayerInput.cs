@@ -2,9 +2,6 @@ using UnityEngine;
 
 public class PlayerInput : MonoBehaviour
 {
-    [SerializeField] private InputQueueSystem inputQueue;
-    [SerializeField] private PlayerController controller;
-    
     // Movement input
     public KeyCode JumpKey = KeyCode.Space;
     public KeyCode DashKey = KeyCode.LeftShift;
@@ -16,22 +13,22 @@ public class PlayerInput : MonoBehaviour
     {
         if (Input.GetKeyDown(JumpKey))
         {
-            inputQueue.MovementInputQueue.EnqueueInput("Jump");
+            InputQueueSystem.Instance.MovementInputQueue.EnqueueInput("Jump");
         }
         
         if (Input.GetKeyDown(DashKey))
         {
-            inputQueue.MovementInputQueue.EnqueueInput("Dash");
+            InputQueueSystem.Instance.MovementInputQueue.EnqueueInput("Dash");
         } 
         
         if (Input.GetKeyDown(LightAttackButton))
         {
-            inputQueue.AttackInputQueue.EnqueueInput("Light Attack");
+            InputQueueSystem.Instance.AttackInputQueue.EnqueueInput("Light Attack");
         }
         
         if (Input.GetKeyDown(RightAttackButton))
         {
-            inputQueue.AttackInputQueue.EnqueueInput("Heavy Attack");
+            InputQueueSystem.Instance.AttackInputQueue.EnqueueInput("Heavy Attack");
         }
     }
 }

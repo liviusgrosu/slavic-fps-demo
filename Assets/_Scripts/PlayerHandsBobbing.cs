@@ -1,6 +1,4 @@
-﻿using System;
-using TMPro;
-using UnityEngine;
+﻿using UnityEngine;
 public class PlayerHandsBobbing : MonoBehaviour
 {
     [SerializeField] private Transform playerArms;
@@ -15,7 +13,6 @@ public class PlayerHandsBobbing : MonoBehaviour
     private float _defaultPosY = 0;
     private float _timer = 0;
 
-    private Vector3 _offset;
     [SerializeField] private float defaultOffsetAmount = 0.1f;
     [SerializeField] private float dashOffsetAmount = 0.1f;
     [SerializeField] private float offsetTimeMultiplier = 1f;
