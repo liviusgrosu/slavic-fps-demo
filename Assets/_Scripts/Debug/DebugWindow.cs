@@ -21,6 +21,12 @@ public class DebugWindow : MonoBehaviour
     private TMP_Text _rigidbodySpeedText;
     [SerializeField]
     private TMP_Text _vaultingTimeText;
+    [SerializeField]
+    private TMP_Text _isAttackingText;
+    [SerializeField]
+    private TMP_Text _isBlockingText;
+    [SerializeField]
+    private TMP_Text _hpText;
 
     private void Start()
     {
@@ -31,6 +37,9 @@ public class DebugWindow : MonoBehaviour
         PlayerController.RigidbodySpeedEvents += UpdatePlayerSpeed;
         PlayerController.IsVaultingEvent += UpdateVaultingText;
         PlayerController.VaultTimeEvent += UpdateVaultTimeText;
+        PlayerAttacking.IsAttackingEvent += UpdateIsAttackingText;
+        PlayerAttacking.IsBlockingEvent += UpdateIsBlockingText;
+        PlayerHealth.HpEvent += UpdateHpText;
     }
 
     private void UpdateGroundedText(bool state)
@@ -76,5 +85,20 @@ public class DebugWindow : MonoBehaviour
     private string DisplayBoolString(bool state)
     {
         return state ? $"<color=#26D73A>{state}</color>" : $"<color=#FF0000>{state}</color>"; 
+    }
+
+    private void UpdateIsAttackingText(bool state)
+    {
+        _isAttackingText.text = $"Is Attacking: {DisplayBoolString(state)}";
+    }
+
+    private void UpdateIsBlockingText(bool state)
+    {
+        _isBlockingText.text = $"Is Blocking: {DisplayBoolString(state)}";
+    }
+
+    private void UpdateHpText(int hp)
+    {
+        _hpText.text = $"HP: {hp}";
     }
 }

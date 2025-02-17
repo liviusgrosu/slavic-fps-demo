@@ -40,4 +40,14 @@ public class PlayerAnimationController : MonoBehaviour
     {
         _playerArms.SetTrigger("Aerial Attack");
     }
+
+    public void PlayerBlockingHoldAnimation()
+    {
+        _playerArms.SetTrigger("Blocking Hold");
+    }
+
+    public void PlayerBlockingReleaseAnimation()
+    {
+        _playerArms.SetTrigger("Blocking Release");
+    }
 }

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class PlayerInput : MonoBehaviour
 {
@@ -8,7 +9,8 @@ public class PlayerInput : MonoBehaviour
     
     // Attacking input
     public KeyCode LightAttackButton = KeyCode.Mouse0;
-    public KeyCode RightAttackButton = KeyCode.Mouse1;
+    public KeyCode HeavyAttackButton = KeyCode.Mouse3;
+    public KeyCode BlockingButton = KeyCode.Mouse1;
     private void Update()
     {
         if (Input.GetKeyDown(JumpKey))
@@ -21,14 +23,24 @@ public class PlayerInput : MonoBehaviour
             InputQueueSystem.Instance.MovementInputQueue.EnqueueInput("Dash");
         } 
         
-        if (Input.GetKeyDown(LightAttackButton))
+        if (Input.GetKeyDown(LightAttackButton) && !PlayerState.IsBlocking)
         {
             InputQueueSystem.Instance.AttackInputQueue.EnqueueInput("Light Attack");
         }
         
-        if (Input.GetKeyDown(RightAttackButton))
+        if (Input.GetKeyDown(HeavyAttackButton) && !PlayerState.IsBlocking)
         {
             InputQueueSystem.Instance.AttackInputQueue.EnqueueInput("Heavy Attack");
+        }
+
+        if (Input.GetKeyDown(BlockingButton) && !PlayerState.IsAttacking)
+        {
+            InputQueueSystem.Instance.AttackInputQueue.EnqueueInput("Blocking Hold");
+        }
+
+        if (Input.GetKeyUp(BlockingButton) && !PlayerState.IsAttacking)
+        {
+            InputQueueSystem.Instance.AttackInputQueue.EnqueueInput("Blocking Release");
         }
     }
 }

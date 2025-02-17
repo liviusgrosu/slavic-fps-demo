@@ -360,7 +360,7 @@ public class PlayerController : MonoBehaviour
     private void CheckVaulting()
     {
         if (!PlayerState.IsGrounded &&
-            !PlayerState.IsAttacking &&
+            !PlayerState.InCombat &&
             !_isVaulting &&
             _isJumping &&
             VaultableInFront())
