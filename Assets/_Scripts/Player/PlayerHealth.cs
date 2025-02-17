@@ -36,6 +36,14 @@ public class PlayerHealth : MonoBehaviour
 
     public void TakeDamage(Vector3 swordPos, int value)
     {
+        if (!PlayerState.IsBlocking)
+        {
+            HP -= value;
+            return;
+        }
+        // TODO: This should probably be the enemies root position rather then the weapon
+        // If its the weapons it could be completely off and the angle might trigger damage
+        // Might be okay with just doing this however
         var camTransform = Camera.main.transform;
         var swordDir = swordPos - camTransform.position;
         var angle = Vector3.Angle(camTransform.forward, swordDir);
