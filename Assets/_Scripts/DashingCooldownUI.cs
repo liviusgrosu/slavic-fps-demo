@@ -8,7 +8,6 @@ public class DashingCooldownUI : MonoBehaviour
     [SerializeField] private float spacing;
     private GameObject _pointUIPrefab;
     private List<GameObject> _pointObjects;
-    private int _remainingPoints;
 
     private void Awake()
     {
@@ -31,16 +30,12 @@ public class DashingCooldownUI : MonoBehaviour
             _pointObjects.Add(dashPoint);
         }
 
-        _remainingPoints = dashPoints;
         PlayerController.DashCooldownEvent += UpdateDashPoint;
-
     }
     private void UpdateDashPoint(int amount)
     {
         // TODO: Refine this
         _pointObjects.ForEach(p => p.GetComponent<Toggle>().isOn = false);
         _pointObjects.Take(amount).ToList().ForEach(p => p.GetComponent<Toggle>().isOn = true);
-
-        _remainingPoints = amount;
     }
 }

@@ -1,7 +1,20 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 public class PlayerAnimationController : MonoBehaviour
 {
     [SerializeField] private Animator _playerArms;
+    public static PlayerAnimationController Instance;
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(Instance);
+            return;
+        }
+
+        Instance = this;
+    }
 
     private void Start()
     {
@@ -26,5 +39,15 @@ public class PlayerAnimationController : MonoBehaviour
     public void PlayAerialAttackAnimation()
     {
         _playerArms.SetTrigger("Aerial Attack");
+    }
+
+    public void PlayerBlockingHoldAnimation()
+    {
+        _playerArms.SetTrigger("Blocking Hold");
+    }
+
+    public void PlayerBlockingReleaseAnimation()
+    {
+        _playerArms.SetTrigger("Blocking Release");
     }
 }

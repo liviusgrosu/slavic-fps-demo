@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Vector3 = UnityEngine.Vector3;
 
@@ -8,7 +7,7 @@ using Vector3 = UnityEngine.Vector3;
 [RequireComponent(typeof(PlayerInput))]
 public class PlayerController : MonoBehaviour
 {
-    [HideInInspector] public static PlayerController Instance;
+    public static PlayerController Instance;
 
     [Header("Movement")]
     [SerializeField] private float moveSpeed = 6f;
@@ -20,8 +19,8 @@ public class PlayerController : MonoBehaviour
 
 
     [Header("Rotation")]
-    [SerializeField] private Transform mainCamera = null;
     [HideInInspector] public Vector3 moveDirection;
+    private Transform _mainCamera;
     private Vector3 _slopeMoveDirection;
     
     [Header("Jumping")]
@@ -81,10 +80,6 @@ public class PlayerController : MonoBehaviour
     private float _ignoreGroundedMaxTime = 0.1f;
     private float _ignoreGroundedCurrentTime = 0.1f;
     
-    [Header("Misc.")]
-    [SerializeField] private InputQueueSystem inputQueue;
-    public Dictionary<string, int > runningCoroutines = new Dictionary<string, int>();
-    
     // Debug Events
     public static event Action<bool> IsGroundedEvent;
     public static event Action<bool> IsOnSlopeEvent;
@@ -123,6 +118,11 @@ public class PlayerController : MonoBehaviour
         _vaultingDetectionPoint = transform.Find("Vault Detection Point");
         _rigidbody.freezeRotation = true;
         DashCurrentPoints = DashMaxPoints;
+    }
+
+    private void Start()
+    {
+        _mainCamera = Camera.main.transform;
     }
 
     private void Update()
@@ -167,9 +167,9 @@ public class PlayerController : MonoBehaviour
             _horizontalMovement = Input.GetAxisRaw("Horizontal");
             _verticalMovement = Input.GetAxisRaw("Vertical");
 
-            var camNotY = Vector3.ProjectOnPlane(mainCamera.forward, Vector3.up).normalized;
+            var camNotY = Vector3.ProjectOnPlane(_mainCamera.forward, Vector3.up).normalized;
             
-            moveDirection = camNotY * _verticalMovement + mainCamera.right * _horizontalMovement;
+            moveDirection = camNotY * _verticalMovement + _mainCamera.right * _horizontalMovement;
             if (PlayerState.IsGrounded)
             {
                 // Added so that players can bounce off the ground when looking down
@@ -178,22 +178,22 @@ public class PlayerController : MonoBehaviour
         }
         
         // Jumping input
-        if (inputQueue.MovementInputQueue.GetNextInput() == "Jump" && 
+        if (InputQueueSystem.Instance.MovementInputQueue.GetNextInput() == "Jump" && 
             (PlayerState.IsGrounded || _graceTimeCurrent < graceTimeMax) &&
             !_isDashing && 
             !_isJumping)
         {
-            inputQueue.MovementInputQueue.DequeueInput();
+            InputQueueSystem.Instance.MovementInputQueue.DequeueInput();
             Jump();
         }
         
         // Dashing input
-        if (inputQueue.MovementInputQueue.GetNextInput() == "Dash" && 
+        if (InputQueueSystem.Instance.MovementInputQueue.GetNextInput() == "Dash" && 
             _canDash &&
             !_isVaulting &&
             moveDirection != Vector3.zero)
         {
-            inputQueue.MovementInputQueue.DequeueInput();
+            InputQueueSystem.Instance.MovementInputQueue.DequeueInput();
             Dash();
         }
     }
@@ -282,6 +282,7 @@ public class PlayerController : MonoBehaviour
     private void CheckGrounded()
     {
         // Check if a sphere collides with the ground as the ground check
+        // TODO: might change this to avoid certain layers rather then looking for a layer
         PlayerState.IsGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
         if (PlayerState.IsGrounded && _ignoreGroundedCurrentTime >= _ignoreGroundedMaxTime)
         {
@@ -317,8 +318,8 @@ public class PlayerController : MonoBehaviour
         // Store the players velocity as this will the direction of the dash
         Vector3 oldPlayerVelocity = _rigidbody.velocity;
         // We do this because we ignore y axis when moving in air but we want it for dashing
-        var moveDirectionWithY = mainCamera.forward * _verticalMovement
-                                + mainCamera.right * _horizontalMovement;
+        var moveDirectionWithY = _mainCamera.forward * _verticalMovement
+                                + _mainCamera.right * _horizontalMovement;
         _rigidbody.velocity = moveDirectionWithY.normalized * dashSpeed * MovementMultiplier;
 
         _dashTimeCurrent = 0f;
@@ -359,7 +360,7 @@ public class PlayerController : MonoBehaviour
     private void CheckVaulting()
     {
         if (!PlayerState.IsGrounded &&
-            !PlayerState.IsAttacking &&
+            !PlayerState.InCombat &&
             !_isVaulting &&
             _isJumping &&
             VaultableInFront())
@@ -398,7 +399,7 @@ public class PlayerController : MonoBehaviour
     private bool VaultableInFront()
     {
         // Check from top forward of the player to see if there is a vaultable object in front of the player
-        if (!Physics.SphereCast(_vaultingDetectionPoint.position, 0.3f, -Vector3.up, out var hit, vaultDistanceTolerance, ~LayerMask.GetMask("Ignore Ledge")) ||
+        if (!Physics.SphereCast(_vaultingDetectionPoint.position, 0.3f, -Vector3.up, out var hit, vaultDistanceTolerance, LayerMask.GetMask("Environment")) ||
             hit.normal.y < 0.6f)
         {
             return false;

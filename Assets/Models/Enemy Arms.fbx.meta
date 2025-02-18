@@ -1,20 +1,29 @@
 fileFormatVersion: 2
-guid: 667f6fd39bfa67b45b791c93f8fa6029
+guid: 79bf8242909e34f49a57827af9f95ad7
 ModelImporter:
   serializedVersion: 19301
   internalIDToNameTable:
   - first:
+      74: -1410827446359221627
+    second: Armature.002|Blocking Hold
+  - first:
+      74: 2148986352180167096
+    second: Armature.002|Blocking Idle
+  - first:
+      74: 4139401794127445340
+    second: Armature.002|Blocking Release
+  - first:
       74: -4187070084771750883
-    second: Idle
+    second: Armature.002|Idle
   - first:
       74: -3028357813508811021
-    second: Light Attack 1
+    second: Armature.002|Light Attack 1
   - first:
       74: 7406502559476813991
-    second: Light Attack 2
+    second: Armature.002|Light Attack 2
   - first:
       74: -8225755656007093979
-    second: Light Attack 3
+    second: Armature.002|Light Attack 3
   externalObjects: {}
   materials:
     materialImportMode: 1
@@ -44,7 +53,7 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: Idle
+      name: Armature.002|Idle
       takeName: Armature.002|Idle
       internalID: 0
       firstFrame: 0
@@ -55,35 +64,6 @@ ModelImporter:
       cycleOffset: 0
       loop: 0
       hasAdditiveReferencePose: 0
-      loopTime: 1
-      loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
-      keepOriginalOrientation: 0
-      keepOriginalPositionY: 1
-      keepOriginalPositionXZ: 0
-      heightFromFeet: 0
-      mirror: 0
-      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
-      curves: []
-      events: []
-      transformMask: []
-      maskType: 3
-      maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
-    - serializedVersion: 16
-      name: Light Attack 1
-      takeName: Armature.002|Light Attack 1
-      internalID: 0
-      firstFrame: 0
-      lastFrame: 21
-      wrapMode: 0
-      orientationOffsetY: 0
-      level: 0
-      cycleOffset: 0
-      loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 0
       loopBlend: 0
       loopBlendOrientation: 0
@@ -102,8 +82,8 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: Light Attack 2
-      takeName: Armature.002|Light Attack 2
+      name: Armature.002|Light Attack 1
+      takeName: Armature.002|Light Attack 1
       internalID: 0
       firstFrame: 0
       lastFrame: 39
@@ -125,36 +105,15 @@ ModelImporter:
       mirror: 0
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
-      events: []
-      transformMask: []
-      maskType: 3
-      maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
-    - serializedVersion: 16
-      name: Light Attack 3
-      takeName: Armature.002|Light Attack 3
-      internalID: 0
-      firstFrame: 0
-      lastFrame: 24
-      wrapMode: 0
-      orientationOffsetY: 0
-      level: 0
-      cycleOffset: 0
-      loop: 0
-      hasAdditiveReferencePose: 0
-      loopTime: 0
-      loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
-      keepOriginalOrientation: 0
-      keepOriginalPositionY: 1
-      keepOriginalPositionXZ: 0
-      heightFromFeet: 0
-      mirror: 0
-      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
-      curves: []
-      events: []
+      events:
+      - time: 0.9994529
+        functionName: ResetAttack
+        data: 
+        objectReferenceParameter: {fileID: 11500000, guid: ddb98f54ef8f9604691052a7aff8d255,
+          type: 3}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
       transformMask: []
       maskType: 3
       maskSource: {instanceID: 0}
@@ -162,7 +121,7 @@ ModelImporter:
     isReadable: 0
   meshes:
     lODScreenPercentages: []
-    globalScale: 8
+    globalScale: 5
     meshCompression: 0
     addColliders: 0
     useSRGBMaterialColor: 1
@@ -209,7 +168,7 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
-    globalScale: 8
+    globalScale: 5
     rootMotionBoneName: 
     hasTranslationDoF: 0
     hasExtraRoot: 0
