@@ -156,7 +156,7 @@ public class PlayerController : MonoBehaviour
             _rigidbody.AddForce(moveDirection.normalized * moveSpeed * MovementMultiplier * airMultiplier + _gravity, ForceMode.Acceleration);
         }
 
-        RigidbodySpeedEvents?.Invoke(_rigidbody.velocity);
+        RigidbodySpeedEvents?.Invoke(_rigidbody.linearVelocity);
     }
     
     private void GetMovementInput()
@@ -225,7 +225,7 @@ public class PlayerController : MonoBehaviour
         StartCoroutine(StartIgnoreGroundedTimer());
 
         // Add the jumping force to the rigidbody
-        _rigidbody.velocity = Vector3.ProjectOnPlane(_rigidbody.velocity, Vector3.up);
+        _rigidbody.linearVelocity = Vector3.ProjectOnPlane(_rigidbody.linearVelocity, Vector3.up);
         _rigidbody.AddForce(transform.up * jumpForce, ForceMode.Impulse);
 
         // Ignore any grace jump timing
@@ -250,7 +250,7 @@ public class PlayerController : MonoBehaviour
     private void ControlDrag()
     {
         // Apply drag depending if the player is in the air or not
-        _rigidbody.drag = PlayerState.IsGrounded && !_isDashing ? groundDrag : airDrag;
+        _rigidbody.linearDamping = PlayerState.IsGrounded && !_isDashing ? groundDrag : airDrag;
     }
 
     private bool OnSlope()
@@ -316,11 +316,11 @@ public class PlayerController : MonoBehaviour
         DashCurrentPoints--;
 
         // Store the players velocity as this will the direction of the dash
-        Vector3 oldPlayerVelocity = _rigidbody.velocity;
+        Vector3 oldPlayerVelocity = _rigidbody.linearVelocity;
         // We do this because we ignore y axis when moving in air but we want it for dashing
         var moveDirectionWithY = _mainCamera.forward * _verticalMovement
                                 + _mainCamera.right * _horizontalMovement;
-        _rigidbody.velocity = moveDirectionWithY.normalized * dashSpeed * MovementMultiplier;
+        _rigidbody.linearVelocity = moveDirectionWithY.normalized * dashSpeed * MovementMultiplier;
 
         _dashTimeCurrent = 0f;
         while (_dashTimeCurrent <= dashTimeMax)
@@ -332,7 +332,7 @@ public class PlayerController : MonoBehaviour
 
         // Reduce players velocity by a quarter as they are coming off a dash
         _isDashing = false;
-        _rigidbody.velocity = oldPlayerVelocity / 4f;
+        _rigidbody.linearVelocity = oldPlayerVelocity / 4f;
         // Start delay to start dash cooldown
         if (_cooldownCoroutine != null) StopCoroutine(_cooldownCoroutine);
         _cooldownCoroutine = StartCoroutine(StartDashingCooldown());
