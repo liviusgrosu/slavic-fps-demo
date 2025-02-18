@@ -27,6 +27,8 @@ public class DebugWindow : MonoBehaviour
     private TMP_Text _isBlockingText;
     [SerializeField]
     private TMP_Text _hpText;
+    [SerializeField]
+    private TMP_Text _canBlock;
 
     private void Start()
     {
@@ -40,6 +42,7 @@ public class DebugWindow : MonoBehaviour
         PlayerAttacking.IsAttackingEvent += UpdateIsAttackingText;
         PlayerAttacking.IsBlockingEvent += UpdateIsBlockingText;
         PlayerHealth.HpEvent += UpdateHpText;
+        PlayerHealth.CanBlockEvent += UpdateCanBlockText;
     }
 
     private void UpdateGroundedText(bool state)
@@ -100,5 +103,10 @@ public class DebugWindow : MonoBehaviour
     private void UpdateHpText(int hp)
     {
         _hpText.text = $"HP: {hp}";
+    }
+
+    private void UpdateCanBlockText(bool state)
+    {
+        _canBlock.text = $"Can Block: {DisplayBoolString(state)}";
     }
 }

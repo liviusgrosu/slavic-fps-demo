@@ -2,14 +2,17 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.EventSystems.EventTrigger;
 
 public class PlayerHealth : MonoBehaviour
 {
-    [SerializeField] private float _blockAngleTolerance = 50f;
+    [SerializeField] private float _enemyToPlayerTolerance = 30f;
+    [SerializeField] private int _hp = 100;
     public static PlayerHealth Instance;
     public static event Action<int> HpEvent;
+    public static event Action<bool> CanBlockEvent;
+    private Transform _camera;
 
-    [SerializeField] private int _hp = 100;
     public int HP
     {
         get { return _hp; }
@@ -34,22 +37,35 @@ public class PlayerHealth : MonoBehaviour
         Instance = this;
     }
 
-    public void TakeDamage(Vector3 swordPos, int value)
+    private void Start()
     {
+        _camera = Camera.main.transform;
+    }
+
+    public void TakeDamage(Transform enemy, int value)
+    {
+        var enemyToPlayer = transform.position - enemy.position;
+        var playerToEnemyAngle = Vector3.Angle(enemy.forward, enemyToPlayer);
+
+        if (playerToEnemyAngle > _enemyToPlayerTolerance)
+        {
+            return;
+        }
+
+
         if (!PlayerState.IsBlocking)
         {
             HP -= value;
-            return;
         }
-        // TODO: This should probably be the enemies root position rather then the weapon
-        // If its the weapons it could be completely off and the angle might trigger damage
-        // Might be okay with just doing this however
-        var camTransform = Camera.main.transform;
-        var swordDir = swordPos - camTransform.position;
-        var angle = Vector3.Angle(camTransform.forward, swordDir);
-        if (angle > _blockAngleTolerance)
+
+        if (Physics.Raycast(_camera.position, _camera.forward, out var hit, 2.0f, LayerMask.GetMask("Enemy Block Condition"), QueryTriggerInteraction.Collide))
+        {
+            CanBlockEvent?.Invoke(true);
+        }
+        else
         {
             HP -= value;
+            CanBlockEvent?.Invoke(false);
         }
     }
 
