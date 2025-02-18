@@ -52,7 +52,7 @@ public class PlayerHandsBobbing : MonoBehaviour
         Vector3 offsetDirection = Vector3.zero;
         if (isPlayerMovingHorizontally)
         {
-            offsetDirection = -(_rigidbody.velocity.normalized);
+            offsetDirection = -(_rigidbody.linearVelocity.normalized);
         }
         
         Vector3 offsetTarget = _defaultPos + anchorPoint.position + (offsetDirection * _currentOffsetAmount);
