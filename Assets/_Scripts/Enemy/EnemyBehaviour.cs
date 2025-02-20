@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.AI;
 
 public class EnemyBehaviour : MonoBehaviour
@@ -26,6 +27,8 @@ public class EnemyBehaviour : MonoBehaviour
     [Header("Attack State")]
     [Tooltip("How fast the enemy will rotate to the player after finishing an attack")]
     [SerializeField] private float _toPlayerRotateAttackSpeed = 250f;
+    [Tooltip("Delay between each attack chain")]
+    [SerializeField] private float _delayAttackTime = 1f;
 
     private State _currentState = State.Idle;
     private Transform _player;
@@ -39,6 +42,8 @@ public class EnemyBehaviour : MonoBehaviour
     // However remaining distance starts at 0 for the first frame
     // Maybe we just don't have the player right in front of the enemy at start
     private float _getDistanceFromPlayer => Vector3.Distance(transform.position, _player.position);
+
+    private bool _canAttack = true;
 
     private void Awake()
     {
@@ -122,9 +127,12 @@ public class EnemyBehaviour : MonoBehaviour
             Quaternion targetRotation = Quaternion.LookRotation(direction);
             transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, _toPlayerRotateAttackSpeed * Time.deltaTime);
 
-            if (Quaternion.Angle(transform.rotation, targetRotation) < _rotationTolernace)
+            if (Quaternion.Angle(transform.rotation, targetRotation) < _rotationTolernace &&
+                _canAttack)
             {
                 _swordAnimator.PlayAttack();
+                _canAttack = false;
+                StartCoroutine(ResetAttackCooldown(_delayAttackTime));
             }
 
             if (_getDistanceFromPlayer > _agent.stoppingDistance)
@@ -148,5 +156,11 @@ public class EnemyBehaviour : MonoBehaviour
             _agent.stoppingDistance = _startingStoppingDistance;
             _currentState = State.Idle;
         }
+    }
+
+    private IEnumerator ResetAttackCooldown(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        _canAttack = true;
     }
 }
