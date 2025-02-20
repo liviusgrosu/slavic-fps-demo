@@ -1,7 +1,13 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 public class EnemySwordAnimator : MonoBehaviour
 {
+    [SerializeField] private string _idleStateName;
+    [SerializeField] private List<string> _attackStateNames;
+    private HashSet<int> _attackStateHashes;
+
     private Animator _animator;
     private EnemySword _enemySword;
 
@@ -9,20 +15,13 @@ public class EnemySwordAnimator : MonoBehaviour
     {
         _enemySword = GetComponentInChildren<EnemySword>();
         _animator = GetComponent<Animator>();
-        //InvokeRepeating(nameof(Attack), 1f, 1f);
+
+        _attackStateHashes = new HashSet<int>(_attackStateNames.Select(Animator.StringToHash));
+
     }
 
-    public void StartAttacking()
-    {
-        InvokeRepeating(nameof(Attack), 0f, 1f);
-    }
 
-    public void StopAttacking()
-    {
-        CancelInvoke(nameof(Attack));
-    }
-
-    private void Attack()
+    public void PlayAttack()
     {
         _animator.SetTrigger("Light Attack");
     }
@@ -30,5 +29,15 @@ public class EnemySwordAnimator : MonoBehaviour
     public void ResetAttack()
     {
         _enemySword.ResetAttack();
+    }
+
+    public bool IsIdiling()
+    {
+        return _animator.GetCurrentAnimatorStateInfo(0).IsName(_idleStateName);
+    }
+    public bool IsAttacking()
+    {
+        var currentState = _animator.GetCurrentAnimatorStateInfo(0);
+        return _attackStateHashes.Contains(currentState.shortNameHash);
     }
 }

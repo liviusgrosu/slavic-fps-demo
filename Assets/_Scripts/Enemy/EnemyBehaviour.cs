@@ -11,13 +11,21 @@ public class EnemyBehaviour : MonoBehaviour
         Return
     }
 
+    [Header("General")]
+    [Tooltip("Angle until rotation is complete")]
+    [SerializeField] private float _rotationTolernace;
+
     [Header("Idle State")]
     [Tooltip("FOV of enemy")]
     [SerializeField] private float _fov;
     [Tooltip("How far the player needs to be from the enemy to engage")]
     [SerializeField] private float _engageDistance;
     [Tooltip("How fast the enemy will rotate back to the starting direction they were facing")]
-    [SerializeField] private float _startingRotationSpeed = 1f;
+    [SerializeField] private float _startingRotationSpeed = 250f;
+
+    [Header("Attack State")]
+    [Tooltip("How fast the enemy will rotate to the player after finishing an attack")]
+    [SerializeField] private float _toPlayerRotateAttackSpeed = 250f;
 
     private State _currentState = State.Idle;
     private Transform _player;
@@ -68,7 +76,7 @@ public class EnemyBehaviour : MonoBehaviour
 
     private void IdleState()
     {
-        if (Quaternion.Angle(transform.rotation, _startingRotation) > 0.1f)
+        if (Quaternion.Angle(transform.rotation, _startingRotation) > _rotationTolernace)
         {
             transform.rotation = Quaternion.RotateTowards(transform.rotation, _startingRotation, _startingRotationSpeed * Time.deltaTime);
         }
@@ -88,17 +96,16 @@ public class EnemyBehaviour : MonoBehaviour
     {
         _agent.SetDestination(_player.position);
 
-        if (_getDistanceFromPlayer <= _agent.stoppingDistance)
+        // Adding tolerance since sometimes the enemy will be stuck in a weird state and not move because the agent has a tolernce for stopping
+        if (_getDistanceFromPlayer <= _agent.stoppingDistance + 0.1f)
         {
             _agent.velocity = Vector3.zero;
-            _swordAnimator.StartAttacking();
             _currentState = State.Attack;
         }
 
         if (_getDistanceFromPlayer > _engageDistance)
         {
             _agent.velocity = _agent.desiredVelocity;
-            _swordAnimator.StopAttacking();
             _agent.stoppingDistance = 0f;
             _currentState = State.Return;
         }
@@ -106,12 +113,31 @@ public class EnemyBehaviour : MonoBehaviour
 
     private void AttackState()
     {
-        if (_getDistanceFromPlayer > _agent.stoppingDistance)
+        //TODO: Consider reversing this if statement
+        if (!_swordAnimator.IsAttacking())
         {
-            _agent.velocity = _agent.desiredVelocity;
-            _swordAnimator.StopAttacking();
-            _currentState = State.Engage;
+            Vector3 direction = (_player.position - transform.position).normalized;
+            direction.y = 0;
+
+            Quaternion targetRotation = Quaternion.LookRotation(direction);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, _toPlayerRotateAttackSpeed * Time.deltaTime);
+
+            if (Quaternion.Angle(transform.rotation, targetRotation) < _rotationTolernace)
+            {
+                _swordAnimator.PlayAttack();
+            }
+
+            if (_getDistanceFromPlayer > _agent.stoppingDistance)
+            {
+                _agent.velocity = _agent.desiredVelocity;
+                _currentState = State.Engage;
+            }
         }
+    }
+
+    private void CheckState()
+    {
+        // This state will make the enemy check left, right, forward, and delay before going to return state
     }
 
     private void ReturnState()

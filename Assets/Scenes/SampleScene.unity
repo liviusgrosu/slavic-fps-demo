@@ -562,9 +562,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d098d37730fc896448a470fdcf56a469, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _rotationTolernace: 0.15
   _fov: 45
   _engageDistance: 10
   _startingRotationSpeed: 250
+  _toPlayerRotateAttackSpeed: 250
 --- !u!195 &60685546
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -10345,9 +10347,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d098d37730fc896448a470fdcf56a469, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _rotationTolernace: 0
   _fov: 0
   _engageDistance: 0
   _startingRotationSpeed: 1
+  _toPlayerRotateAttackSpeed: 250
 --- !u!1 &960304763
 GameObject:
   m_ObjectHideFlags: 0
@@ -11031,6 +11035,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ddb98f54ef8f9604691052a7aff8d255, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _idleStateName: Idle
+  _attackStateNames:
+  - Light Attack 1
 --- !u!95 &1066475155
 Animator:
   serializedVersion: 7
