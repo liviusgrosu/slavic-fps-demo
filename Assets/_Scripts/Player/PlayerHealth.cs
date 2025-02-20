@@ -44,6 +44,7 @@ public class PlayerHealth : MonoBehaviour
 
     public void TakeDamage(Transform enemy, int value)
     {
+        // Enemy must face the player
         var enemyToPlayer = transform.position - enemy.position;
         var playerToEnemyAngle = Vector3.Angle(enemy.forward, enemyToPlayer);
 
@@ -52,7 +53,7 @@ public class PlayerHealth : MonoBehaviour
             return;
         }
 
-
+        // Player must face the enemy to be able to block
         if (!PlayerState.IsBlocking)
         {
             HP -= value;

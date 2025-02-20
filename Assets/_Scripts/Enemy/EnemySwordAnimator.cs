@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class EnemyDebugAnimator : MonoBehaviour
+public class EnemySwordAnimator : MonoBehaviour
 {
     private Animator _animator;
     private EnemySword _enemySword;
@@ -9,7 +9,17 @@ public class EnemyDebugAnimator : MonoBehaviour
     {
         _enemySword = GetComponentInChildren<EnemySword>();
         _animator = GetComponent<Animator>();
-        InvokeRepeating(nameof(Attack), 1f, 1f);
+        //InvokeRepeating(nameof(Attack), 1f, 1f);
+    }
+
+    public void StartAttacking()
+    {
+        InvokeRepeating(nameof(Attack), 0f, 1f);
+    }
+
+    public void StopAttacking()
+    {
+        CancelInvoke(nameof(Attack));
     }
 
     private void Attack()

@@ -114,7 +114,7 @@ public class PlayerController : MonoBehaviour
          
         _collider = GetComponent<CapsuleCollider>();
         _rigidbody = GetComponent<Rigidbody>();
-        _playerEffects = FindObjectOfType<PlayerEffects>();
+        _playerEffects = FindFirstObjectByType<PlayerEffects>();
         _vaultingDetectionPoint = transform.Find("Vault Detection Point");
         _rigidbody.freezeRotation = true;
         DashCurrentPoints = DashMaxPoints;
