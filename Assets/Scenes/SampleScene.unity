@@ -567,6 +567,7 @@ MonoBehaviour:
   _engageDistance: 10
   _startingRotationSpeed: 250
   _toPlayerRotateAttackSpeed: 250
+  _delayAttackTime: 1
 --- !u!195 &60685546
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -10352,6 +10353,7 @@ MonoBehaviour:
   _engageDistance: 0
   _startingRotationSpeed: 1
   _toPlayerRotateAttackSpeed: 250
+  _delayAttackTime: 1
 --- !u!1 &960304763
 GameObject:
   m_ObjectHideFlags: 0
@@ -11036,8 +11038,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _idleStateName: Idle
-  _attackStateNames:
-  - Light Attack 1
+  _attackStateTag: Attack
 --- !u!95 &1066475155
 Animator:
   serializedVersion: 7

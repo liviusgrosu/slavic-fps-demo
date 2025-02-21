@@ -33,7 +33,7 @@ public class EnemyBehaviour : MonoBehaviour
     private State _currentState = State.Idle;
     private Transform _player;
     private NavMeshAgent _agent;
-    private EnemySwordAnimator _swordAnimator;
+    private EnemyWeaponBehaviour _swordAnimator;
 
     private Vector3 _startingPosition;
     private float _startingStoppingDistance;
@@ -48,7 +48,7 @@ public class EnemyBehaviour : MonoBehaviour
     private void Awake()
     {
         _agent = GetComponent<NavMeshAgent>();
-        _swordAnimator = transform.GetComponentInChildren<EnemySwordAnimator>();
+        _swordAnimator = transform.GetComponentInChildren<EnemyWeaponBehaviour>();
         _startingStoppingDistance = _agent.stoppingDistance;
         _startingRotation = transform.rotation;
         _currentState = State.Idle;

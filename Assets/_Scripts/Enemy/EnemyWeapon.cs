@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemySword : MonoBehaviour
+public class EnemyWeapon : MonoBehaviour
 {
     [SerializeField] private int _damage = 20;
 
@@ -30,7 +30,7 @@ public class EnemySword : MonoBehaviour
         }
     }
 
-    public void ResetAttack()
+    public void TurnSwordColliderBackOn()
     {
         _collider.enabled = true;
     }
