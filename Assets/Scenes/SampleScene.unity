@@ -567,7 +567,6 @@ MonoBehaviour:
   _engageDistance: 10
   _startingRotationSpeed: 250
   _toPlayerRotateAttackSpeed: 250
-  _delayAttackTime: 1
 --- !u!195 &60685546
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -885,6 +884,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27850c84b94f4d8aa5442c859644788e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  BlockTime: 0
 --- !u!95 &88869251
 Animator:
   serializedVersion: 7
@@ -10353,7 +10353,6 @@ MonoBehaviour:
   _engageDistance: 0
   _startingRotationSpeed: 1
   _toPlayerRotateAttackSpeed: 250
-  _delayAttackTime: 1
 --- !u!1 &960304763
 GameObject:
   m_ObjectHideFlags: 0
@@ -11039,6 +11038,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _idleStateName: Idle
   _attackStateTag: Attack
+  _delayAttackTime: 1
+  ParryTime: 0.1
 --- !u!95 &1066475155
 Animator:
   serializedVersion: 7

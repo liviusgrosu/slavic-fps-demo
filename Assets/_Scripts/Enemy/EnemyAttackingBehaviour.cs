@@ -10,6 +10,8 @@ public class EnemyAttackingBehaviour : MonoBehaviour
     [SerializeField]private string _attackStateTag;
     [Tooltip("Delay between each attack chain")]
     [SerializeField] private float _delayAttackTime = 1f;
+    [Tooltip("Time between player blocking and enemy hitting enemy to be considered a parry")]
+    public float ParryTime = 0.25f;
 
     private Animator _animator;
     private EnemyWeapon _enemySword;
@@ -52,7 +54,7 @@ public class EnemyAttackingBehaviour : MonoBehaviour
             StartCoroutine(ResetAttackCooldown(_delayAttackTime));
         }
 
-        var chainLength = Random.Range(1, 4);
+        var chainLength = Random.Range(1, 3);
         Enumerable.Repeat("Light Attack", chainLength)
                     .ToList()
                     .ForEach(_currentAttackQueue.Enqueue);
@@ -62,6 +64,12 @@ public class EnemyAttackingBehaviour : MonoBehaviour
     public void ReadyToAttackAgain()
     {
         _readyToAttack = true;
+    }
+
+    public void BecomeStaggered()
+    {
+        _currentAttackQueue.Clear();
+        _animator.SetTrigger("Stagger");
     }
 
     public void TurnSwordColliderBackOn()   

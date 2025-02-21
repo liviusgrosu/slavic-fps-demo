@@ -3,8 +3,21 @@ using UnityEngine;
 
 public class PlayerAttacking : MonoBehaviour
 {
+    public static PlayerAttacking Instance;
+
     public static event Action<bool> IsAttackingEvent;
     public static event Action<bool> IsBlockingEvent;
+
+    public float BlockTime;
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(Instance);
+            return;
+        }
+        Instance = this;
+    }
 
     private void Update()
     {
@@ -41,6 +54,7 @@ public class PlayerAttacking : MonoBehaviour
         }
         else if (InputQueueSystem.Instance.AttackInputQueue.GetNextInput() == "Blocking Hold")
         {
+            BlockTime = Time.time;
             PlayerState.IsBlocking = true;
             IsBlockingEvent?.Invoke(true);
             InputQueueSystem.Instance.AttackInputQueue.DequeueInput();
