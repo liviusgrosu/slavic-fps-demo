@@ -9,6 +9,7 @@ public class EnemyBehaviour : MonoBehaviour
         Idle,
         Engage,
         Attack,
+        Check,
         Return
     }
 
@@ -24,9 +25,14 @@ public class EnemyBehaviour : MonoBehaviour
     [Tooltip("How fast the enemy will rotate back to the starting direction they were facing")]
     [SerializeField] private float _startingRotationSpeed = 250f;
 
+    [Header("Check State")]
+    [Tooltip("How long the enemy will wait before returning to idle state")]
+    [SerializeField] private float _checkStateTime = 2f;
+
     [Header("Attack State")]
     [Tooltip("How fast the enemy will rotate to the player after finishing an attack")]
     [SerializeField] private float _toPlayerRotateAttackSpeed = 250f;
+
 
     private State _currentState = State.Idle;
     private Transform _player;
@@ -36,6 +42,7 @@ public class EnemyBehaviour : MonoBehaviour
     private Vector3 _startingPosition;
     private float _startingStoppingDistance;
     private Quaternion _startingRotation;
+    private float _checkStateElapsedTime;
     // TODO: might be inefficent to do this as remaining distance is already calcuated
     // However remaining distance starts at 0 for the first frame
     // Maybe we just don't have the player right in front of the enemy at start
@@ -58,6 +65,8 @@ public class EnemyBehaviour : MonoBehaviour
 
     private void Update()
     {
+        CheckIfPlayerInFov();
+
         switch (_currentState)
         {
             case State.Idle:
@@ -68,6 +77,9 @@ public class EnemyBehaviour : MonoBehaviour
                 break;
             case State.Attack:
                 AttackState();
+                break;
+            case State.Check:
+                CheckState();
                 break;
             case State.Return:
                 ReturnState();
@@ -81,23 +93,13 @@ public class EnemyBehaviour : MonoBehaviour
         {
             transform.rotation = Quaternion.RotateTowards(transform.rotation, _startingRotation, _startingRotationSpeed * Time.deltaTime);
         }
-
-        if (Vector3.Distance(transform.position, _player.position) <= _engageDistance)
-        {
-            var enemyToPlayer = _player.position - transform.position;
-
-            if (Vector3.Angle(enemyToPlayer, transform.forward) <= _fov)
-            {
-                _currentState = State.Engage;
-            }
-        }
     }
 
     private void EngageState()
     {
         _agent.SetDestination(_player.position);
 
-        // Adding tolerance since sometimes the enemy will be stuck in a weird state and not move because the agent has a tolernce for stopping
+        // Adding tolerance since sometimes the enemy will be stuck in a weird state and not move because the agent has a tolerance for stopping
         if (_getDistanceFromPlayer <= _agent.stoppingDistance + 0.1f)
         {
             _agent.velocity = Vector3.zero;
@@ -106,9 +108,9 @@ public class EnemyBehaviour : MonoBehaviour
 
         if (_getDistanceFromPlayer > _engageDistance)
         {
-            _agent.velocity = _agent.desiredVelocity;
-            _agent.stoppingDistance = 0f;
-            _currentState = State.Return;
+            _agent.isStopped = true;
+            _checkStateElapsedTime = 0f;
+            _currentState = State.Check;
         }
     }
 
@@ -138,7 +140,16 @@ public class EnemyBehaviour : MonoBehaviour
 
     private void CheckState()
     {
-        // This state will make the enemy check left, right, forward, and delay before going to return state
+        _checkStateElapsedTime += Time.deltaTime;
+
+        if (_checkStateElapsedTime >= _checkStateTime)
+        {
+            _agent.isStopped = false;
+            _agent.velocity = _agent.desiredVelocity;
+            _agent.stoppingDistance = 0f;
+            _checkStateElapsedTime = 0f;
+            _currentState = State.Return;
+        }
     }
 
     private void ReturnState()
@@ -148,6 +159,20 @@ public class EnemyBehaviour : MonoBehaviour
         {
             _agent.stoppingDistance = _startingStoppingDistance;
             _currentState = State.Idle;
+        }
+    }
+
+    private void CheckIfPlayerInFov()
+    {
+        if (Vector3.Distance(transform.position, _player.position) <= _engageDistance)
+        {
+            var enemyToPlayer = _player.position - transform.position;
+
+            if (Vector3.Angle(enemyToPlayer, transform.forward) <= _fov)
+            {
+                _agent.isStopped = false;
+                _currentState = State.Engage;
+            }
         }
     }
 }

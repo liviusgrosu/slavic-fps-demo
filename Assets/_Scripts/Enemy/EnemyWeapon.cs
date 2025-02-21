@@ -27,7 +27,7 @@ public class EnemyWeapon : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            if (PlayerState.IsBlocking && IsEligableForParry())
+            if (PlayerState.IsBlocking && IsEligibleForParry())
             {
                 _enemyAttackingBehaviour.BecomeStaggered();
             }
@@ -41,7 +41,7 @@ public class EnemyWeapon : MonoBehaviour
         _collider.enabled = true;
     }
 
-    private bool IsEligableForParry()
+    private bool IsEligibleForParry()
     {
         var timeDifference = Time.time - PlayerAttacking.Instance.BlockTime;
         return timeDifference < _enemyAttackingBehaviour.ParryTime;
