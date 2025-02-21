@@ -27,13 +27,11 @@ public class EnemyBehaviour : MonoBehaviour
     [Header("Attack State")]
     [Tooltip("How fast the enemy will rotate to the player after finishing an attack")]
     [SerializeField] private float _toPlayerRotateAttackSpeed = 250f;
-    [Tooltip("Delay between each attack chain")]
-    [SerializeField] private float _delayAttackTime = 1f;
 
     private State _currentState = State.Idle;
     private Transform _player;
     private NavMeshAgent _agent;
-    private EnemyWeaponBehaviour _swordAnimator;
+    private EnemyAttackingBehaviour _enemyAttackingBehaviour;
 
     private Vector3 _startingPosition;
     private float _startingStoppingDistance;
@@ -43,12 +41,10 @@ public class EnemyBehaviour : MonoBehaviour
     // Maybe we just don't have the player right in front of the enemy at start
     private float _getDistanceFromPlayer => Vector3.Distance(transform.position, _player.position);
 
-    private bool _canAttack = true;
-
     private void Awake()
     {
         _agent = GetComponent<NavMeshAgent>();
-        _swordAnimator = transform.GetComponentInChildren<EnemyWeaponBehaviour>();
+        _enemyAttackingBehaviour = transform.GetComponentInChildren<EnemyAttackingBehaviour>();
         _startingStoppingDistance = _agent.stoppingDistance;
         _startingRotation = transform.rotation;
         _currentState = State.Idle;
@@ -119,7 +115,7 @@ public class EnemyBehaviour : MonoBehaviour
     private void AttackState()
     {
         //TODO: Consider reversing this if statement
-        if (!_swordAnimator.IsAttacking())
+        if (!_enemyAttackingBehaviour.IsAttacking())
         {
             Vector3 direction = (_player.position - transform.position).normalized;
             direction.y = 0;
@@ -127,12 +123,9 @@ public class EnemyBehaviour : MonoBehaviour
             Quaternion targetRotation = Quaternion.LookRotation(direction);
             transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, _toPlayerRotateAttackSpeed * Time.deltaTime);
 
-            if (Quaternion.Angle(transform.rotation, targetRotation) < _rotationTolernace &&
-                _canAttack)
+            if (Quaternion.Angle(transform.rotation, targetRotation) < _rotationTolernace)
             {
-                _swordAnimator.PlayAttack();
-                _canAttack = false;
-                StartCoroutine(ResetAttackCooldown(_delayAttackTime));
+                _enemyAttackingBehaviour.Attack();
             }
 
             if (_getDistanceFromPlayer > _agent.stoppingDistance)
@@ -156,11 +149,5 @@ public class EnemyBehaviour : MonoBehaviour
             _agent.stoppingDistance = _startingStoppingDistance;
             _currentState = State.Idle;
         }
-    }
-
-    private IEnumerator ResetAttackCooldown(float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        _canAttack = true;
     }
 }
