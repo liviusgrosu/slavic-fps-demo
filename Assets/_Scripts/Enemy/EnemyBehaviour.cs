@@ -14,8 +14,11 @@ public class EnemyBehaviour : MonoBehaviour
     }
 
     [Header("General")]
+    [Tooltip("Turn on/off the behaviour")]
+    [SerializeField] private bool _toggle = true;
     [Tooltip("Angle until rotation is complete")]
     [SerializeField] private float _rotationTolernace;
+
 
     [Header("Idle State")]
     [Tooltip("FOV of enemy")]
@@ -65,6 +68,11 @@ public class EnemyBehaviour : MonoBehaviour
 
     private void Update()
     {
+        if (!_toggle)
+        {
+            return;
+        }
+
         CheckIfPlayerInFov();
 
         switch (_currentState)
@@ -164,6 +172,11 @@ public class EnemyBehaviour : MonoBehaviour
 
     private void CheckIfPlayerInFov()
     {
+        if (_currentState == State.Attack)
+        {
+            return;
+        }
+
         if (Vector3.Distance(transform.position, _player.position) <= _engageDistance)
         {
             var enemyToPlayer = _player.position - transform.position;

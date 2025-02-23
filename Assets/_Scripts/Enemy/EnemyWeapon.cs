@@ -21,6 +21,7 @@ public class EnemyWeapon : MonoBehaviour
         _enemyBehaviour = GetComponentInParent<EnemyBehaviour>();
         _enemyAttackingBehaviour = GetComponentInParent<EnemyAttackingBehaviour>();
         _root = _enemyBehaviour.transform;
+        ToggleSwordCollider(0);
     }
 
     private void OnTriggerEnter(Collider other)
@@ -32,13 +33,16 @@ public class EnemyWeapon : MonoBehaviour
                 _enemyAttackingBehaviour.BecomeStaggered();
             }
             PlayerHealth.Instance.TakeDamage(_root, _damage);
-            _collider.enabled = false;
+            ToggleSwordCollider(0);
         }
     }
 
-    public void TurnSwordColliderBackOn()
+    // Animation even can't do bool so we're stuck with ints
+    // 0 = false
+    // 1 = true
+    public void ToggleSwordCollider(int state)
     {
-        _collider.enabled = true;
+        _collider.enabled = state == 1;
     }
 
     private bool IsEligibleForParry()

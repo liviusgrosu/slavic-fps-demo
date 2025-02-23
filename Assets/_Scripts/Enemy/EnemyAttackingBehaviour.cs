@@ -16,6 +16,7 @@ public class EnemyAttackingBehaviour : MonoBehaviour
     private Animator _animator;
     private EnemyWeapon _enemySword;
 
+    private bool _allowWeaponToDamage;
     private bool _readyToAttack;
     private bool _attackCooldownFinished = true;
     private Queue<string> _currentAttackQueue;
@@ -54,7 +55,7 @@ public class EnemyAttackingBehaviour : MonoBehaviour
             StartCoroutine(ResetAttackCooldown(_delayAttackTime));
         }
 
-        var chainLength = Random.Range(1, 3);
+        var chainLength = Random.Range(1, 4);
         Enumerable.Repeat("Light Attack", chainLength)
                     .ToList()
                     .ForEach(_currentAttackQueue.Enqueue);
@@ -72,15 +73,11 @@ public class EnemyAttackingBehaviour : MonoBehaviour
         _animator.SetTrigger("Stagger");
     }
 
-    public void TurnSwordColliderBackOn()   
-    {
-        _enemySword.TurnSwordColliderBackOn();
-    }
-
     public bool IsIdiling()
     {
         return _animator.GetCurrentAnimatorStateInfo(0).IsName(_idleStateName);
     }
+    
     public bool IsAttacking()
     {
         return _animator.GetCurrentAnimatorStateInfo(0).IsTag(_attackStateTag);
@@ -90,5 +87,12 @@ public class EnemyAttackingBehaviour : MonoBehaviour
     {
         yield return new WaitForSeconds(delay);
         _attackCooldownFinished = true;
+    }
+
+    // I have to put it here cause the animator doesn't know where EnemySword is
+    // TODO: Might add a transient between the two
+    public void ToggleSwordCollider(int state)
+    {
+        _enemySword.ToggleSwordCollider(state);
     }
 }

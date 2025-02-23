@@ -105,6 +105,13 @@ ModelImporter:
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
       events:
+      - time: 0.29797894
+        functionName: ToggleSwordCollider
+        data: 
+        objectReferenceParameter: {fileID: 11500000, guid: ddb98f54ef8f9604691052a7aff8d255, type: 3}
+        floatParameter: 0
+        intParameter: 1
+        messageOptions: 0
       - time: 0.5215686
         functionName: ReadyToAttackAgain
         data: 
@@ -112,8 +119,8 @@ ModelImporter:
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
-      - time: 0.9994529
-        functionName: TurnSwordColliderBackOn
+      - time: 0.5798287
+        functionName: ToggleSwordCollider
         data: 
         objectReferenceParameter: {fileID: 11500000, guid: ddb98f54ef8f9604691052a7aff8d255, type: 3}
         floatParameter: 0
@@ -148,22 +155,22 @@ ModelImporter:
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
       events:
-      - time: 0.5215686
+      - time: 0.4136379
+        functionName: ToggleSwordCollider
+        data: 
+        objectReferenceParameter: {fileID: 11500000, guid: ddb98f54ef8f9604691052a7aff8d255, type: 3}
+        floatParameter: 0
+        intParameter: 1
+        messageOptions: 0
+      - time: 0.7570646
+        functionName: ToggleSwordCollider
+        data: 
+        objectReferenceParameter: {fileID: 11500000, guid: ddb98f54ef8f9604691052a7aff8d255, type: 3}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
+      - time: 0.7741782
         functionName: ReadyToAttackAgain
-        data: 
-        objectReferenceParameter: {fileID: 11500000, guid: ddb98f54ef8f9604691052a7aff8d255, type: 3}
-        floatParameter: 0
-        intParameter: 0
-        messageOptions: 0
-      - time: 0.99923575
-        functionName: TurnSwordColliderBackOn
-        data: 
-        objectReferenceParameter: {fileID: 11500000, guid: ddb98f54ef8f9604691052a7aff8d255, type: 3}
-        floatParameter: 0
-        intParameter: 0
-        messageOptions: 0
-      - time: 0
-        functionName: TurnSwordColliderBackOn
         data: 
         objectReferenceParameter: {fileID: 11500000, guid: ddb98f54ef8f9604691052a7aff8d255, type: 3}
         floatParameter: 0
@@ -198,15 +205,15 @@ ModelImporter:
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
       events:
-      - time: 0.9983865
-        functionName: TurnSwordColliderBackOn
+      - time: 0.4735407
+        functionName: ToggleSwordCollider
         data: 
         objectReferenceParameter: {fileID: 11500000, guid: ddb98f54ef8f9604691052a7aff8d255, type: 3}
         floatParameter: 0
-        intParameter: 0
+        intParameter: 1
         messageOptions: 0
-      - time: 0
-        functionName: TurnSwordColliderBackOn
+      - time: 0.6351297
+        functionName: ToggleSwordCollider
         data: 
         objectReferenceParameter: {fileID: 11500000, guid: ddb98f54ef8f9604691052a7aff8d255, type: 3}
         floatParameter: 0
@@ -240,14 +247,7 @@ ModelImporter:
       mirror: 0
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
-      events:
-      - time: 1
-        functionName: TurnSwordColliderBackOn
-        data: 
-        objectReferenceParameter: {fileID: 11500000, guid: ddb98f54ef8f9604691052a7aff8d255, type: 3}
-        floatParameter: 0
-        intParameter: 0
-        messageOptions: 0
+      events: []
       transformMask: []
       maskType: 3
       maskSource: {instanceID: 0}

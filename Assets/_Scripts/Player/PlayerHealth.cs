@@ -1,27 +1,25 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using static UnityEngine.EventSystems.EventTrigger;
 
 public class PlayerHealth : MonoBehaviour
 {
     [SerializeField] private float _enemyToPlayerTolerance = 30f;
-    [SerializeField] private int _hp = 100;
+    [SerializeField] private int _maxHP = 100;
+    private int _currentHp;
     public static PlayerHealth Instance;
-    public static event Action<int> HpEvent;
+    public static event Action<int, int> HpEvent;
     public static event Action<bool> CanBlockEvent;
     private Transform _camera;
 
     public int HP
     {
-        get { return _hp; }
+        get { return _currentHp; }
         set
         {
-            if (_hp != value)
+            if (_currentHp != value)
             {
-                _hp = value;
-                HpEvent?.Invoke(_hp);
+                _currentHp = value;
+                HpEvent?.Invoke(_maxHP, _currentHp);
             }
         }
     }
@@ -35,6 +33,8 @@ public class PlayerHealth : MonoBehaviour
         }
 
         Instance = this;
+
+        HP = _maxHP;
     }
 
     private void Start()
