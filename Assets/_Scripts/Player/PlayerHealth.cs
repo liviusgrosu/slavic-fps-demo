@@ -3,11 +3,14 @@ using UnityEngine;
 
 public class PlayerHealth : MonoBehaviour
 {
+    [Tooltip("Angle in which the enemy has to face in order to consider their damage to the player")]
     [SerializeField] private float _enemyToPlayerTolerance = 30f;
     [SerializeField] private int _maxHP = 100;
     private int _currentHp;
     public static PlayerHealth Instance;
     public static event Action<int, int> HpEvent;
+    public static event Action PlayerDied;
+
     public static event Action<bool> CanBlockEvent;
     private Transform _camera;
 
@@ -20,6 +23,10 @@ public class PlayerHealth : MonoBehaviour
             {
                 _currentHp = value;
                 HpEvent?.Invoke(_maxHP, _currentHp);
+                if (_currentHp <= 0)
+                {
+                    PlayerDied?.Invoke();
+                }
             }
         }
     }
@@ -39,6 +46,8 @@ public class PlayerHealth : MonoBehaviour
 
     private void Start()
     {
+        Respawner.TriggerRestart += ResetHealth;
+
         _camera = Camera.main.transform;
     }
 
@@ -80,5 +89,15 @@ public class PlayerHealth : MonoBehaviour
         {
             HP += 20;
         }
+    }
+
+    public bool IsDead()
+    {
+        return HP <= 0;
+    }
+
+    private void ResetHealth()
+    {
+        HP = _maxHP;
     }
 }
