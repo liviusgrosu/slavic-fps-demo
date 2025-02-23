@@ -1,10 +1,23 @@
 ﻿using System;
 using UnityEngine;
 
-public class PlayerAttacking : MonoBehaviour
+public class PlayerAttackingBehaviour : MonoBehaviour
 {
+    public static PlayerAttackingBehaviour Instance;
+
     public static event Action<bool> IsAttackingEvent;
     public static event Action<bool> IsBlockingEvent;
+
+    public float BlockTime;
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(Instance);
+            return;
+        }
+        Instance = this;
+    }
 
     private void Update()
     {
@@ -41,6 +54,7 @@ public class PlayerAttacking : MonoBehaviour
         }
         else if (InputQueueSystem.Instance.AttackInputQueue.GetNextInput() == "Blocking Hold")
         {
+            BlockTime = Time.time;
             PlayerState.IsBlocking = true;
             IsBlockingEvent?.Invoke(true);
             InputQueueSystem.Instance.AttackInputQueue.DequeueInput();
@@ -59,5 +73,12 @@ public class PlayerAttacking : MonoBehaviour
     {
         PlayerState.IsAttacking = false;
         IsAttackingEvent?.Invoke(false);
+    }
+
+    // I have to put it here cause the animator doesn't know where EnemySword is
+    // TODO: Might add a transient between the two
+    public void ToggleSwordCollider(int state)
+    {
+        PlayerWeapon.Instance.ToggleSwordCollider(state);
     }
 }

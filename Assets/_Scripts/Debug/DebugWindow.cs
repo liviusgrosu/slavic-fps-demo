@@ -39,8 +39,8 @@ public class DebugWindow : MonoBehaviour
         PlayerController.RigidbodySpeedEvents += UpdatePlayerSpeed;
         PlayerController.IsVaultingEvent += UpdateVaultingText;
         PlayerController.VaultTimeEvent += UpdateVaultTimeText;
-        PlayerAttacking.IsAttackingEvent += UpdateIsAttackingText;
-        PlayerAttacking.IsBlockingEvent += UpdateIsBlockingText;
+        PlayerAttackingBehaviour.IsAttackingEvent += UpdateIsAttackingText;
+        PlayerAttackingBehaviour.IsBlockingEvent += UpdateIsBlockingText;
         PlayerHealth.HpEvent += UpdateHpText;
         PlayerHealth.CanBlockEvent += UpdateCanBlockText;
     }
@@ -100,9 +100,9 @@ public class DebugWindow : MonoBehaviour
         _isBlockingText.text = $"Is Blocking: {DisplayBoolString(state)}";
     }
 
-    private void UpdateHpText(int hp)
+    private void UpdateHpText(int max, int current)
     {
-        _hpText.text = $"HP: {hp}";
+        _hpText.text = $"HP: {current}/{max}";
     }
 
     private void UpdateCanBlockText(bool state)
