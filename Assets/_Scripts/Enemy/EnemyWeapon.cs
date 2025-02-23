@@ -47,7 +47,7 @@ public class EnemyWeapon : MonoBehaviour
 
     private bool IsEligibleForParry()
     {
-        var timeDifference = Time.time - PlayerAttacking.Instance.BlockTime;
+        var timeDifference = Time.time - PlayerAttackingBehaviour.Instance.BlockTime;
         return timeDifference < _enemyAttackingBehaviour.ParryTime;
     }
 }

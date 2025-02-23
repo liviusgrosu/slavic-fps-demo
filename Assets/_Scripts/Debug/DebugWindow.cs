@@ -39,8 +39,8 @@ public class DebugWindow : MonoBehaviour
         PlayerController.RigidbodySpeedEvents += UpdatePlayerSpeed;
         PlayerController.IsVaultingEvent += UpdateVaultingText;
         PlayerController.VaultTimeEvent += UpdateVaultTimeText;
-        PlayerAttacking.IsAttackingEvent += UpdateIsAttackingText;
-        PlayerAttacking.IsBlockingEvent += UpdateIsBlockingText;
+        PlayerAttackingBehaviour.IsAttackingEvent += UpdateIsAttackingText;
+        PlayerAttackingBehaviour.IsBlockingEvent += UpdateIsBlockingText;
         PlayerHealth.HpEvent += UpdateHpText;
         PlayerHealth.CanBlockEvent += UpdateCanBlockText;
     }

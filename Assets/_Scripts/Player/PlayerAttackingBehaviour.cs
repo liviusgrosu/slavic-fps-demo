@@ -1,9 +1,9 @@
 ﻿using System;
 using UnityEngine;
 
-public class PlayerAttacking : MonoBehaviour
+public class PlayerAttackingBehaviour : MonoBehaviour
 {
-    public static PlayerAttacking Instance;
+    public static PlayerAttackingBehaviour Instance;
 
     public static event Action<bool> IsAttackingEvent;
     public static event Action<bool> IsBlockingEvent;
@@ -73,5 +73,12 @@ public class PlayerAttacking : MonoBehaviour
     {
         PlayerState.IsAttacking = false;
         IsAttackingEvent?.Invoke(false);
+    }
+
+    // I have to put it here cause the animator doesn't know where EnemySword is
+    // TODO: Might add a transient between the two
+    public void ToggleSwordCollider(int state)
+    {
+        PlayerWeapon.Instance.ToggleSwordCollider(state);
     }
 }

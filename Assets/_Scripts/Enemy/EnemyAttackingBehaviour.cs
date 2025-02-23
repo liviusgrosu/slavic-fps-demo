@@ -16,7 +16,6 @@ public class EnemyAttackingBehaviour : MonoBehaviour
     private Animator _animator;
     private EnemyWeapon _enemySword;
 
-    private bool _allowWeaponToDamage;
     private bool _readyToAttack;
     private bool _attackCooldownFinished = true;
     private Queue<string> _currentAttackQueue;
