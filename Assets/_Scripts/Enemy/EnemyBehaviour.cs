@@ -17,8 +17,7 @@ public class EnemyBehaviour : MonoBehaviour
     [Tooltip("Turn on/off the behaviour")]
     [SerializeField] private bool _toggle = true;
     [Tooltip("Angle until rotation is complete")]
-    [SerializeField] private float _rotationTolernace;
-
+    [SerializeField] private float _rotationTolerance;
 
     [Header("Idle State")]
     [Tooltip("FOV of enemy")]
@@ -62,6 +61,8 @@ public class EnemyBehaviour : MonoBehaviour
 
     private void Start()
     {
+        Respawner.TriggerRestart += RestartBehaviour;
+
         _startingPosition = transform.position;
         _player = GameObject.FindGameObjectWithTag("Player").transform;
     }
@@ -97,7 +98,7 @@ public class EnemyBehaviour : MonoBehaviour
 
     private void IdleState()
     {
-        if (Quaternion.Angle(transform.rotation, _startingRotation) > _rotationTolernace)
+        if (Quaternion.Angle(transform.rotation, _startingRotation) > _rotationTolerance)
         {
             transform.rotation = Quaternion.RotateTowards(transform.rotation, _startingRotation, _startingRotationSpeed * Time.deltaTime);
         }
@@ -133,7 +134,7 @@ public class EnemyBehaviour : MonoBehaviour
             Quaternion targetRotation = Quaternion.LookRotation(direction);
             transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, _toPlayerRotateAttackSpeed * Time.deltaTime);
 
-            if (Quaternion.Angle(transform.rotation, targetRotation) < _rotationTolernace)
+            if (Quaternion.Angle(transform.rotation, targetRotation) < _rotationTolerance)
             {
                 _enemyAttackingBehaviour.Attack();
             }
@@ -187,5 +188,14 @@ public class EnemyBehaviour : MonoBehaviour
                 _currentState = State.Engage;
             }
         }
+    }
+
+    private void RestartBehaviour()
+    {
+        _currentState = State.Idle;
+
+        transform.position = _startingPosition;
+        transform.rotation = _startingRotation;
+        _agent.stoppingDistance = _startingStoppingDistance;
     }
 }

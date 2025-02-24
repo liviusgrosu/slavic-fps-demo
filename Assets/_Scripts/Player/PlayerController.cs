@@ -100,6 +100,9 @@ public class PlayerController : MonoBehaviour
     private PlayerEffects _playerEffects;
     private CapsuleCollider _collider;
 
+    private Vector3 _startingPosition;
+    private Quaternion _startingRotation;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -118,15 +121,25 @@ public class PlayerController : MonoBehaviour
         _vaultingDetectionPoint = transform.Find("Vault Detection Point");
         _rigidbody.freezeRotation = true;
         DashCurrentPoints = DashMaxPoints;
+
+        _startingPosition = transform.position;
+        _startingRotation = transform.rotation;
     }
 
     private void Start()
     {
+        Respawner.TriggerRestart += ResetPlayer;
+
         _mainCamera = Camera.main.transform;
     }
 
     private void Update()
     {
+        if (PlayerState.IsDead)
+        {
+            return;
+        }
+
         AdjustGravity();
         GetMovementInput();
         CheckGrounded();
@@ -433,5 +446,11 @@ public class PlayerController : MonoBehaviour
         IsOnSlopeEvent?.Invoke(OnSlope());
         IsJumpingEvent?.Invoke(_isJumping);
         GraceTimerEvent?.Invoke(_graceTimeCurrent);
+    }
+
+    private void ResetPlayer()
+    {
+        transform.position = _startingPosition;
+        transform.rotation = _startingRotation;
     }
 }

@@ -13,6 +13,11 @@ public class PlayerInput : MonoBehaviour
     public KeyCode BlockingButton = KeyCode.Mouse1;
     private void Update()
     {
+        if (PlayerState.IsDead)
+        {
+            return;
+        }
+
         if (Input.GetKeyDown(JumpKey))
         {
             InputQueueSystem.Instance.MovementInputQueue.EnqueueInput("Jump");
