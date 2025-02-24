@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using UnityEngine;
 
 public class PlayerAttackingBehaviour : MonoBehaviour
@@ -26,7 +27,14 @@ public class PlayerAttackingBehaviour : MonoBehaviour
             return;
         }
 
-        if (InputQueueSystem.Instance.AttackInputQueue.GetNextInput() == "Light Attack" && !PlayerState.IsAttacking)
+        var nextInput = InputQueueSystem.Instance.AttackInputQueue.GetNextInput();
+
+        if (nextInput == "")
+        {
+            return;
+        }
+
+        if (nextInput == "Primary Press" && !PlayerState.IsAttacking)
         {
             PlayerState.IsAttacking = true;
             IsAttackingEvent?.Invoke(true);
@@ -45,14 +53,20 @@ public class PlayerAttackingBehaviour : MonoBehaviour
                 PlayerAnimationController.Instance.PlayLightAttackAnimation();
             }
         }
-        else if (InputQueueSystem.Instance.AttackInputQueue.GetNextInput() == "Heavy Attack" && !PlayerState.IsAttacking)
+
+        else if (nextInput == "Primary Hold")
         {
-            PlayerState.IsAttacking = true;
-            IsAttackingEvent?.Invoke(true);
             InputQueueSystem.Instance.AttackInputQueue.DequeueInput();
-            PlayerAnimationController.Instance.PlayHeavyAttackAnimation();
+            Debug.Log(nextInput);
         }
-        else if (InputQueueSystem.Instance.AttackInputQueue.GetNextInput() == "Blocking Hold")
+
+        else if (nextInput == "Primary Release")
+        {
+            InputQueueSystem.Instance.AttackInputQueue.DequeueInput();
+            Debug.Log(nextInput);
+        }
+
+        else if (nextInput == "Secondary Hold" && !PlayerState.IsBlocking)
         {
             BlockTime = Time.time;
             PlayerState.IsBlocking = true;
@@ -60,12 +74,22 @@ public class PlayerAttackingBehaviour : MonoBehaviour
             InputQueueSystem.Instance.AttackInputQueue.DequeueInput();
             PlayerAnimationController.Instance.PlayerBlockingHoldAnimation();
         }
-        else if (InputQueueSystem.Instance.AttackInputQueue.GetNextInput() == "Blocking Release")
+
+        else if (nextInput == "Secondary Release")
         {
+            Debug.Log(nextInput);
             PlayerState.IsBlocking = false;
             IsBlockingEvent?.Invoke(false);
             InputQueueSystem.Instance.AttackInputQueue.DequeueInput();
             PlayerAnimationController.Instance.PlayerBlockingReleaseAnimation();
+        }
+
+        else
+        {
+            if (nextInput != "Primary Press")
+            {
+                InputQueueSystem.Instance.AttackInputQueue.DequeueInput();
+            }
         }
     }
     

@@ -562,8 +562,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d098d37730fc896448a470fdcf56a469, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _toggle: 1
-  _rotationTolernace: 0.15
+  _toggle: 0
+  _rotationTolerance: 40
   _fov: 45
   _engageDistance: 10
   _startingRotationSpeed: 250
@@ -9368,6 +9368,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c60cba3163fe4ae47a0ac68a89ef2875, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _deathScreen: {fileID: 796732632}
 --- !u!1 &685497146
 GameObject:
   m_ObjectHideFlags: 0
@@ -10592,7 +10593,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _toggle: 0
-  _rotationTolernace: 0
+  _rotationTolerance: 0
   _fov: 0
   _engageDistance: 0
   _startingRotationSpeed: 1
@@ -11190,6 +11191,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1038737366}
   - component: {fileID: 1038737365}
+  - component: {fileID: 1038737367}
+  - component: {fileID: 1038737368}
   m_Layer: 0
   m_Name: Game Manager
   m_TagString: Untagged
@@ -11226,6 +11229,30 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1038737367
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1038737364}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5735c376dea6f544896824a4f9b20957, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1038737368
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1038737364}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b4a503d977711924d98f0c35ab077da5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1040632042
 GameObject:
   m_ObjectHideFlags: 0
@@ -16430,7 +16457,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _enemyToPlayerTolerance: 45
-  _maxHP: 100
+  _maxHP: 20
 --- !u!4 &4591865485351635448
 Transform:
   m_ObjectHideFlags: 0
@@ -16547,6 +16574,7 @@ MonoBehaviour:
   LightAttackButton: 323
   HeavyAttackButton: 326
   BlockingButton: 324
+  _holdThreshold: 0.15
 --- !u!1 &4591865486878809297
 GameObject:
   m_ObjectHideFlags: 0
