@@ -27,7 +27,6 @@ public class PlayerInput : MonoBehaviour
         _currentHoldThreshold = _holdThreshold;
     }
 
-
     private void Update()
     {
         if (PlayerState.IsDead)

@@ -1,29 +1,12 @@
 ﻿using System;
 using UnityEngine;
-public class PlayerAnimationController : MonoBehaviour
+public class PlayerSwordAnimationController : MonoBehaviour
 {
-    [SerializeField] private Animator _playerArms;
-    public static PlayerAnimationController Instance;
+    private Animator _playerArms;
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(Instance);
-            return;
-        }
-
-        Instance = this;
-    }
-
-    private void Start()
-    {
-        PlayerController.VaultingEvent += PlayVaultingAnimation;
-    }
-
-    private void PlayVaultingAnimation()
-    {
-        _playerArms.SetTrigger("Vault");
+        _playerArms = GetComponent<Animator>();
     }
 
     public void PlayLightAttackAnimation()

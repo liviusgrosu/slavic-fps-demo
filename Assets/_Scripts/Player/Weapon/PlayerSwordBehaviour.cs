@@ -2,14 +2,16 @@
 using System.Net;
 using UnityEngine;
 
-public class PlayerAttackingBehaviour : MonoBehaviour
+public class PlayerSwordBehaviour : MonoBehaviour, IPlayerWeaponBehaviour
 {
-    public static PlayerAttackingBehaviour Instance;
+    // TODO: Remove this singleton
+    public static PlayerSwordBehaviour Instance;
+    private PlayerSwordAnimationController _animationController;
 
     public static event Action<bool> IsAttackingEvent;
     public static event Action<bool> IsBlockingEvent;
 
-    public float BlockTime;
+    public float BlockTime { get; private set; }
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -18,6 +20,8 @@ public class PlayerAttackingBehaviour : MonoBehaviour
             return;
         }
         Instance = this;
+
+        _animationController = GetComponent<PlayerSwordAnimationController>();
     }
 
     private void Update()
@@ -36,52 +40,40 @@ public class PlayerAttackingBehaviour : MonoBehaviour
 
         if (nextInput == "Primary Press" && !PlayerState.IsAttacking)
         {
+            InputQueueSystem.Instance.AttackInputQueue.DequeueInput();
             PlayerState.IsAttacking = true;
             IsAttackingEvent?.Invoke(true);
-
-
-            InputQueueSystem.Instance.AttackInputQueue.DequeueInput();
-            if (!PlayerState.IsGrounded)
-            {
-                // TODO: this needs to be removed because once we create the animation then we can rely on its event to set IsAttacking back to false
-                PlayerState.IsAttacking = false;
-                IsAttackingEvent?.Invoke(false);
-                //PlayerAnimationController.Instance.PlayAerialAttackAnimation();
-            }
-            else
-            {
-                PlayerAnimationController.Instance.PlayLightAttackAnimation();
-            }
+            _animationController.PlayLightAttackAnimation();
         }
 
         else if (nextInput == "Primary Hold")
         {
             InputQueueSystem.Instance.AttackInputQueue.DequeueInput();
-            Debug.Log(nextInput);
+            // TODO: Play aerial attack here
         }
 
         else if (nextInput == "Primary Release")
         {
             InputQueueSystem.Instance.AttackInputQueue.DequeueInput();
-            Debug.Log(nextInput);
         }
 
         else if (nextInput == "Secondary Hold" && !PlayerState.IsBlocking)
         {
-            BlockTime = Time.time;
-            PlayerState.IsBlocking = true;
-            IsBlockingEvent?.Invoke(true);
             InputQueueSystem.Instance.AttackInputQueue.DequeueInput();
-            PlayerAnimationController.Instance.PlayerBlockingHoldAnimation();
+            
+            PlayerState.IsBlocking = true;
+            BlockTime = Time.time;
+            IsBlockingEvent?.Invoke(true);
+            _animationController.PlayerBlockingHoldAnimation();
         }
 
         else if (nextInput == "Secondary Release")
         {
-            Debug.Log(nextInput);
+            InputQueueSystem.Instance.AttackInputQueue.DequeueInput();
+            
             PlayerState.IsBlocking = false;
             IsBlockingEvent?.Invoke(false);
-            InputQueueSystem.Instance.AttackInputQueue.DequeueInput();
-            PlayerAnimationController.Instance.PlayerBlockingReleaseAnimation();
+            _animationController.PlayerBlockingReleaseAnimation();
         }
 
         else
