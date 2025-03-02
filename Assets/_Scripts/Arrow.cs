@@ -1,5 +1,4 @@
 using UnityEngine;
-using static UnityEngine.ParticleSystem;
 
 public class Arrow : MonoBehaviour
 {
@@ -11,11 +10,10 @@ public class Arrow : MonoBehaviour
     public LayerMask damageableLayers;
     public LayerMask ignoreLayers;
     public int Damage = 20;
-    private Collider _collider;
     private TrailRenderer _trail;
+    private bool _raycastEnabled = true;
     private void Awake()
     {
-        _collider = GetComponent<Collider>();
         _trail = GetComponent<TrailRenderer>();
     }
 
@@ -28,18 +26,22 @@ public class Arrow : MonoBehaviour
             Destroy(gameObject);
         }
 
+        if (!_raycastEnabled)
+        {
+            return;
+        }
+
         if (Physics.Raycast(transform.position, -transform.forward, out var hit, 2f, ~ignoreLayers))
         {
+            _raycastEnabled = false;
             var collider = hit.collider;
             if (((1 << collider.gameObject.layer) & damageableLayers) != 0)
             {
                 collider.GetComponent<IDamageable>().TakeDamage(Damage);
-                Destroy(gameObject);
+                //Destroy(gameObject);
             }
 
-
             _speed = 0;
-            _collider.enabled = false;
             _trail.enabled = false;
             transform.position = hit.point + transform.forward * _displacementAmount;
             // MEMO: Be careful when the scale of the object is not vector.identity since the arrow will scale 
