@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class EnemyAttackingBehaviour : MonoBehaviour
+public class EnemySwordAttackingBehaviour : MonoBehaviour
 {
+    // TODO: Might remove
     [SerializeField] private string _idleStateName;
     [Tooltip("The tag used to check if the state is an attack state. Look at the animator state to get an idea")]
     [SerializeField]private string _attackStateTag;

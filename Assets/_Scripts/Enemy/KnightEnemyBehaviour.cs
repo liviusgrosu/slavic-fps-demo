@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.AI;
 
-public class EnemyBehaviour : MonoBehaviour
+public class KnightEnemyBehaviour : MonoBehaviour
 {
     public enum State
     {
@@ -39,7 +39,7 @@ public class EnemyBehaviour : MonoBehaviour
     private State _currentState = State.Idle;
     private Transform _player;
     private NavMeshAgent _agent;
-    private EnemyAttackingBehaviour _enemyAttackingBehaviour;
+    private EnemySwordAttackingBehaviour _enemyAttackingBehaviour;
 
     private Vector3 _startingPosition;
     private float _startingStoppingDistance;
@@ -53,7 +53,7 @@ public class EnemyBehaviour : MonoBehaviour
     private void Awake()
     {
         _agent = GetComponent<NavMeshAgent>();
-        _enemyAttackingBehaviour = transform.GetComponentInChildren<EnemyAttackingBehaviour>();
+        _enemyAttackingBehaviour = transform.GetComponentInChildren<EnemySwordAttackingBehaviour>();
         _startingStoppingDistance = _agent.stoppingDistance;
         _startingRotation = transform.rotation;
         _currentState = State.Idle;
@@ -75,6 +75,7 @@ public class EnemyBehaviour : MonoBehaviour
         }
 
         CheckIfPlayerInFov();
+
 
         switch (_currentState)
         {

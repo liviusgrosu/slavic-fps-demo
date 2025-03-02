@@ -6,8 +6,8 @@ public class EnemyWeapon : MonoBehaviour
     [SerializeField] private int _damage = 20;
 
 
-    private EnemyBehaviour _enemyBehaviour;
-    private EnemyAttackingBehaviour _enemyAttackingBehaviour;
+    private KnightEnemyBehaviour _enemyBehaviour;
+    private EnemySwordAttackingBehaviour _enemyAttackingBehaviour;
     private Collider _collider;
     private Transform _root;
 
@@ -18,8 +18,8 @@ public class EnemyWeapon : MonoBehaviour
 
     private void Start()
     {
-        _enemyBehaviour = GetComponentInParent<EnemyBehaviour>();
-        _enemyAttackingBehaviour = GetComponentInParent<EnemyAttackingBehaviour>();
+        _enemyBehaviour = GetComponentInParent<KnightEnemyBehaviour>();
+        _enemyAttackingBehaviour = GetComponentInParent<EnemySwordAttackingBehaviour>();
         _root = _enemyBehaviour.transform;
         ToggleSwordCollider(0);
     }
