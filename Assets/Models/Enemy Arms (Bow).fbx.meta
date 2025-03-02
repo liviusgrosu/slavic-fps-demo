@@ -87,32 +87,21 @@ ModelImporter:
       - time: 0.0374771
         functionName: ToggleArrowRenderer
         data: 
-        objectReferenceParameter: {fileID: 11500000, guid: d5d31738140f8a74caaa7999b36d7c84,
-          type: 3}
+        objectReferenceParameter: {fileID: 11500000, guid: d5d31738140f8a74caaa7999b36d7c84, type: 3}
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
       - time: 0.547591
         functionName: ToggleArrowRenderer
         data: 
-        objectReferenceParameter: {fileID: 11500000, guid: d5d31738140f8a74caaa7999b36d7c84,
-          type: 3}
-        floatParameter: 0
-        intParameter: 1
-        messageOptions: 0
-      - time: 0.8583885
-        functionName: ResetToFire
-        data: 
-        objectReferenceParameter: {fileID: 11500000, guid: e81783b836faa1642bea75aac90741f5,
-          type: 3}
+        objectReferenceParameter: {fileID: 11500000, guid: d5d31738140f8a74caaa7999b36d7c84, type: 3}
         floatParameter: 0
         intParameter: 1
         messageOptions: 0
       - time: 0.032756023
         functionName: SpawnArrow
         data: 
-        objectReferenceParameter: {fileID: 11500000, guid: e81783b836faa1642bea75aac90741f5,
-          type: 3}
+        objectReferenceParameter: {fileID: 11500000, guid: e81783b836faa1642bea75aac90741f5, type: 3}
         floatParameter: 0
         intParameter: 1
         messageOptions: 0

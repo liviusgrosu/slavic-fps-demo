@@ -15,7 +15,7 @@ public class EnemySwordAttackingBehaviour : MonoBehaviour
     public float ParryTime = 0.25f;
 
     private Animator _animator;
-    private EnemyWeapon _enemySword;
+    private EnemySwordWeapon _enemySword;
 
     private bool _readyToAttack;
     private bool _attackCooldownFinished = true;
@@ -23,7 +23,7 @@ public class EnemySwordAttackingBehaviour : MonoBehaviour
 
     private void Awake()
     {
-        _enemySword = GetComponentInChildren<EnemyWeapon>();
+        _enemySword = GetComponentInChildren<EnemySwordWeapon>();
         _animator = GetComponent<Animator>();
         _currentAttackQueue = new Queue<string>();
 

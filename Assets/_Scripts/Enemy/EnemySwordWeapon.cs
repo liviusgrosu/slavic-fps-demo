@@ -1,10 +1,9 @@
 ﻿using System;
 using UnityEngine;
 
-public class EnemyWeapon : MonoBehaviour
+public class EnemySwordWeapon : MonoBehaviour
 {
     [SerializeField] private int _damage = 20;
-
 
     private KnightEnemyBehaviour _enemyBehaviour;
     private EnemySwordAttackingBehaviour _enemyAttackingBehaviour;

@@ -19,7 +19,7 @@ MonoBehaviour:
     width: 2560
     height: 1367
   m_ShowMode: 4
-  m_Title: Inspector
+  m_Title: Scene
   m_RootView: {fileID: 3}
   m_MinSize: {x: 875, y: 300}
   m_MaxSize: {x: 10000, y: 10000}
@@ -145,7 +145,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 100}
   m_MaxSize: {x: 24288, y: 16192}
   vertical: 0
-  controlID: 42
+  controlID: 41
   draggingID: 0
 --- !u!114 &7
 MonoBehaviour:
@@ -171,7 +171,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 100}
   m_MaxSize: {x: 16192, y: 16192}
   vertical: 1
-  controlID: 43
+  controlID: 42
   draggingID: 0
 --- !u!114 &8
 MonoBehaviour:
@@ -197,7 +197,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 50}
   m_MaxSize: {x: 16192, y: 8096}
   vertical: 0
-  controlID: 44
+  controlID: 43
   draggingID: 0
 --- !u!114 &9
 MonoBehaviour:
@@ -250,7 +250,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 50}
   m_MaxSize: {x: 16192, y: 8096}
   vertical: 0
-  controlID: 135
+  controlID: 100
   draggingID: 0
 --- !u!114 &11
 MonoBehaviour:
@@ -383,7 +383,7 @@ MonoBehaviour:
       e10: 0
       e11: 1
       e12: 0
-      e13: 78
+      e13: 42.5
       e20: 0
       e21: 0
       e22: 1
@@ -427,11 +427,11 @@ MonoBehaviour:
     - e00: 1
       e01: 0
       e02: 0
-      e03: 126.5
+      e03: 61.5
       e10: 0
       e11: 1
       e12: 0
-      e13: 56
+      e13: 147.5
       e20: 0
       e21: 0
       e22: 1
@@ -441,9 +441,9 @@ MonoBehaviour:
       e32: 0
       e33: 1
   m_PreviewAnimator: {fileID: 0}
-  m_AnimatorController: {fileID: 9100000, guid: c415dbac95bc5044ca81a0a424e82699, type: 2}
+  m_AnimatorController: {fileID: 9100000, guid: 1ac87b468edb9674fb429e603573db29, type: 2}
   m_BreadCrumbs:
-  - m_Target: {fileID: 1208078001794745779, guid: c415dbac95bc5044ca81a0a424e82699, type: 2}
+  - m_Target: {fileID: 363477669142808997, guid: 1ac87b468edb9674fb429e603573db29, type: 2}
     m_ScrollPosition: {x: 0, y: 0}
   stateMachineGraph: {fileID: 0}
   stateMachineGraphGUI: {fileID: 0}
@@ -453,7 +453,7 @@ MonoBehaviour:
   m_MiniTool: 0
   m_LockTracker:
     m_IsLocked: 0
-  m_CurrentEditor: 0
+  m_CurrentEditor: 1
   m_LayerEditor:
     m_SelectedLayerIndex: 0
 --- !u!114 &15
@@ -513,9 +513,9 @@ MonoBehaviour:
     m_TextWithWhitespace: "Lighting\u200B"
   m_Pos:
     serializedVersion: 2
-    x: 2008
+    x: 1961
     y: 79
-    width: 551
+    width: 598
     height: 1285
   m_SerializedDataModeController:
     m_DataMode: 0
@@ -670,7 +670,7 @@ MonoBehaviour:
       scrollPos: {x: 0, y: 0}
       m_SelectedIDs: 
       m_LastClickedID: 0
-      m_ExpandedIDs: 0a68fffff6faffffda7e0000147f00004e800000ee8100000e8200001c820000
+      m_ExpandedIDs: 2af9ffff3af9ffff4ef9ffff20faffff40faffff88fafffff6faffffe47e00000a7f000070800000b2800000d0800000f2800000f68000001e8200004482000052820000
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -1148,9 +1148,9 @@ MonoBehaviour:
   m_AudioPlay: 0
   m_DebugDrawModesUseInteractiveLightBakingData: 0
   m_Position:
-    m_Target: {x: -11.436617, y: 2.9470713, z: -91.521515}
+    m_Target: {x: -9.516813, y: 2.6925197, z: -90.12074}
     speed: 2
-    m_Value: {x: -11.436617, y: 2.9470713, z: -91.521515}
+    m_Value: {x: -9.516813, y: 2.6925197, z: -90.12074}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 0
@@ -1196,13 +1196,13 @@ MonoBehaviour:
     m_GridAxis: 1
     m_gridOpacity: 0.5
   m_Rotation:
-    m_Target: {x: -0.16930741, y: -0.662758, z: 0.1575804, w: -0.7122785}
+    m_Target: {x: -0.29259747, y: -0.6825235, z: 0.34965804, w: -0.5712927}
     speed: 2
-    m_Value: {x: 0.16930741, y: 0.662758, z: -0.1575804, w: 0.7122785}
+    m_Value: {x: 0.29259747, y: 0.6825235, z: -0.34965804, w: 0.5712927}
   m_Size:
-    m_Target: 0.60448265
+    m_Target: 1.048933
     speed: 2
-    m_Value: 0.60448265
+    m_Value: 1.048933
   m_Ortho:
     m_Target: 0
     speed: 2
@@ -1283,7 +1283,7 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Assets/Animation
+    - Assets/Models
     m_Globs: []
     m_ProductIds: 
     m_AnyWithAssetOrigin: 0
@@ -1293,16 +1293,16 @@ MonoBehaviour:
   m_ViewMode: 1
   m_StartGridSize: 16
   m_LastFolders:
-  - Assets/Animation
+  - Assets/Models
   m_LastFoldersGridSize: 16
   m_LastProjectPath: C:\dev\unity\slavic-fps-demo
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
     scrollPos: {x: 0, y: 0}
-    m_SelectedIDs: 62870000
-    m_LastClickedID: 34658
-    m_ExpandedIDs: 000000003488000036880000
+    m_SelectedIDs: b0880000
+    m_LastClickedID: 34992
+    m_ExpandedIDs: 000000003a8800003c880000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1331,7 +1331,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 000000003488000036880000
+    m_ExpandedIDs: 000000003a8800003c880000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1468,7 +1468,7 @@ MonoBehaviour:
     m_ControlHash: -371814159
     m_PrefName: Preview_InspectorPreview
   m_LastInspectedObjectInstanceID: -1
-  m_LastVerticalScrollValue: 0
+  m_LastVerticalScrollValue: 162
   m_GlobalObjectId: 
   m_InspectorMode: 0
   m_LockTracker:

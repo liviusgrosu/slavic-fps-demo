@@ -1,4 +1,5 @@
 using UnityEngine;
+using static UnityEngine.ParticleSystem;
 
 public class Arrow : MonoBehaviour
 {
@@ -11,9 +12,11 @@ public class Arrow : MonoBehaviour
     public LayerMask ignoreLayers;
     public int Damage = 20;
     private Collider _collider;
+    private TrailRenderer _trail;
     private void Awake()
     {
         _collider = GetComponent<Collider>();
+        _trail = GetComponent<TrailRenderer>();
     }
 
     void FixedUpdate()
@@ -37,6 +40,7 @@ public class Arrow : MonoBehaviour
 
             _speed = 0;
             _collider.enabled = false;
+            _trail.enabled = false;
             transform.position = hit.point + transform.forward * _displacementAmount;
             // MEMO: Be careful when the scale of the object is not vector.identity since the arrow will scale 
             gameObject.transform.parent = collider.transform;

@@ -139,7 +139,7 @@ public class ArcherEnemyBehaviour : MonoBehaviour
 
             if (Quaternion.Angle(transform.rotation, targetRotation) < _rotationTolerance)
             {
-                //_enemyAttackingBehaviour.Attack();
+                _enemyAttackingBehaviour.Attack();
             }
 
             if (_getDistanceFromPlayer > _maxAttackDistance)
@@ -147,6 +147,14 @@ public class ArcherEnemyBehaviour : MonoBehaviour
                 _agent.velocity = _agent.desiredVelocity;
                 _currentState = State.Engage;
             }
+        }
+        else
+        {
+            Vector3 direction = (_player.position - transform.position).normalized;
+            direction.y = 0;
+
+            Quaternion targetRotation = Quaternion.LookRotation(direction);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, _toPlayerRotateAttackSpeed * Time.deltaTime * 0.25f);
         }
     }
 

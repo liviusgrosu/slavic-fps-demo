@@ -17,7 +17,7 @@ public class PlayerWeaponManager : MonoBehaviour
 
     private void Start()
     {
-        SwitchWeapons(Weapon.Bow);
+        SwitchWeapons(Weapon.Sword);
     }
 
     private void SwitchWeapons(Weapon weaponToSwitch)
