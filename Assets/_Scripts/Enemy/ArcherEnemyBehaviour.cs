@@ -44,10 +44,13 @@ public class ArcherEnemyBehaviour : MonoBehaviour
     private Transform _player;
     private NavMeshAgent _agent;
     private EnemyBowAttackingBehaviour _enemyAttackingBehaviour;
+    private Transform _arms;
 
     private Vector3 _startingPosition;
     private float _startingStoppingDistance;
-    private Quaternion _startingRotation;
+    private Quaternion _startingBodyRotation;
+    private Quaternion _startingArmsRotation;
+    private float _lookAngleClamps = 45f;
     private float _checkStateElapsedTime;
     // TODO: might be inefficent to do this as remaining distance is already calcuated
     // However remaining distance starts at 0 for the first frame
@@ -58,8 +61,10 @@ public class ArcherEnemyBehaviour : MonoBehaviour
     {
         _agent = GetComponent<NavMeshAgent>();
         _enemyAttackingBehaviour = transform.GetComponentInChildren<EnemyBowAttackingBehaviour>();
+        _arms = _enemyAttackingBehaviour.transform;
         _startingStoppingDistance = _agent.stoppingDistance;
-        _startingRotation = transform.rotation;
+        _startingBodyRotation = transform.rotation;
+        _startingArmsRotation = _arms.localRotation;
         _currentState = State.Idle;
     }
 
@@ -102,9 +107,17 @@ public class ArcherEnemyBehaviour : MonoBehaviour
 
     private void IdleState()
     {
-        if (Quaternion.Angle(transform.rotation, _startingRotation) > _rotationTolerance)
+        if (Quaternion.Angle(transform.rotation, _startingBodyRotation) > _rotationTolerance)
         {
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, _startingRotation, _startingRotationSpeed * Time.deltaTime);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, _startingBodyRotation, _startingRotationSpeed * Time.deltaTime);
+        }
+
+        if (Quaternion.Angle(_arms.localRotation, _startingArmsRotation) > _rotationTolerance)
+        {
+            _arms.localRotation = Quaternion.Slerp(
+                _arms.localRotation,
+                _startingArmsRotation,
+                _startingRotationSpeed * Time.deltaTime);
         }
     }
 
@@ -129,6 +142,7 @@ public class ArcherEnemyBehaviour : MonoBehaviour
 
     private void AttackState()
     {
+        RotateArmsToPlayer();
         if (!_enemyAttackingBehaviour.IsAttacking())
         {
             Vector3 direction = (_player.position - transform.position).normalized;
@@ -206,7 +220,28 @@ public class ArcherEnemyBehaviour : MonoBehaviour
         _currentState = State.Idle;
 
         transform.position = _startingPosition;
-        transform.rotation = _startingRotation;
+        transform.rotation = _startingBodyRotation;
         _agent.stoppingDistance = _startingStoppingDistance;
+    }
+
+    private void RotateArmsToPlayer()
+    {
+        Vector3 directionToPlayer = _player.position - transform.position;
+
+        // Get the angle for X-axis rotation (pitch)
+        float targetAngle = Mathf.Clamp(
+            Mathf.Atan2(directionToPlayer.y,
+            Mathf.Sqrt(directionToPlayer.x * directionToPlayer.x + directionToPlayer.z * directionToPlayer.z))
+            * Mathf.Rad2Deg,
+            -_lookAngleClamps, _lookAngleClamps);
+
+        // Create target rotation (only rotating on X-axis)
+        Quaternion targetRotation = Quaternion.Euler(targetAngle, _arms.localEulerAngles.y, _arms.localEulerAngles.z);
+
+        // Smoothly rotate arms
+        _arms.localRotation = Quaternion.Slerp(
+            _arms.localRotation,
+            targetRotation,
+            10f * Time.deltaTime);
     }
 }

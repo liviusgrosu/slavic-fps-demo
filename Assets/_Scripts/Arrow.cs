@@ -38,7 +38,6 @@ public class Arrow : MonoBehaviour
             if (((1 << collider.gameObject.layer) & damageableLayers) != 0)
             {
                 collider.GetComponent<IDamageable>().TakeDamage(Damage);
-                //Destroy(gameObject);
             }
 
             _speed = 0;
