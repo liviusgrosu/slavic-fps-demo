@@ -33,6 +33,8 @@ public class PlayerSwordBehaviour : MonoBehaviour, IPlayerWeaponBehaviour
 
         var nextInput = InputQueueSystem.Instance.AttackInputQueue.GetNextInput();
 
+        Debug.Log(nextInput);
+
         if (nextInput == "")
         {
             return;
@@ -91,10 +93,22 @@ public class PlayerSwordBehaviour : MonoBehaviour, IPlayerWeaponBehaviour
         IsAttackingEvent?.Invoke(false);
     }
 
+    public void OnDisable()
+    {
+        // Because the switch weapon can cause this to be stuck on true we have to reset
+        PlayerState.IsAttacking = false;
+        IsAttackingEvent?.Invoke(false);
+    }
+
     // I have to put it here cause the animator doesn't know where EnemySword is
     // TODO: Might add a transient between the two
     public void ToggleSwordCollider(int state)
     {
         PlayerWeapon.Instance.ToggleSwordCollider(state);
+    }
+
+    public bool IsIdling()
+    {
+        return _animationController.IsIdling();
     }
 }

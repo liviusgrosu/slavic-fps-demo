@@ -2,6 +2,7 @@
 using UnityEngine;
 public class PlayerSwordAnimationController : MonoBehaviour
 {
+    [SerializeField] private string _idleStateName;
     private Animator _playerArms;
 
     private void Awake()
@@ -32,5 +33,10 @@ public class PlayerSwordAnimationController : MonoBehaviour
     public void PlayerBlockingReleaseAnimation()
     {
         _playerArms.SetTrigger("Blocking Release");
+    }
+
+    public bool IsIdling()
+    {
+        return _playerArms.GetCurrentAnimatorStateInfo(0).IsName(_idleStateName);
     }
 }

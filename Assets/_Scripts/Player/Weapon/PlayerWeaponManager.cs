@@ -1,11 +1,15 @@
 ﻿using UnityEngine;
+using UnityEngine.UIElements;
 
 public class PlayerWeaponManager : MonoBehaviour
 {
-    public static IPlayerWeaponBehaviour CurrentWeapon { get; set; }
+    public IPlayerWeaponBehaviour CurrentWeaponBehaviour;
+    public static PlayerWeaponManager Instance;
+    [HideInInspector] public bool SwitchingWeapons;
 
     public GameObject swordArms;
     public GameObject bowArms;
+
 
     public enum Weapon
     {
@@ -15,9 +19,35 @@ public class PlayerWeaponManager : MonoBehaviour
 
     private Weapon _currentWeapon;
 
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(Instance);
+            return;
+        }
+        Instance = this;
+    }
+
     private void Start()
     {
         SwitchWeapons(Weapon.Bow);
+    }
+
+    private void Update()
+    {
+        var scroll = Input.GetAxis("Mouse ScrollWheel");
+
+        if (scroll > 0 || scroll < 0) 
+        {
+            SwitchingWeapons = true;
+        }
+
+        if (SwitchingWeapons && CurrentWeaponBehaviour.IsIdling()) 
+        {
+            SwitchingWeapons = false;
+            SwitchWeapons(_currentWeapon == Weapon.Sword ? Weapon.Bow : Weapon.Sword);
+        }
     }
 
     private void SwitchWeapons(Weapon weaponToSwitch)
@@ -29,12 +59,17 @@ public class PlayerWeaponManager : MonoBehaviour
         if (weaponToSwitch == Weapon.Sword)
         {
             swordArms.SetActive(true);
-            CurrentWeapon = swordArms.GetComponent<IPlayerWeaponBehaviour>();
+            CurrentWeaponBehaviour = swordArms.GetComponent<IPlayerWeaponBehaviour>();
         }
         else if (weaponToSwitch == Weapon.Bow)
         {
             bowArms.SetActive(true);
-            CurrentWeapon = bowArms.GetComponent<IPlayerWeaponBehaviour>();
+            CurrentWeaponBehaviour = bowArms.GetComponent<IPlayerWeaponBehaviour>();
         }
+    }
+
+    public Transform GetArms()
+    {
+        return ((MonoBehaviour)CurrentWeaponBehaviour).transform;
     }
 }

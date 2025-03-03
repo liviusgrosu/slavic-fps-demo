@@ -34,6 +34,11 @@ public class InputQueue
     {
         _queue.Dequeue();
     }
+
+    public void Clear()
+    {
+        _queue.Clear();
+    }
     
     public string GetNextInput()
     {

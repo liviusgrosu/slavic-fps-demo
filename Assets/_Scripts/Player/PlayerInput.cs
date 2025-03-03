@@ -52,6 +52,11 @@ public class PlayerInput : MonoBehaviour
 
     private void CheckAttackInput(KeyPress state, KeyCode key)
     {
+        if (PlayerWeaponManager.Instance.SwitchingWeapons)
+        {
+            InputQueueSystem.Instance.AttackInputQueue.Clear();
+        }
+
         if (Input.GetKeyDown(key))
         {
             _currentHoldThreshold = 0f;
