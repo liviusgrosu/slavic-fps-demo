@@ -33,8 +33,6 @@ public class PlayerSwordBehaviour : MonoBehaviour, IPlayerWeaponBehaviour
 
         var nextInput = InputQueueSystem.Instance.AttackInputQueue.GetNextInput();
 
-        Debug.Log(nextInput);
-
         if (nextInput == "")
         {
             return;

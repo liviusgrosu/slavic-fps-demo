@@ -92,6 +92,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 2048
   Damage: 20
+  _looseSound: {fileID: 8300000, guid: ef3257b1c79796c41974dadff2cba286, type: 3}
+  _impactSound: {fileID: 8300000, guid: a39438c6c398cb9418029bd5c152408e, type: 3}
 --- !u!96 &5473927465124804597
 TrailRenderer:
   serializedVersion: 3
