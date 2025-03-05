@@ -8,15 +8,34 @@ public class PlayerInput : MonoBehaviour
     public KeyCode DashKey = KeyCode.LeftShift;
     
     // Attacking input
-    public KeyCode LightAttackButton = KeyCode.Mouse0;
-    public KeyCode HeavyAttackButton = KeyCode.Mouse3;
-    public KeyCode BlockingButton = KeyCode.Mouse1;
+    public KeyCode PrimaryMouseButton = KeyCode.Mouse0;
+    public KeyCode SecondaryMouseButton = KeyCode.Mouse1;
+
+    public enum KeyPress
+    {
+        Primary,
+        Secondary,
+        None
+    }
+
+    [Tooltip("How long the player holds a button until its considered a hold")]
+    [SerializeField] private float _holdThreshold = 0.5f;
+    private float _currentHoldThreshold  = 0f;
+
+    private void Awake()
+    {
+        _currentHoldThreshold = _holdThreshold;
+    }
+
     private void Update()
     {
         if (PlayerState.IsDead)
         {
             return;
         }
+
+        CheckAttackInput(KeyPress.Primary, PrimaryMouseButton);
+        CheckAttackInput(KeyPress.Secondary, SecondaryMouseButton);
 
         if (Input.GetKeyDown(JumpKey))
         {
@@ -27,25 +46,41 @@ public class PlayerInput : MonoBehaviour
         {
             InputQueueSystem.Instance.MovementInputQueue.EnqueueInput("Dash");
         } 
-        
-        if (Input.GetKeyDown(LightAttackButton) && !PlayerState.IsBlocking)
+
+        return;
+    }
+
+    private void CheckAttackInput(KeyPress state, KeyCode key)
+    {
+        if (PlayerWeaponManager.Instance.SwitchingWeapons)
         {
-            InputQueueSystem.Instance.AttackInputQueue.EnqueueInput("Light Attack");
-        }
-        
-        if (Input.GetKeyDown(HeavyAttackButton) && !PlayerState.IsBlocking)
-        {
-            InputQueueSystem.Instance.AttackInputQueue.EnqueueInput("Heavy Attack");
+            InputQueueSystem.Instance.AttackInputQueue.Clear();
         }
 
-        if (Input.GetKeyDown(BlockingButton) && !PlayerState.IsAttacking)
+        if (Input.GetKeyDown(key))
         {
-            InputQueueSystem.Instance.AttackInputQueue.EnqueueInput("Blocking Hold");
+            _currentHoldThreshold = 0f;
         }
 
-        if (Input.GetKeyUp(BlockingButton) && !PlayerState.IsAttacking)
+        if (Input.GetKey(key))
         {
-            InputQueueSystem.Instance.AttackInputQueue.EnqueueInput("Blocking Release");
+            _currentHoldThreshold += Time.deltaTime;
+            if (_currentHoldThreshold >= _holdThreshold)
+            {
+                InputQueueSystem.Instance.AttackInputQueue.EnqueueInput($"{state} Hold");
+            }
+        }
+
+        if (Input.GetKeyUp(key))
+        {
+            if (_currentHoldThreshold >= _holdThreshold)
+            {
+                InputQueueSystem.Instance.AttackInputQueue.EnqueueInput($"{state} Release");
+            }
+            else
+            {
+                InputQueueSystem.Instance.AttackInputQueue.EnqueueInput($"{state} Press");
+            }
         }
     }
 }

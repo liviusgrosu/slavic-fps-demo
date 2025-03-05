@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
 public class PlayerHandsBobbing : MonoBehaviour
 {
-    [SerializeField] private Transform playerArms;
     [SerializeField] private Transform anchorPoint;
     private Rigidbody _rigidbody;
+    private Transform _playerArms => PlayerWeaponManager.Instance.GetArms();
     private PlayerController _playerController;
 
     public float bobbingSpeed = 10f;
@@ -22,12 +22,15 @@ public class PlayerHandsBobbing : MonoBehaviour
     {
         _playerController = GetComponent<PlayerController>();
         _rigidbody = GetComponent<Rigidbody>();
-        _defaultPos = playerArms.position - anchorPoint.position;
-        _defaultPosY = playerArms.transform.localPosition.y;
-
         _currentOffsetAmount = defaultOffsetAmount;
 
         PlayerController.DashTimerEvent += ModifyOffsetAmount;
+    }
+
+    private void Start()
+    {
+        _defaultPos = _playerArms.position - anchorPoint.position;
+        _defaultPosY = _playerArms.transform.localPosition.y;
     }
 
     // Update is called once per frame
@@ -40,13 +43,13 @@ public class PlayerHandsBobbing : MonoBehaviour
         {
             //Player is moving
             _timer += Time.deltaTime * bobbingSpeed;
-            playerArms.transform.localPosition = new Vector3(playerArms.transform.localPosition.x, _defaultPosY + Mathf.Sin(_timer) * bobbingAmount, playerArms.transform.localPosition.z);
+            _playerArms.transform.localPosition = new Vector3(_playerArms.transform.localPosition.x, _defaultPosY + Mathf.Sin(_timer) * bobbingAmount, _playerArms.transform.localPosition.z);
         }
         else
         {
             //Idle
             _timer = 0;
-            playerArms.transform.localPosition = new Vector3(playerArms.transform.localPosition.x, Mathf.Lerp(playerArms.transform.localPosition.y, _defaultPosY, Time.deltaTime * bobbingSpeed), playerArms.transform.localPosition.z);
+            _playerArms.transform.localPosition = new Vector3(_playerArms.transform.localPosition.x, Mathf.Lerp(_playerArms.transform.localPosition.y, _defaultPosY, Time.deltaTime * bobbingSpeed), _playerArms.transform.localPosition.z);
         }
         
         Vector3 offsetDirection = Vector3.zero;
@@ -56,7 +59,7 @@ public class PlayerHandsBobbing : MonoBehaviour
         }
         
         Vector3 offsetTarget = _defaultPos + anchorPoint.position + (offsetDirection * _currentOffsetAmount);
-        playerArms.position = Vector3.Lerp(playerArms.position, offsetTarget, Time.deltaTime * offsetTimeMultiplier);
+        _playerArms.position = Vector3.Lerp(_playerArms.position, offsetTarget, Time.deltaTime * offsetTimeMultiplier);
     }
 
     private void ModifyOffsetAmount(float current, float max)
