@@ -508,7 +508,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d098d37730fc896448a470fdcf56a469, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _toggle: 1
+  _toggle: 0
   _rotationTolerance: 40
   _fov: 45
   _engageDistance: 10
@@ -936,7 +936,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dcf58534c1689a743ab56f03d842601e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _toggle: 1
+  _toggle: 0
   _rotationTolerance: 40
   _fov: 45
   _engageDistance: 10
@@ -1001,6 +1001,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7bc41b0858b54a47bf898b9d33535b6f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _idleStateName: Idle
 --- !u!1 &101724083
 GameObject:
   m_ObjectHideFlags: 0
@@ -11313,6 +11314,7 @@ GameObject:
   - component: {fileID: 1038737367}
   - component: {fileID: 1038737368}
   - component: {fileID: 1038737369}
+  - component: {fileID: 1038737370}
   m_Layer: 0
   m_Name: Game Manager
   m_TagString: Untagged
@@ -11385,8 +11387,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 046486df98e4bd34ca126fd7fabd1cba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  SwitchingWeapons: 0
   swordArms: {fileID: 88869248}
   bowArms: {fileID: 1176178692}
+--- !u!114 &1038737370
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1038737364}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 758ad06d7ff28f44c960262326319637, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  clips:
+  - key: Arrow Loose
+    clip: {fileID: 8300000, guid: ef3257b1c79796c41974dadff2cba286, type: 3}
+  - key: Bow Release
+    clip: {fileID: 8300000, guid: d0fe183c7dda48f418ee8ce5184f6091, type: 3}
+  - key: Arrow Impact
+    clip: {fileID: 8300000, guid: a39438c6c398cb9418029bd5c152408e, type: 3}
 --- !u!1 &1040632042
 GameObject:
   m_ObjectHideFlags: 0
@@ -11909,6 +11931,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5d31738140f8a74caaa7999b36d7c84, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _idleStateName: Idle
   _arrow: {fileID: 683719701}
 --- !u!114 &1176178696
 MonoBehaviour:
@@ -11922,6 +11945,103 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e81783b836faa1642bea75aac90741f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!82 &1176178697
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1176178692}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 8300000, guid: d0fe183c7dda48f418ee8ce5184f6091, type: 3}
+  m_Resource: {fileID: 8300000, guid: d0fe183c7dda48f418ee8ce5184f6091, type: 3}
+  m_PlayOnAwake: 0
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &1224005142
 GameObject:
   m_ObjectHideFlags: 0
@@ -12503,6 +12623,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f30f68a002239584997f2ba470395e83, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1176178695}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f30f68a002239584997f2ba470395e83, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1176178697}
     - targetCorrespondingSourceObject: {fileID: 3458587752786342676, guid: f30f68a002239584997f2ba470395e83, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1159790084}
@@ -15287,7 +15410,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dcf58534c1689a743ab56f03d842601e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _toggle: 1
+  _toggle: 0
   _rotationTolerance: 40
   _fov: 45
   _engageDistance: 10
@@ -17421,7 +17544,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9cc04b3da4d2447e98e178fe9b85763c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerArms: {fileID: 1176178693}
   anchorPoint: {fileID: 4591865486878809300}
   bobbingSpeed: 15
   bobbingAmount: 0.01
