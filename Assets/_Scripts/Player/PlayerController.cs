@@ -319,6 +319,7 @@ public class PlayerController : MonoBehaviour
     private void Dash()
     {
         _playerEffects.PerformDashEffect(moveDirection, dashTimeMax);
+        SoundManager.Instance.PlaySoundFXClip("Dash", transform);
         // Start dashing
         StartCoroutine(StartDashingTimer());
     }

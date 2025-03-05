@@ -433,7 +433,7 @@ GameObject:
   - component: {fileID: 60685545}
   - component: {fileID: 60685542}
   - component: {fileID: 60685546}
-  m_Layer: 13
+  m_Layer: 10
   m_Name: Sword Enemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -508,7 +508,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d098d37730fc896448a470fdcf56a469, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _toggle: 1
+  _toggle: 0
   _rotationTolerance: 40
   _fov: 45
   _engageDistance: 10
@@ -841,7 +841,7 @@ GameObject:
   - component: {fileID: 87654306}
   - component: {fileID: 87654301}
   - component: {fileID: 87654300}
-  m_Layer: 13
+  m_Layer: 10
   m_Name: Bow Enemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -936,7 +936,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dcf58534c1689a743ab56f03d842601e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _toggle: 0
+  _toggle: 1
   _rotationTolerance: 40
   _fov: 45
   _engageDistance: 10
@@ -11440,6 +11440,9 @@ MonoBehaviour:
   - key: Sword Block
     clip: {fileID: 8300000, guid: 51d3dee135d3b624895c2ea4370398c7, type: 3}
     volume: 0.146
+  - key: Dash
+    clip: {fileID: 8300000, guid: 432d1126b644fee45967b0d6ce9f6cc4, type: 3}
+    volume: 0.332
 --- !u!1 &1040632042
 GameObject:
   m_ObjectHideFlags: 0
@@ -15359,7 +15362,7 @@ GameObject:
   - component: {fileID: 1717240958}
   - component: {fileID: 1717240957}
   - component: {fileID: 1717240956}
-  m_Layer: 13
+  m_Layer: 10
   m_Name: Bow Enemy (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -15503,7 +15506,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   damageableLayers:
     serializedVersion: 2
-    m_Bits: 8192
+    m_Bits: 1024
   Damage: 20
 --- !u!1 &1740792683
 GameObject:
@@ -17475,7 +17478,7 @@ GameObject:
   - component: {fileID: 4591865485351635446}
   - component: {fileID: 1242814073}
   - component: {fileID: 1242814074}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Player
   m_TagString: Player
   m_Icon: {fileID: 0}
