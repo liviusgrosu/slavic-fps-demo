@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net;
 using UnityEngine;
 
 public class PlayerSwordBehaviour : MonoBehaviour, IPlayerWeaponBehaviour
@@ -102,7 +101,12 @@ public class PlayerSwordBehaviour : MonoBehaviour, IPlayerWeaponBehaviour
     // TODO: Might add a transient between the two
     public void ToggleSwordCollider(int state)
     {
-        PlayerWeapon.Instance.ToggleSwordCollider(state);
+        PlayerSwordWeapon.Instance.ToggleSwordCollider(state);
+    }
+
+    public void PlaySwooshNoise()
+    {
+        SoundManager.Instance.PlaySoundFXClip($"Sword Swoosh {UnityEngine.Random.Range(1, 5)}", transform);
     }
 
     public bool IsIdling()

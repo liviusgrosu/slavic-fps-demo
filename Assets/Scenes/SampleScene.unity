@@ -508,7 +508,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d098d37730fc896448a470fdcf56a469, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _toggle: 0
+  _toggle: 1
   _rotationTolerance: 40
   _fov: 45
   _engageDistance: 10
@@ -11402,13 +11402,44 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 758ad06d7ff28f44c960262326319637, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _audioSource: {fileID: 182784846349697362, guid: beaf96fc2cc966e488caca34c9eabc4e, type: 3}
   clips:
   - key: Arrow Loose
     clip: {fileID: 8300000, guid: ef3257b1c79796c41974dadff2cba286, type: 3}
+    volume: 0.099
   - key: Bow Release
     clip: {fileID: 8300000, guid: d0fe183c7dda48f418ee8ce5184f6091, type: 3}
+    volume: 0.668
   - key: Arrow Impact
     clip: {fileID: 8300000, guid: a39438c6c398cb9418029bd5c152408e, type: 3}
+    volume: 0.146
+  - key: Blood Impact Arrow
+    clip: {fileID: 8300000, guid: 2991896a654649d40b7caf4bc7f3f433, type: 3}
+    volume: 0.146
+  - key: Blood Impact 1
+    clip: {fileID: 8300000, guid: c93e4729bddd1f0409d1dfe9f848c734, type: 3}
+    volume: 0.146
+  - key: Blood Impact 2
+    clip: {fileID: 8300000, guid: b1181cc78c16faf4cb6fd442575a0427, type: 3}
+    volume: 0.146
+  - key: Sword Swoosh 1
+    clip: {fileID: 8300000, guid: bbd96ae2271a33e4e85b958df048178f, type: 3}
+    volume: 0.146
+  - key: Sword Swoosh 2
+    clip: {fileID: 8300000, guid: 4649f50998c86b148bc79669de33e544, type: 3}
+    volume: 0.146
+  - key: Sword Swoosh 3
+    clip: {fileID: 8300000, guid: c00695012f174c2419641e99fdbd5538, type: 3}
+    volume: 0.146
+  - key: Sword Swoosh 4
+    clip: {fileID: 8300000, guid: 3e23b189719ea2f469019293a62c2f35, type: 3}
+    volume: 0.146
+  - key: Sword Parry
+    clip: {fileID: 8300000, guid: f354e2d7d7810054580e6ba2d4f7d464, type: 3}
+    volume: 0.146
+  - key: Sword Block
+    clip: {fileID: 8300000, guid: 51d3dee135d3b624895c2ea4370398c7, type: 3}
+    volume: 0.146
 --- !u!1 &1040632042
 GameObject:
   m_ObjectHideFlags: 0

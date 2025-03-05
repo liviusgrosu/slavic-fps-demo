@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-public class PlayerHealth : MonoBehaviour
+public class PlayerHealth : MonoBehaviour, IDamageable
 {
     [Tooltip("Angle in which the enemy has to face in order to consider their damage to the player")]
     [SerializeField] private float _enemyToPlayerTolerance = 30f;
@@ -51,6 +51,13 @@ public class PlayerHealth : MonoBehaviour
         _camera = Camera.main.transform;
     }
 
+    public void TakeDamage(int value)
+    {
+        // Generic function so we can always be hit
+        HP -= value;
+        SoundManager.Instance.PlaySoundFXClip($"Blood Impact {UnityEngine.Random.Range(1, 3)}", transform);
+    }
+
     public void TakeDamage(Transform enemy, int value)
     {
         // Enemy must face the player
@@ -66,6 +73,7 @@ public class PlayerHealth : MonoBehaviour
         if (!PlayerState.IsBlocking)
         {
             HP -= value;
+            SoundManager.Instance.PlaySoundFXClip($"Blood Impact {UnityEngine.Random.Range(1, 3)}", transform);
         }
 
         if (Physics.Raycast(_camera.position, _camera.forward, out var hit, 2.0f, LayerMask.GetMask("Enemy Block Condition"), QueryTriggerInteraction.Collide))
