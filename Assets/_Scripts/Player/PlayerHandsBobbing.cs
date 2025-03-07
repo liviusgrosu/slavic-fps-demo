@@ -17,7 +17,8 @@ public class PlayerHandsBobbing : MonoBehaviour
     [SerializeField] private float dashOffsetAmount = 0.1f;
     [SerializeField] private float offsetTimeMultiplier = 1f;
     private float _currentOffsetAmount;
-    
+    private bool _resetWalkTrigger = true;
+
     private void Awake()
     {
         _playerController = GetComponent<PlayerController>();
@@ -43,11 +44,24 @@ public class PlayerHandsBobbing : MonoBehaviour
         {
             //Player is moving
             _timer += Time.deltaTime * bobbingSpeed;
-            _playerArms.transform.localPosition = new Vector3(_playerArms.transform.localPosition.x, _defaultPosY + Mathf.Sin(_timer) * bobbingAmount, _playerArms.transform.localPosition.z);
+            _playerArms.transform.localPosition = new Vector3(_playerArms.transform.localPosition.x, _defaultPosY - Mathf.Sin(_timer) * bobbingAmount, _playerArms.transform.localPosition.z);
+            if (!PlayerState.IsDashing)
+            {
+                if (Mathf.Sin(_timer) > 0f && _resetWalkTrigger)
+                {
+                    PlayerWalkingSound.Instance.TriggerWalkSound();
+                    _resetWalkTrigger = false;
+                }
+                if (Mathf.Sin(_timer) < 0f && !_resetWalkTrigger)
+                {
+                    _resetWalkTrigger = true;
+                }
+            }
         }
         else
         {
             //Idle
+            _resetWalkTrigger = true;
             _timer = 0;
             _playerArms.transform.localPosition = new Vector3(_playerArms.transform.localPosition.x, Mathf.Lerp(_playerArms.transform.localPosition.y, _defaultPosY, Time.deltaTime * bobbingSpeed), _playerArms.transform.localPosition.z);
         }
