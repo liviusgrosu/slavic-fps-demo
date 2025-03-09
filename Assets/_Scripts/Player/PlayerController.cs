@@ -299,7 +299,7 @@ public class PlayerController : MonoBehaviour
         var groundBelow = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
         if (groundBelow && !PlayerState.IsGrounded)
         {
-            //PlayerWalkingSound.Instance.TriggerLandingSound();
+            PlayerWalkingSound.Instance.TriggerLandingSound();
         }
         PlayerState.IsGrounded = groundBelow;
         if (PlayerState.IsGrounded && _ignoreGroundedCurrentTime >= _ignoreGroundedMaxTime)

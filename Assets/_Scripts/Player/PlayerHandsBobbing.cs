@@ -49,6 +49,7 @@ public class PlayerHandsBobbing : MonoBehaviour
             {
                 if (Mathf.Sin(_timer) > 0f && _resetWalkTrigger)
                 {
+                    Debug.Log("Play walking sound");
                     PlayerWalkingSound.Instance.TriggerWalkSound();
                     _resetWalkTrigger = false;
                 }

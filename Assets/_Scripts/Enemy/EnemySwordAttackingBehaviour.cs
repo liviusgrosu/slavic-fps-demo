@@ -56,6 +56,7 @@ public class EnemySwordAttackingBehaviour : MonoBehaviour
         }
 
         var chainLength = Random.Range(1, 4);
+        Debug.Log(chainLength);
         Enumerable.Repeat("Light Attack", chainLength)
                     .ToList()
                     .ForEach(_currentAttackQueue.Enqueue);

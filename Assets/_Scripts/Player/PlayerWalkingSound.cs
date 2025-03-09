@@ -19,7 +19,7 @@ public class PlayerWalkingSound : MonoBehaviour
 
     public void TriggerWalkSound()
     {
-        if (Physics.Raycast(transform.position, Vector3.down, out var hit, 0.5f, _environmentMask))
+        if (Physics.Raycast(transform.position, Vector3.down, out var hit, 0.5f))
         {
             var tagName = hit.collider.tag;
             var soundName = $"{tagName} Footstep {Random.Range(1, 7)}";
@@ -29,6 +29,7 @@ public class PlayerWalkingSound : MonoBehaviour
 
     public void TriggerLandingSound()
     {
+        // TODO: Change volume depending on how far the player jumped from
         TriggerWalkSound();
         TriggerWalkSound();
     }

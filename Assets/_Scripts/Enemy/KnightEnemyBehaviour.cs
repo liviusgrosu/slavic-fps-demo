@@ -35,11 +35,14 @@ public class KnightEnemyBehaviour : MonoBehaviour
     [Tooltip("How fast the enemy will rotate to the player after finishing an attack")]
     [SerializeField] private float _toPlayerRotateAttackSpeed = 250f;
 
+    [SerializeField] private float _movementThreshold = 0.1f;
+    private bool _wasMoving = false;
 
     private State _currentState = State.Idle;
     private Transform _player;
     private NavMeshAgent _agent;
     private EnemySwordAttackingBehaviour _enemyAttackingBehaviour;
+    private Animator _animator;
 
     private Vector3 _startingPosition;
     private float _startingStoppingDistance;
@@ -53,6 +56,7 @@ public class KnightEnemyBehaviour : MonoBehaviour
     private void Awake()
     {
         _agent = GetComponent<NavMeshAgent>();
+        _animator = GetComponentInChildren<Animator>();
         _enemyAttackingBehaviour = transform.GetComponentInChildren<EnemySwordAttackingBehaviour>();
         _startingStoppingDistance = _agent.stoppingDistance;
         _startingRotation = transform.rotation;
@@ -75,7 +79,7 @@ public class KnightEnemyBehaviour : MonoBehaviour
         }
 
         CheckIfPlayerInFov();
-
+        CheckRunningAnimation();
 
         switch (_currentState)
         {
@@ -198,5 +202,22 @@ public class KnightEnemyBehaviour : MonoBehaviour
         transform.position = _startingPosition;
         transform.rotation = _startingRotation;
         _agent.stoppingDistance = _startingStoppingDistance;
+    }
+    
+    private void CheckRunningAnimation()
+    {
+        bool isMoving = _agent.velocity.magnitude > _movementThreshold;
+
+        // Only trigger animation state changes when movement state changes
+        if (isMoving && !_wasMoving)
+        {
+            _animator.SetTrigger("Run");
+        }
+        else if (!isMoving && _wasMoving)
+        {
+            _animator.SetTrigger("Stop Run");
+        }
+
+        _wasMoving = isMoving;
     }
 }
