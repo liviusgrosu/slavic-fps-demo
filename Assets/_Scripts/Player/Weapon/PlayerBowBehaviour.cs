@@ -52,7 +52,9 @@ public class PlayerBowBehaviour : MonoBehaviour, IPlayerWeaponBehaviour
 
     public void SpawnArrow()
     {
+        SoundManager.Instance.PlaySoundFXClip("Bow Release", _arrowSpawner.transform);
         _arrowSpawner.SpawnArrow();
+        SoundManager.Instance.PlaySoundFXClip("Arrow Loose", _arrowSpawner.transform);
     }
 
     public bool IsIdling()

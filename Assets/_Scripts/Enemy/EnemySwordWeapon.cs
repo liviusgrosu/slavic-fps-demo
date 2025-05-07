@@ -27,9 +27,17 @@ public class EnemySwordWeapon : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            if (PlayerState.IsBlocking && IsEligibleForParry())
+            if (PlayerState.IsBlocking)
             {
-                _enemyAttackingBehaviour.BecomeStaggered();
+                if (IsEligibleForParry())
+                {
+                    _enemyAttackingBehaviour.BecomeStaggered();
+                    SoundManager.Instance.PlaySoundFXClip("Sword Parry", transform);
+                }
+                else
+                {
+                    SoundManager.Instance.PlaySoundFXClip("Sword Block", transform);
+                }
             }
             PlayerHealth.Instance.TakeDamage(_root, _damage);
             ToggleSwordCollider(0);

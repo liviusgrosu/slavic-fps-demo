@@ -6,4 +6,5 @@ public static class PlayerState
     public static bool IsVaulting;
     public static bool InCombat => IsAttacking || IsBlocking;
     public static bool IsDead => PlayerHealth.Instance.IsDead();
+    public static bool IsDashing => PlayerController.Instance.IsDashing;
 }

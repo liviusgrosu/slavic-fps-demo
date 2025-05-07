@@ -38,6 +38,11 @@ public class Arrow : MonoBehaviour
             if (((1 << collider.gameObject.layer) & damageableLayers) != 0)
             {
                 collider.GetComponent<IDamageable>().TakeDamage(Damage);
+                SoundManager.Instance.PlaySoundFXClip("Blood Impact Arrow", hit.transform);
+            }
+            else
+            {
+                SoundManager.Instance.PlaySoundFXClip("Arrow Impact", hit.transform);
             }
 
             _speed = 0;

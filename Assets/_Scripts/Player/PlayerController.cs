@@ -49,8 +49,8 @@ public class PlayerController : MonoBehaviour
         }
     }
     private float _dashCurrentCooldownTime;
-    private bool _isDashing;
-    private bool _canDash => DashCurrentPoints > 0 && !_isDashing;
+    [HideInInspector] public bool IsDashing;
+    private bool _canDash => DashCurrentPoints > 0 && !IsDashing;
 
     private Coroutine _cooldownCoroutine;
 
@@ -175,7 +175,7 @@ public class PlayerController : MonoBehaviour
     private void GetMovementInput()
     {
         // Regular movement input
-        if (!_isDashing)
+        if (!IsDashing)
         {
             _horizontalMovement = Input.GetAxisRaw("Horizontal");
             _verticalMovement = Input.GetAxisRaw("Vertical");
@@ -193,7 +193,7 @@ public class PlayerController : MonoBehaviour
         // Jumping input
         if (InputQueueSystem.Instance.MovementInputQueue.GetNextInput() == "Jump" && 
             (PlayerState.IsGrounded || _graceTimeCurrent < graceTimeMax) &&
-            !_isDashing && 
+            !IsDashing && 
             !_isJumping)
         {
             InputQueueSystem.Instance.MovementInputQueue.DequeueInput();
@@ -249,7 +249,7 @@ public class PlayerController : MonoBehaviour
     private void ControlSpeed()
     {
         // Dashing speed
-        if (_isDashing)
+        if (IsDashing)
         {
             moveSpeed = dashSpeed;
         }
@@ -263,7 +263,7 @@ public class PlayerController : MonoBehaviour
     private void ControlDrag()
     {
         // Apply drag depending if the player is in the air or not
-        _rigidbody.linearDamping = PlayerState.IsGrounded && !_isDashing ? groundDrag : airDrag;
+        _rigidbody.linearDamping = PlayerState.IsGrounded && !IsDashing ? groundDrag : airDrag;
     }
 
     private bool OnSlope()
@@ -286,7 +286,7 @@ public class PlayerController : MonoBehaviour
             _gravity = -_slopeHit.normal * Physics.gravity.magnitude;
         }
 
-        if (_isDashing)
+        if (IsDashing)
         {
             _gravity = Vector3.zero;
         }
@@ -296,7 +296,12 @@ public class PlayerController : MonoBehaviour
     {
         // Check if a sphere collides with the ground as the ground check
         // TODO: might change this to avoid certain layers rather then looking for a layer
-        PlayerState.IsGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+        var groundBelow = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+        if (groundBelow && !PlayerState.IsGrounded)
+        {
+            PlayerWalkingSound.Instance.TriggerLandingSound();
+        }
+        PlayerState.IsGrounded = groundBelow;
         if (PlayerState.IsGrounded && _ignoreGroundedCurrentTime >= _ignoreGroundedMaxTime)
         {
             // Stop any coroutines related to touching the ground
@@ -319,13 +324,14 @@ public class PlayerController : MonoBehaviour
     private void Dash()
     {
         _playerEffects.PerformDashEffect(moveDirection, dashTimeMax);
+        SoundManager.Instance.PlaySoundFXClip("Dash", transform);
         // Start dashing
         StartCoroutine(StartDashingTimer());
     }
 
     private IEnumerator StartDashingTimer()
     {
-        _isDashing = true;
+        IsDashing = true;
         DashCurrentPoints--;
 
         // Store the players velocity as this will the direction of the dash
@@ -344,7 +350,7 @@ public class PlayerController : MonoBehaviour
         }
 
         // Reduce players velocity by a quarter as they are coming off a dash
-        _isDashing = false;
+        IsDashing = false;
         _rigidbody.linearVelocity = oldPlayerVelocity / 4f;
         // Start delay to start dash cooldown
         if (_cooldownCoroutine != null) StopCoroutine(_cooldownCoroutine);

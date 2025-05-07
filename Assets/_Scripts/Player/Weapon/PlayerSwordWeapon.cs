@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 
-public class PlayerWeapon : MonoBehaviour
+public class PlayerSwordWeapon : MonoBehaviour
 {
-    public static PlayerWeapon Instance;
+    public static PlayerSwordWeapon Instance;
 
     public LayerMask damageableLayers;
     public int Damage = 20;
@@ -26,6 +26,7 @@ public class PlayerWeapon : MonoBehaviour
         if (((1 << other.gameObject.layer) & damageableLayers) != 0)
         {
             other.GetComponent<IDamageable>().TakeDamage(Damage);
+            SoundManager.Instance.PlaySoundFXClip($"Blood Impact {Random.Range(1, 3)}", transform);
         }
     }
 

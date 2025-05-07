@@ -129,6 +129,13 @@ ModelImporter:
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
+      - time: 0.3570783
+        functionName: PlaySwooshNoise
+        data: 
+        objectReferenceParameter: {fileID: 11500000, guid: 27850c84b94f4d8aa5442c859644788e, type: 3}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
       transformMask: []
       maskType: 3
       maskSource: {instanceID: 0}
@@ -179,6 +186,13 @@ ModelImporter:
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
+      - time: 0.50143075
+        functionName: PlaySwooshNoise
+        data: 
+        objectReferenceParameter: {fileID: 11500000, guid: 27850c84b94f4d8aa5442c859644788e, type: 3}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
       transformMask: []
       maskType: 3
       maskSource: {instanceID: 0}
@@ -224,6 +238,13 @@ ModelImporter:
         messageOptions: 0
       - time: 0.6254269
         functionName: AttackPieceFinished
+        data: 
+        objectReferenceParameter: {fileID: 11500000, guid: 27850c84b94f4d8aa5442c859644788e, type: 3}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
+      - time: 0.5130271
+        functionName: PlaySwooshNoise
         data: 
         objectReferenceParameter: {fileID: 11500000, guid: 27850c84b94f4d8aa5442c859644788e, type: 3}
         floatParameter: 0

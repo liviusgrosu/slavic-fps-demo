@@ -59,6 +59,6 @@ public class EnemyBowAttackingBehaviour : MonoBehaviour
 
     public void ToggleArrowRenderer(int state)
     {
-        _arrow.SetActive(state == 1);
+        //_arrow.SetActive(state == 1);
     }
 }
