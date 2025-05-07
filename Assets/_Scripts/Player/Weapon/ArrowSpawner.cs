@@ -7,6 +7,8 @@ public class ArrowSpawner : MonoBehaviour
 
     public void SpawnArrow()
     {
-        Instantiate(_arrowPrefab, transform.position, transform.rotation);
+        Vector3 directionToPlayer = transform.position - PlayerController.Instance.transform.position;
+        Quaternion lookRotation = Quaternion.LookRotation(directionToPlayer.normalized);
+        Instantiate(_arrowPrefab, transform.position, lookRotation);
     }
 }
